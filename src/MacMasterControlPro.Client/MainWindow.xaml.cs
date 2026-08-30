@@ -29,6 +29,11 @@ public partial class MainWindow
         LanguageStore.Changed += () => { if (PageHost.Content is DashboardPage) PageHost.Content = new DashboardPage(); };
 
         PageHost.Content = new DashboardPage();
+        // Evidentiaza vizual "Dashboard" in lista - facut aici, NU cu
+        // IsSelected="True" in XAML (vezi comentariul din MainWindow.xaml):
+        // la acest punct PageHost e deja asignat, deci OnModuleSelected
+        // (declansat de asta) e sigur.
+        ModuleList.SelectedItem = ItemDashboard;
 
         _ = MaybeShowUpdatePopupAsync(respectDismissal: true);
     }

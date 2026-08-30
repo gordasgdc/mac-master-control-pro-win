@@ -1,5 +1,19 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.4.2 (2026-08-30) — FIX CRITIC (cauza reală): NullReferenceException la pornire
+
+Log-ul de diagnostic din v1.4.1 a prins imediat cauza reală: `ItemDashboard`
+avea `IsSelected="True"` în `MainWindow.xaml`, ceea ce declanșa
+`OnModuleSelected` SINCRON în timpul `InitializeComponent()` — la acel
+moment `PageHost` (declarat mai jos în același XAML) încă nu era asignat,
+deci `PageHost.Content = ...` arunca `NullReferenceException` chiar în
+constructor, prinsă de handler-ul din v1.4.1 (care măcar a arătat eroarea
+în loc să eșueze silențios ca înainte).
+
+- Fix: eliminat `IsSelected="True"` din XAML; selecția vizuală „Dashboard”
+  se face acum programatic, după ce `PageHost` e garantat asignat.
+- v1.4.1 (log de diagnostic + handler global de excepții) rămâne inclus.
+
 ## v1.4.1 (2026-08-30) — FIX CRITIC: aplicația nu deschidea nicio fereastră
 
 **Bug real, raportat de Cristi după primul test pe Windows real**: aplicația
