@@ -1,5 +1,21 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.5.1 (2026-08-30) — Fix real: „Adaugă cont Cloud” + indicator verde Dependențe
+
+**Fix cauza reală a erorii rclone**: „Adaugă cont Cloud” eșua cu
+„the system cannot find the file specified", cu `WorkingDirectory =
+C:\Program Files\GDC Plugin Manager` — userul lansase Master Control Studio
+Pro din butonul „Deschide" al GDC Plugin Manager. `Process.Start
+(UseShellExecute:true)` fără `WorkingDirectory` explicit moștenește
+directorul curent al PĂRINTELUI, nu al acestei aplicații. Fix:
+`Environment.CurrentDirectory` resetat explicit la propriul folder, la
+pornire, indiferent cine a lansat aplicația.
+
+**Fix UX Dependențe**: checkbox-ul dezactivat pentru un pachet deja
+instalat nu arăta niciun indicator verde — confuz („de ce nu apare cu
+verde?"). Punctul de status (verde/roșu) e acum mereu vizibil; checkbox-ul
+apare DOAR pentru componentele neinstalate.
+
 ## v1.5.0 (2026-08-30) — Fix meniu invizibil (temă Light) + selecție granulară Dependențe
 
 **Fix real, raportat de Cristi**: sidebar-ul (Panel/Rețea/Cloud/etc.) avea
