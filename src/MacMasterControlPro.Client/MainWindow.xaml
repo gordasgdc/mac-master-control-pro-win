@@ -34,6 +34,10 @@
                          SelectionChanged="OnModuleSelected">
                     <ListBoxItem Content="📊 Dashboard" Tag="Dashboard" IsSelected="True" />
                     <ListBoxItem Content="🌐 Rețea" Tag="Network" />
+                    <ListBoxItem Content="☁️ Cloud Manager" Tag="Cloud" />
+                    <ListBoxItem Content="🧹 Curățare &amp; RAM" Tag="Cleanup" />
+                    <ListBoxItem Content="🛠️ Tweak-uri Sistem" Tag="Tweaks" />
+                    <ListBoxItem x:Name="DependenciesItem" Content="🧩 Dependențe" Tag="Dependencies" />
                     <ListBoxItem Content="⚙️ Setări" Tag="Settings" />
                 </ListBox>
 
