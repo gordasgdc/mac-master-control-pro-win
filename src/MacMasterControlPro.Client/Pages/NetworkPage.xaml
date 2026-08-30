@@ -5,17 +5,26 @@
     <StackPanel MaxWidth="560">
         <TextBlock Text="🌐 Rețea" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Adaptor selectat" IsExpanded="True" Margin="0,0,0,12">
-            <StackPanel Orientation="Horizontal">
-                <ComboBox x:Name="AdapterCombo" Width="240" />
-                <ui:Button Content="Rescanează" Margin="10,0,0,0" Click="OnRescanClicked" />
+        <ui:CardExpander Header="Plăci de rețea detectate" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Margin="0,0,6,0" Click="OnSelectAllClicked" />
+                    <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
+                </Grid>
+                <StackPanel x:Name="AdaptersPanel" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,0" />
             </StackPanel>
         </ui:CardExpander>
 
         <ui:CardExpander Header="Tuning TCP" IsExpanded="True">
             <StackPanel>
-                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google." Foreground="Gray" Margin="0,0,0,10" TextWrapping="Wrap" />
-                <ui:Button Content="Aplică Tuning" Appearance="Primary" Click="OnApplyTuningClicked" />
+                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google — pe plăcile bifate." Foreground="Gray" Margin="0,0,0,10" TextWrapping="Wrap" />
+                <ui:Button x:Name="ApplyButton" Content="Aplică Tuning pe selecție" Appearance="Primary" Click="OnApplyTuningClicked" />
             </StackPanel>
         </ui:CardExpander>
 
