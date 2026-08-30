@@ -5,18 +5,25 @@
     <StackPanel MaxWidth="560">
         <TextBlock Text="🧹 Curățare &amp; RAM" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Analiză spațiu recuperabil" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="Cache-uri recuperabile" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock x:Name="ReportText" FontFamily="Consolas" FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap" />
-                <ui:Button Content="Analizează" Click="OnAnalyzeClicked" />
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Margin="0,0,6,0" Click="OnSelectAllClicked" />
+                    <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
+                </Grid>
+                <StackPanel x:Name="ItemsPanel" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,10" />
+                <ui:Button x:Name="DeleteButton" Content="Șterge cache-urile selectate" Appearance="Primary" Click="OnDeleteClicked" />
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Header="Acțiuni" IsExpanded="True">
-            <StackPanel>
-                <ui:Button Content="Curăță cache Media (DaVinci / Adobe)" Margin="0,0,0,8" Click="OnCleanMediaClicked" />
-                <ui:Button Content="Purjare RAM + Flush DNS" Click="OnPurgeClicked" />
-            </StackPanel>
+        <ui:CardExpander Header="RAM &amp; DNS" IsExpanded="True">
+            <ui:Button Content="Purjare RAM + Flush DNS" Click="OnPurgeClicked" />
         </ui:CardExpander>
 
         <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" />

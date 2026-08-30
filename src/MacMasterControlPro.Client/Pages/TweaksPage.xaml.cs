@@ -9,20 +9,38 @@ public partial class TweaksPage : UserControl
 {
     private readonly TweaksService _service = new();
 
-    public TweaksPage() => InitializeComponent();
-
-    private void OnExplorerClicked(object sender, RoutedEventArgs e)
+    public TweaksPage()
     {
-        if (!RequireLicense()) return;
-        _service.EnableExplorerAdvancedView();
-        StatusText.Text = "✔ Vizualizare avansată Explorer aplicată.";
+        InitializeComponent();
+        UpdateSelectionText();
     }
 
-    private void OnThumbsClicked(object sender, RoutedEventArgs e)
+    private void OnSelectAllClicked(object sender, RoutedEventArgs e)
+    {
+        var allChecked = ExplorerCheck.IsChecked == true && ThumbsCheck.IsChecked == true;
+        ExplorerCheck.IsChecked = !allChecked;
+        ThumbsCheck.IsChecked = !allChecked;
+    }
+
+    private void OnCheckChanged(object sender, RoutedEventArgs e) => UpdateSelectionText();
+
+    private void UpdateSelectionText()
+    {
+        var count = (ExplorerCheck.IsChecked == true ? 1 : 0) + (ThumbsCheck.IsChecked == true ? 1 : 0);
+        SelectionText.Text = $"Selectat {count} din 2";
+        SelectAllButton.Content = count == 2 ? "Deselectează tot" : "Selectează tot";
+        ApplyButton.IsEnabled = count > 0;
+    }
+
+    private void OnApplyClicked(object sender, RoutedEventArgs e)
     {
         if (!RequireLicense()) return;
-        _service.BlockThumbsDbOnNetworkDrives();
-        StatusText.Text = "✔ thumbs.db blocat pe unități de rețea.";
+        var applied = 0;
+        if (ExplorerCheck.IsChecked == true) { _service.EnableExplorerAdvancedView(); applied++; }
+        if (ThumbsCheck.IsChecked == true) { _service.BlockThumbsDbOnNetworkDrives(); applied++; }
+        StatusText.Text = $"✔ {applied} tweak-uri aplicate.";
+        ExplorerCheck.IsChecked = false;
+        ThumbsCheck.IsChecked = false;
     }
 
     private void OnProtectFolderClicked(object sender, RoutedEventArgs e)

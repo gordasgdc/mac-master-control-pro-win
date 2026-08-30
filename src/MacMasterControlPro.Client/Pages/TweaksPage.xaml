@@ -5,10 +5,21 @@
     <StackPanel MaxWidth="560">
         <TextBlock Text="🛠️ Tweak-uri Sistem" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Explorer &amp; Search" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="Explorer" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <ui:Button Content="Activează vizualizare avansată Explorer" Margin="0,0,0,8" Click="OnExplorerClicked" />
-                <ui:Button Content="Blochează thumbs.db pe unități de rețea" Margin="0,0,0,8" Click="OnThumbsClicked" />
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Click="OnSelectAllClicked" />
+                </Grid>
+                <CheckBox x:Name="ExplorerCheck" Content="Activează vizualizare avansată Explorer" Margin="0,0,0,6" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
+                <CheckBox x:Name="ThumbsCheck" Content="Blochează thumbs.db pe unități de rețea" Margin="0,0,0,10" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,0,0,10" />
+                <ui:Button x:Name="ApplyButton" Content="Aplică tweak-urile selectate" Appearance="Primary" Margin="0,0,0,12" Click="OnApplyClicked" />
+
+                <Separator Margin="0,0,0,12" />
                 <ui:Button Content="Protejează folder RAW de indexare…" Click="OnProtectFolderClicked" />
                 <TextBlock x:Name="ProtectStatusText" FontSize="11" Foreground="Gray" Margin="0,6,0,0" />
             </StackPanel>

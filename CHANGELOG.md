@@ -1,5 +1,11 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.3.0 (2026-08-30)
+**Selecție granulară** (checkbox-uri per element), port 1:1 din Mac v2.2.0:
+- **Curățare & RAM**: fiecare cache (DaVinci/Adobe/%Temp%) are bifă proprie, Selectează/Deselectează tot, contor live „X GB din Y GB", ștergere doar pe elementele bifate.
+- **Tweak-uri Sistem**: Explorer avansat + blocare thumbs.db convertite în checklist cu „Aplică tweak-urile selectate".
+- Butoanele de acțiune dezactivate fără nicio bifă.
+
 ## v1.2.0 (2026-08-30)
 - **Rebranding**: "Mac Master Control Pro" → "Master Control Studio Pro" în tot codul (afișare, căi AppData, installer). ProductID și nume repo rămân neschimbate.
 - **Localizare RO/EN/ES** completă în UI (Sidebar, Dashboard, Settings, TrialGateWindow) — `Localization.cs`, port 1:1 al Mac.
