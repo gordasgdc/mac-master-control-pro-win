@@ -28,6 +28,19 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // BUG REAL, gasit 2026-08-30 (raport Cristi): "Adauga cont Cloud"
+        // (rclone) esua cu "the system cannot find the file specified" si
+        // WorkingDirectory = "C:\Program Files\GDC Plugin Manager" - userul
+        // lansase Master Control Studio Pro din butonul "Deschide" al GDC
+        // Plugin Manager. `Process.Start(UseShellExecute:true)` FARA
+        // WorkingDirectory explicit mosteneste directorul curent al
+        // PARINTELUI (GDC Plugin Manager), nu directorul propriu al acestei
+        // aplicatii - orice comanda ulterioara pornita de-aici cu o cale
+        // relativa/WorkingDirectory implicit ar fi cautat-o gresit acolo.
+        // Resetam explicit la propriul folder, indiferent cine ne-a lansat.
+        Environment.CurrentDirectory = AppContext.BaseDirectory;
+
         DiagnosticLog.Write("App", "OnStartup: pornire aplicatie.");
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>

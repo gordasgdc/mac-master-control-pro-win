@@ -53,27 +53,27 @@ public partial class DependenciesPage : UserControl
         {
             var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 4) };
 
-            if (Installable.Contains(item.Id))
+            // Punctul de status (verde/rosu) ramane mereu vizibil, indiferent
+            // de bifa - fara el, un checkbox needit+dezactivat pentru un
+            // pachet deja instalat nu comunica vizual "e OK" (bug real,
+            // gasit 2026-08-30: "de ce nu apare cu verde?").
+            row.Children.Add(new Ellipse
+            {
+                Width = 9, Height = 9, Margin = new Thickness(2, 0, 10, 0),
+                Fill = item.IsInstalled ? Brushes.LimeGreen : Brushes.OrangeRed,
+            });
+
+            if (Installable.Contains(item.Id) && !item.IsInstalled)
             {
                 var check = new CheckBox
                 {
                     IsChecked = _selected.Contains(item.Id),
-                    IsEnabled = !item.IsInstalled,
                     Margin = new Thickness(0, 0, 8, 0),
                     VerticalAlignment = VerticalAlignment.Center,
                 };
                 check.Checked += (_, _) => { _selected.Add(item.Id); UpdateSelectionText(); };
                 check.Unchecked += (_, _) => { _selected.Remove(item.Id); UpdateSelectionText(); };
                 row.Children.Add(check);
-            }
-            else
-            {
-                // winget - fara bifa, doar indicator de status.
-                row.Children.Add(new Ellipse
-                {
-                    Width = 9, Height = 9, Margin = new Thickness(2, 0, 10, 0),
-                    Fill = item.IsInstalled ? Brushes.LimeGreen : Brushes.OrangeRed,
-                });
             }
 
             row.Children.Add(new TextBlock { Text = item.Name, FontWeight = FontWeights.Bold, Width = 190 });
