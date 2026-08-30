@@ -1,0 +1,24 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.CleanupPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <StackPanel MaxWidth="560">
+        <TextBlock Text="🧹 Curățare &amp; RAM" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <ui:CardExpander Header="Analiză spațiu recuperabil" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock x:Name="ReportText" FontFamily="Consolas" FontSize="12" Margin="0,0,0,10" TextWrapping="Wrap" />
+                <ui:Button Content="Analizează" Click="OnAnalyzeClicked" />
+            </StackPanel>
+        </ui:CardExpander>
+
+        <ui:CardExpander Header="Acțiuni" IsExpanded="True">
+            <StackPanel>
+                <ui:Button Content="Curăță cache Media (DaVinci / Adobe)" Margin="0,0,0,8" Click="OnCleanMediaClicked" />
+                <ui:Button Content="Purjare RAM + Flush DNS" Click="OnPurgeClicked" />
+            </StackPanel>
+        </ui:CardExpander>
+
+        <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" />
+    </StackPanel>
+</UserControl>

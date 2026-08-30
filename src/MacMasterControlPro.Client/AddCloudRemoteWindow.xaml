@@ -1,0 +1,25 @@
+<Window x:Class="MacMasterControlPro.Client.AddCloudRemoteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Adaugă cont Cloud" Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource ApplicationBackgroundBrush}">
+    <StackPanel Margin="24">
+        <TextBlock Text="Adaugă cont Cloud" FontSize="16" FontWeight="Bold" Margin="0,0,0,14" />
+        <ui:TextBox x:Name="NameBox" PlaceholderText="Nume cont (ex: drive_personal)" Margin="0,0,0,10" />
+        <ComboBox x:Name="ProviderCombo" Margin="0,0,0,10" SelectionChanged="OnProviderChanged" />
+        <TextBlock x:Name="OAuthNote" Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,10" Visibility="Collapsed"
+                   Text="Se va deschide browser-ul pentru autorizare — flux standard Rclone." />
+        <StackPanel x:Name="FieldsPanel" Margin="0,0,0,10" />
+        <TextBlock x:Name="StatusText" Foreground="Gray" FontSize="11" Margin="0,0,0,10" TextWrapping="Wrap" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ui:Button Content="Anulează" Click="OnCancelClicked" />
+            <ui:Button x:Name="CreateButton" Grid.Column="1" Content="Adaugă" Appearance="Primary" Click="OnCreateClicked" />
+        </Grid>
+    </StackPanel>
+</Window>

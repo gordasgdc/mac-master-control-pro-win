@@ -9,6 +9,8 @@ namespace MacMasterControlPro.Client;
 
 public partial class MainWindow
 {
+    private readonly DependencyChecker _dependencyChecker = new();
+
     public MainWindow()
     {
         InitializeComponent();
@@ -17,6 +19,9 @@ public partial class MainWindow
         VersionText.Text = $"v{UpdateChecker.CurrentVersion} Pro";
         RefreshProfile();
         MachineIdButton.Content = $"Machine ID: {MachineID.Display[..Math.Min(13, MachineID.Display.Length)]}…";
+
+        _dependencyChecker.CheckAll();
+        RefreshDependencyBadge();
 
         PageHost.Content = new DashboardPage();
 
@@ -29,9 +34,20 @@ public partial class MainWindow
         PageHost.Content = (item.Tag as string) switch
         {
             "Network" => new NetworkPage(),
+            "Cloud" => new Pages.CloudPage(),
+            "Cleanup" => new Pages.CleanupPage(),
+            "Tweaks" => new Pages.TweaksPage(),
+            "Dependencies" => new Pages.DependenciesPage(_dependencyChecker, this),
             "Settings" => new SettingsPage(this),
             _ => new DashboardPage(),
         };
+    }
+
+    public void RefreshDependencyBadge()
+    {
+        DependenciesItem.Foreground = _dependencyChecker.AllInstalled
+            ? System.Windows.Media.Brushes.White
+            : System.Windows.Media.Brushes.OrangeRed;
     }
 
     public void RefreshProfile()

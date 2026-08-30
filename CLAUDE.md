@@ -571,34 +571,36 @@ Diagnostic permanent, nu print-uri temporare (2026-08-29).**
   Shell.swift/PrivilegedRunner.swift Mac), `NetworkService.cs` (netsh/
   Set-DnsClientServerAddress), `UserProfileStore.cs`.
 - `src/MacMasterControlPro.Client/` — WPF (`Wpf.Ui` 3.0.5,
-  `CommunityToolkit.Mvvm`), `Pages/` (Dashboard/Network/Settings — restul
-  modulelor Mac urmeaza in etape viitoare: Cloud Manager, Cleanup, Tweaks,
-  Rosetta Inspector, Dependency Auto-Installer).
+  `CommunityToolkit.Mvvm`), `Pages/` (Dashboard/Network/Cloud/Cleanup/
+  Tweaks/Dependencies/Settings — paritate completa cu Mac, cu exceptia
+  Rosetta Inspector, concept Mac-only fara echivalent Windows).
 - `installer.iss` — Inno Setup, `LicenseFile=installer\license.txt`
   (Regula 19 — GDCVaultWin NU are asta, gap real gasit in trecere).
 - `uninstall.ps1` — dezinstalare completa (Regula Clean Uninstall).
 
-## Stare curenta (2026-08-30) — v1.0.0 scaffold
+## Stare curenta (2026-08-30) — v1.1.0, paritate module cu Mac
 
-Primul pas: structura solutiei (`MacMasterControlPro.Core`+`.Client`),
-licentiere Ed25519 reala, tema System/Light/Dark, Marime Text (Regula 24,
-`LayoutTransform` pe `RootGrid`), Sidebar Footer (profil/Machine ID/
-versiune/update), Self-Updater real (Regula 20), un singur modul portat
-(Retea/TCP tuning). Build verificat local (`dotnet build`, XAML->BAML
-inclus, gratie `EnableWindowsTargeting`) — 0 erori, 0 warning-uri.
-**Verificare finala tot prin CI Windows real** (`build-windows.yml`)
-inainte de orice release, la fel ca restul ecosistemului.
+Toate modulele Mac portate, cu adaptarile de platforma:
+- **Cloud Manager Universal** (`CloudManagerService.cs`) — acelasi set de
+  10 provideri Rclone; monteaza pe litera de disc libera (WinFSP), nu
+  folder Desktop ca pe Mac.
+- **Curatare & RAM** (`CleanupService.cs`) — cai Windows (DaVinci CacheClip,
+  Adobe Media Cache, %Temp%), `EmptyWorkingSet` (P/Invoke psapi.dll) +
+  `ipconfig /flushdns` in loc de purge/dscacheutil.
+- **Tweak-uri Sistem** (`TweaksService.cs`) — Explorer avansat (Registry),
+  block thumbs.db pe retea, `FileAttributes.NotContentIndexed` ca
+  echivalent Spotlight Shield (atribut standard Windows Search).
+- **Dependency Auto-Installer** (`DependencyChecker.cs`) — winget in loc
+  de Homebrew, verifica/instaleaza Rclone + WinFSP.
+- **Rosetta Inspector**: NU portat — concept Mac-only (Apple Silicon vs
+  Intel), fara echivalent real pe Windows.
+- Localizare RO/EN/ES completa in UI: NU inca facuta — doar ghidul PDF
+  alege limba dupa `CultureInfo.CurrentUICulture`. Ramane pentru o
+  versiune viitoare.
 
-## Urmatorii pasi (module ramase, paritate cu Mac)
-
-- Cloud Manager Universal (Rclone + WinFSP in loc de macFUSE)
-- Cleanup & RAM (cai %AppData%/%LocalAppData%/%Temp%, EmptyWorkingSet)
-- System Tweaks (Explorer, Thumbs.db, ...)
-- Rosetta Inspector: NU se aplica pe Windows (concept Mac-only) —
-  inlocuit eventual cu un modul echivalent de relevanta Windows, de discutat
-- Dependency Auto-Installer (WinFSP/Rclone in loc de Homebrew)
-- Localizare RO/EN/ES completa in UI (deocamdata doar ghidul PDF alege
-  limba dupa CultureInfo.CurrentUICulture)
+Build verificat local (`dotnet build`, XAML->BAML inclus, gratie
+`EnableWindowsTargeting`) — 0 erori, 0 warning-uri. **Verificare finala
+tot prin CI Windows real** (`build-windows.yml`) inainte de orice release.
 
 ## Rebuild local (verificare sintaxa, NU echivalent build Windows real)
 
