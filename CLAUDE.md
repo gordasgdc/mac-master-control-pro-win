@@ -602,6 +602,26 @@ Build verificat local (`dotnet build`, XAML->BAML inclus, gratie
 `EnableWindowsTargeting`) — 0 erori, 0 warning-uri. **Verificare finala
 tot prin CI Windows real** (`build-windows.yml`) inainte de orice release.
 
+## Release v1.2.0 (2026-08-30) — primul release oficial
+
+Publicat direct din artefactul CI real (`windows-latest`, XAML->BAML
+compilat efectiv + `dotnet publish` self-contained win-x64 + Inno Setup
+`ISCC.exe`), nu doar build local de pe Mac. Assets:
+`MacMasterControlProSetup-1.2.0.exe` (Regula 17) +
+`MacMasterControlProSetup.exe` (stabil, tinta Self-Updater-ului si a
+site-ului) — ambele verificate `releases/latest/download/...` HTTP 200.
+
+**Nesemnat cu certificat Authenticode platit** — Windows SmartScreen
+poate arata "Unrecognized app / Windows protected your PC" la prima
+rulare (normal pentru distributie indie, aceeasi nota ca restul
+ecosistemului Windows GDC — vezi installer.iss).
+
+**WARNING (Regula 20)**: pasul efectiv de instalare (wizard-ul Inno,
+clickurile userului, promptul SmartScreen) NU a putut fi verificat
+automat — doar descarcarea reala (HTTP 200, executabil PE32 valid,
+57MB) e confirmata. Instalarea + auto-update-ul efectiv TREBUIE
+confirmate manual, o data, de Cristi.
+
 ## Rebuild local (verificare sintaxa, NU echivalent build Windows real)
 
 ```bash
