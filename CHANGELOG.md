@@ -1,5 +1,22 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.6.0 (2026-08-30) — Panou „terminal live” + butoane roșu/verde la Dependențe + fix buton actualizări invizibil
+
+- **Fix**: `CheckUpdatesButton` nu avea `Foreground` explicit — invizibil sub
+  tema Light, exact ca restul textului din sidebar (v1.5.0). Self-Updater-ul
+  era deja complet implementat (descărcare reală + instalare + relansare,
+  ca la DataMover/GDCVault) — doar butonul era invizibil.
+- **`TerminalLogView`** (`Controls/TerminalLogView.xaml`) — panou reutilizabil
+  tip terminal, afișează linie cu linie orice comandă externă rulată.
+- **Dependențe rescrise**: fiecare pachet (Rclone, WinFSP) are propriul
+  buton — roșu (neinstalat, apăsabil) devine verde (instalat) după succes.
+  Niciun buton „instalează tot" — instalare pas-cu-pas, ca să nu blocheze
+  sistemul.
+- **Fix real ștergere cache**: catch-ul original învelea toată bucla de
+  ștergere, nu fiecare fișier — un singur fișier blocat oprea silențios
+  TOATĂ operația. Acum fiecare fișier are propriul try/catch + raportare în
+  panoul terminal.
+
 ## v1.5.1 (2026-08-30) — Fix real: „Adaugă cont Cloud” + indicator verde Dependențe
 
 **Fix cauza reală a erorii rclone**: „Adaugă cont Cloud” eșua cu

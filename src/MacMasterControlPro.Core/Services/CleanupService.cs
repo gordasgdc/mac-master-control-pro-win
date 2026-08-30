@@ -50,21 +50,38 @@ public sealed class CleanupService
     }
 
     /// Actiune reala - sterge DOAR itemii bifati de utilizator, fara UAC.
-    public void DeleteSelected(IEnumerable<CleanableItem> selected)
+    /// `log` primeste o linie per fisier/folder (panou "terminal live" in UI)
+    /// - fara el, o eroare pe PRIMUL fisier bloca silentios TOATA stergerea
+    /// (bug real, gasit 2026-08-30: catch-ul original invelea toata bucla,
+    /// nu fiecare fisier in parte, deci un singur fisier "in uz" oprea orice
+    /// progres fara nicio urma vizibila pentru user).
+    public void DeleteSelected(IEnumerable<CleanableItem> selected, Action<string>? log = null)
     {
-        foreach (var item in selected) DeleteContents(item.Path);
+        foreach (var item in selected)
+        {
+            log?.Invoke($"Ștergere: {item.Name}…");
+            var (deleted, skipped) = DeleteContents(item.Path, log);
+            log?.Invoke($"  ✔ {item.Name}: {deleted} șterse, {skipped} sărite (în uz/blocate).");
+        }
         ScanReclaimable();
     }
 
-    private static void DeleteContents(string path)
+    private static (int deleted, int skipped) DeleteContents(string path, Action<string>? log)
     {
-        if (!Directory.Exists(path)) return;
-        try
+        if (!Directory.Exists(path)) return (0, 0);
+        var deleted = 0;
+        var skipped = 0;
+        foreach (var file in Directory.EnumerateFiles(path))
         {
-            foreach (var file in Directory.EnumerateFiles(path)) File.Delete(file);
-            foreach (var dir in Directory.EnumerateDirectories(path)) Directory.Delete(dir, true);
+            try { File.Delete(file); deleted++; }
+            catch (Exception ex) { skipped++; log?.Invoke($"    blocat: {Path.GetFileName(file)} ({ex.GetType().Name})"); }
         }
-        catch { /* fisiere in uz, ignoram individual */ }
+        foreach (var dir in Directory.EnumerateDirectories(path))
+        {
+            try { Directory.Delete(dir, true); deleted++; }
+            catch (Exception ex) { skipped++; log?.Invoke($"    blocat: {Path.GetFileName(dir)}/ ({ex.GetType().Name})"); }
+        }
+        return (deleted, skipped);
     }
 
     /// EmptyWorkingSet cere doar handle-ul procesului curent, fara UAC.

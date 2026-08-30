@@ -1,21 +1,20 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.DependenciesPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <StackPanel MaxWidth="560">
         <TextBlock Text="🧩 Dependențe &amp; Cerințe Sistem" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
         <ui:CardExpander Header="Status pachete" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,8"
-                           Text="Bifează exact ce vrei să instalezi — nimic nu se instalează automat, ca să nu-ți încarce sistemul cu pachete nedorite." />
+                           Text="Fiecare componentă are propriul buton de instalare — roșu (neinstalat) devine verde (instalat) după ce comanda reușește." />
                 <ItemsControl x:Name="ItemsList" Margin="0,0,0,10" />
-                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,0,0,10" />
-                <ui:Button Content="Rescanează" Margin="0,0,0,8" Click="OnRescanClicked" />
-                <ui:Button x:Name="InstallButton" Content="Instalează selecția" Appearance="Primary" Click="OnInstallClicked" />
+                <ui:Button Content="Rescanează" Click="OnRescanClicked" />
             </StackPanel>
         </ui:CardExpander>
 
-        <TextBlock x:Name="LogText" FontFamily="Consolas" FontSize="10.5" Foreground="Gray" TextWrapping="Wrap" MaxHeight="160" />
+        <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
 </UserControl>

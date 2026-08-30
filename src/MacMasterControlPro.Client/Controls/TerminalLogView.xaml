@@ -1,0 +1,15 @@
+<UserControl x:Class="MacMasterControlPro.Client.Controls.TerminalLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Panou "terminal live" - vezi CLAUDE.md "Standard UI: feedback vizibil
+         de executie". Orice actiune care ruleaza o comanda externa
+         (stergere fisiere, winget, rclone) apeleaza Append() per pas, ca
+         userul sa vada CONCRET ca se intampla ceva, nu doar "se instaleaza..."
+         urmat de tacere. -->
+    <Border Background="#0D0F12" BorderBrush="#2B2F36" BorderThickness="1" CornerRadius="4"
+            Visibility="Collapsed" x:Name="Root">
+        <ScrollViewer x:Name="Scroller" MaxHeight="160" VerticalScrollBarVisibility="Auto" Padding="10,8">
+            <TextBlock x:Name="LogText" FontFamily="Consolas" FontSize="11" Foreground="#8FE388" TextWrapping="Wrap" />
+        </ScrollViewer>
+    </Border>
+</UserControl>

@@ -76,17 +76,24 @@ public partial class CleanupPage : UserControl
     private void OnDeleteClicked(object sender, RoutedEventArgs e)
     {
         if (!RequireLicense()) return;
+        Log.Clear();
+        Log.Append("$ Ștergere cache-uri selectate…");
+        DeleteButton.IsEnabled = false;
         var toDelete = _service.Items.Where(i => _selected.Contains(i.Id)).ToList();
-        _service.DeleteSelected(toDelete);
+        _service.DeleteSelected(toDelete, line => Log.Append(line));
         _selected.Clear();
         Render();
-        StatusText.Text = "✔ Cache-uri șterse.";
+        StatusText.Text = "✔ Gata — vezi detaliile mai jos.";
+        DeleteButton.IsEnabled = true;
     }
 
     private void OnPurgeClicked(object sender, RoutedEventArgs e)
     {
         if (!RequireLicense()) return;
+        Log.Clear();
+        Log.Append("$ Purjare RAM + flush DNS…");
         _service.PurgeRamAndFlushDns();
+        Log.Append("✔ RAM eliberat pe toate procesele accesibile, cache DNS golit.");
         StatusText.Text = "✔ RAM eliberat, DNS golit.";
     }
 
