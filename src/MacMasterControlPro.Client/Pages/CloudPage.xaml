@@ -1,7 +1,8 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.CloudPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <StackPanel MaxWidth="620">
         <Grid Margin="0,0,0,16">
             <Grid.ColumnDefinitions>
@@ -13,6 +14,18 @@
             <ui:Button Grid.Column="1" Content="+ Adaugă cont" Margin="0,0,8,0" Click="OnAddClicked" />
             <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
         </Grid>
+
+        <ui:CardExpander Header="Locație montare" IsExpanded="False" Margin="0,0,0,14">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,8"
+                           Text="Implicit, fiecare cont montat primește o literă de disc nouă. Poți alege în schimb un folder — util pe un disc extern (Thunderbolt/USB-C), ca să nu ocupi litere de disc pe intern." />
+                <TextBlock x:Name="MountFolderText" FontSize="11" Margin="0,0,0,8" />
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Content="Alege folder…" Margin="0,0,8,0" Click="OnChooseMountFolderClicked" />
+                    <ui:Button Content="Resetează (literă de disc)" Click="OnResetMountFolderClicked" />
+                </StackPanel>
+            </StackPanel>
+        </ui:CardExpander>
 
         <Grid Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
@@ -28,6 +41,7 @@
             <ui:Button x:Name="MountSelectedButton" Content="Montează selecția" Appearance="Primary" Margin="0,0,8,0" Click="OnMountSelectedClicked" />
             <ui:Button x:Name="UnmountSelectedButton" Content="Demontează selecția" Click="OnUnmountSelectedClicked" />
         </StackPanel>
-        <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
+        <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
+        <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
 </UserControl>

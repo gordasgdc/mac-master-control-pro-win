@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using MacMasterControlPro.Core.Services;
 using Wpf.Ui.Controls;
 
@@ -15,6 +16,7 @@ public partial class CloudPage : UserControl
     public CloudPage()
     {
         InitializeComponent();
+        RenderMountFolderText();
         Refresh();
     }
 
@@ -24,6 +26,29 @@ public partial class CloudPage : UserControl
     {
         var window = new AddCloudRemoteWindow(_service) { Owner = Window.GetWindow(this) };
         if (window.ShowDialog() == true) Refresh();
+    }
+
+    private void OnChooseMountFolderClicked(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog { Title = "Alege folderul unde se montează conturile Cloud" };
+        if (dialog.ShowDialog() != true) return;
+        CloudMountSettings.CustomMountFolder = dialog.FolderName;
+        RenderMountFolderText();
+    }
+
+    private void OnResetMountFolderClicked(object sender, RoutedEventArgs e)
+    {
+        CloudMountSettings.CustomMountFolder = null;
+        RenderMountFolderText();
+    }
+
+    private void RenderMountFolderText()
+    {
+        var folder = CloudMountSettings.CustomMountFolder;
+        MountFolderText.Text = string.IsNullOrWhiteSpace(folder)
+            ? "Implicit: literă de disc nouă per cont."
+            : $"Folder curent: {folder}";
+        MountFolderText.Foreground = string.IsNullOrWhiteSpace(folder) ? System.Windows.Media.Brushes.Gray : System.Windows.Media.Brushes.LimeGreen;
     }
 
     private void OnSelectAllClicked(object sender, RoutedEventArgs e)
@@ -47,18 +72,20 @@ public partial class CloudPage : UserControl
             var gate = new TrialGateWindow { Owner = Window.GetWindow(this) };
             if (gate.ShowDialog() != true) return;
         }
+        Log.Clear();
         foreach (var name in _selected.Where(n => !_service.MountedDriveLetters.ContainsKey(n)))
         {
-            _service.Mount(name);
+            _service.Mount(name, line => Log.Append(line));
         }
         Refresh();
     }
 
     private void OnUnmountSelectedClicked(object sender, RoutedEventArgs e)
     {
+        Log.Clear();
         foreach (var name in _selected.Where(n => _service.MountedDriveLetters.ContainsKey(n)))
         {
-            _service.Unmount(name);
+            _service.Unmount(name, line => Log.Append(line));
         }
         Refresh();
     }
@@ -97,14 +124,15 @@ public partial class CloudPage : UserControl
             };
             actionButton.Click += (_, _) =>
             {
-                if (isMounted) { _service.Unmount(remote.Name); Refresh(); return; }
+                Log.Clear();
+                if (isMounted) { _service.Unmount(remote.Name, line => Log.Append(line)); Refresh(); return; }
                 if (!LicenseManager.Shared.IsUnlocked)
                 {
                     var gate = new TrialGateWindow { Owner = Window.GetWindow(this) };
                     if (gate.ShowDialog() != true) return;
                 }
-                var letter = _service.Mount(remote.Name);
-                StatusText.Text = letter is not null ? $"✔ Montat pe {letter}" : "Nicio literă de disc liberă.";
+                var target = _service.Mount(remote.Name, line => Log.Append(line));
+                StatusText.Text = target is not null ? $"✔ Montat pe {target}" : "Nicio literă de disc liberă.";
                 Refresh();
             };
             Grid.SetColumn(actionButton, 2);

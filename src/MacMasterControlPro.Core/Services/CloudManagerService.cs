@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.IO;
+using System.Text.Json;
 
 namespace MacMasterControlPro.Core.Services;
 
@@ -92,12 +94,60 @@ public sealed class CloudRemote
     public required string Type { get; init; }
 }
 
+/// Setare persistata: folder custom (posibil pe disc extern) unde se
+/// monteaza remote-urile, in loc de o litera de disc noua - cerinta
+/// explicita 2026-08-30 (Cristi: SSD-uri interne mici, se lucreaza de pe
+/// discuri externe Thunderbolt/USB-C). `null` = comportament vechi
+/// (prima litera libera).
+public static class CloudMountSettings
+{
+    private static string FilePath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "MacMasterControlPro", "cloud-mount-settings.json");
+
+    public static string? CustomMountFolder
+    {
+        get
+        {
+            try
+            {
+                if (!File.Exists(FilePath)) return null;
+                var json = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllBytes(FilePath));
+                return json?.GetValueOrDefault("customMountFolder");
+            }
+            catch { return null; }
+        }
+        set
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+                var json = new Dictionary<string, string?> { ["customMountFolder"] = value };
+                File.WriteAllBytes(FilePath, JsonSerializer.SerializeToUtf8Bytes(json));
+            }
+            catch { /* nescrierea nu trebuie sa blocheze sesiunea curenta */ }
+        }
+    }
+}
+
 /// Manager Universal Multi-Cloud - identic conceptual cu CloudManagerService
-/// (Mac), dar monteaza pe o litera de disc (WinFSP), nu un folder Desktop.
+/// (Mac). Monteaza fie pe o litera de disc noua (WinFSP, implicit), fie
+/// intr-un folder ales de user (posibil pe disc extern) - vezi
+/// `CloudMountSettings`.
 public sealed class CloudManagerService
 {
+    /// Port RC unic per montare, NU un port fix comun - bug real gasit
+    /// 2026-08-30: montarea nu pornea deloc cu `--rc` (deci `rclone rc
+    /// core/quit` din Unmount nu avea la ce sa se conecteze, demontarea
+    /// reala se baza doar pe `net use /delete`, care nu opreste procesul
+    /// WinFsp de dedesubt), iar un port comun ar fi facut ca a doua
+    /// montare simultana sa o demonteze accidental pe prima.
+    private const int RcBasePort = 5572;
+    private readonly Dictionary<string, int> _rcPorts = new();
+
     public List<CloudRemote> Remotes { get; private set; } = new();
-    public Dictionary<string, string> MountedDriveLetters { get; } = new(); // remoteName -> litera (ex: "X:")
+    /// remoteName -> litera ("X:") SAU folder complet, dupa cum e configurat.
+    public Dictionary<string, string> MountedDriveLetters { get; } = new();
 
     public void RefreshRemotes()
     {
@@ -160,27 +210,63 @@ public sealed class CloudManagerService
         RefreshRemotes();
     }
 
-    /// Monteaza pe prima litera libera (necesita WinFSP instalat).
-    public string? Mount(string remoteName)
+    /// Monteaza fie pe un folder custom (CloudMountSettings, posibil disc
+    /// extern), fie pe prima litera libera (necesita WinFSP instalat) -
+    /// `log` primeste linia de comanda + orice eroare (panou Terminal Live).
+    public string? Mount(string remoteName, Action<string>? log = null)
     {
-        var letter = FirstFreeDriveLetter();
-        if (letter is null) return null;
+        var customFolder = CloudMountSettings.CustomMountFolder;
+        string target;
+        if (!string.IsNullOrWhiteSpace(customFolder))
+        {
+            if (!Directory.Exists(customFolder))
+            {
+                log?.Invoke($"⚠ Folderul de mount configurat ({customFolder}) nu există (disc extern deconectat?) — folosesc o literă de disc în loc.");
+                target = FirstFreeDriveLetter() ?? "";
+                if (target == "") { log?.Invoke("✗ Nicio literă de disc liberă."); return null; }
+            }
+            else
+            {
+                target = Path.Combine(customFolder, $"Cloud_{remoteName}");
+                Directory.CreateDirectory(target);
+            }
+        }
+        else
+        {
+            target = FirstFreeDriveLetter() ?? "";
+            if (target == "") { log?.Invoke("✗ Nicio literă de disc liberă."); return null; }
+        }
+
+        var port = RcBasePort + _rcPorts.Count;
+        _rcPorts[remoteName] = port;
+        log?.Invoke($"$ rclone mount {remoteName}: {target} --rc-addr 127.0.0.1:{port}");
         Process.Start(new ProcessStartInfo("cmd.exe")
         {
-            Arguments = $"/c start /min rclone mount {remoteName}: {letter} --vfs-cache-mode off",
+            Arguments = $"/c start /min rclone mount {remoteName}: \"{target}\" --vfs-cache-mode off --rc --rc-addr 127.0.0.1:{port} --rc-no-auth",
             UseShellExecute = false,
             CreateNoWindow = true,
         });
-        MountedDriveLetters[remoteName] = letter;
-        return letter;
+        MountedDriveLetters[remoteName] = target;
+        return target;
     }
 
-    public void Unmount(string remoteName)
+    public void Unmount(string remoteName, Action<string>? log = null)
     {
-        if (!MountedDriveLetters.TryGetValue(remoteName, out var letter)) return;
-        Shell.Run($"rclone rc core/quit --rc-addr 127.0.0.1:5572 2>$null");
-        Shell.Run($"net use {letter} /delete /y 2>$null");
+        if (!MountedDriveLetters.TryGetValue(remoteName, out var target)) return;
+        if (_rcPorts.TryGetValue(remoteName, out var port))
+        {
+            log?.Invoke($"$ rclone rc core/quit --rc-addr 127.0.0.1:{port}");
+            Shell.Run($"rclone rc core/quit --rc-addr 127.0.0.1:{port} 2>$null");
+            _rcPorts.Remove(remoteName);
+        }
+        // Fallback pentru montari vechi pe litera (fara --rc) - `net use`
+        // functioneaza doar pe litere, niciodata pe un folder custom.
+        if (target.Length == 2 && target[1] == ':')
+        {
+            Shell.Run($"net use {target} /delete /y 2>$null");
+        }
         MountedDriveLetters.Remove(remoteName);
+        log?.Invoke($"✔ {remoteName}: demontat.");
     }
 
     private static string? FirstFreeDriveLetter()

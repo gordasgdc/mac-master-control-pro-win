@@ -1,5 +1,14 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.7.0 (2026-08-30) — Faza 1: Locație de montare configurabilă (disc extern)
+
+Cloud Manager permite acum alegerea unui folder (posibil pe disc extern)
+unde se montează conturile, în loc de o literă de disc nouă automată.
+Fix real adiacent, găsit în timpul lucrului: demontarea folosea un port RC
+fix (5572) comun pentru toate montările — a doua montare simultană ar fi
+demontat-o accidental pe prima. Acum fiecare montare are propriul port RC
+unic. Progresul de montare/demontare apare linie cu linie în Terminal Live.
+
 ## v1.6.1 (2026-08-30) — Donație actualizată la 17€
 
 Decizie Cristi: rămâne un singur nivel de licențiere — suma de referință a
