@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using MacMasterControlPro.Core.Services;
@@ -8,6 +10,7 @@ namespace MacMasterControlPro.Client.Pages;
 public partial class CloudPage : UserControl
 {
     private readonly CloudManagerService _service = new();
+    private readonly HashSet<string> _selected = new();
 
     public CloudPage()
     {
@@ -23,6 +26,43 @@ public partial class CloudPage : UserControl
         if (window.ShowDialog() == true) Refresh();
     }
 
+    private void OnSelectAllClicked(object sender, RoutedEventArgs e)
+    {
+        if (_selected.Count == _service.Remotes.Count)
+        {
+            _selected.Clear();
+        }
+        else
+        {
+            _selected.Clear();
+            foreach (var remote in _service.Remotes) _selected.Add(remote.Name);
+        }
+        Refresh();
+    }
+
+    private void OnMountSelectedClicked(object sender, RoutedEventArgs e)
+    {
+        if (!LicenseManager.Shared.IsUnlocked)
+        {
+            var gate = new TrialGateWindow { Owner = Window.GetWindow(this) };
+            if (gate.ShowDialog() != true) return;
+        }
+        foreach (var name in _selected.Where(n => !_service.MountedDriveLetters.ContainsKey(n)))
+        {
+            _service.Mount(name);
+        }
+        Refresh();
+    }
+
+    private void OnUnmountSelectedClicked(object sender, RoutedEventArgs e)
+    {
+        foreach (var name in _selected.Where(n => _service.MountedDriveLetters.ContainsKey(n)))
+        {
+            _service.Unmount(name);
+        }
+        Refresh();
+    }
+
     private void Refresh()
     {
         _service.RefreshRemotes();
@@ -32,14 +72,21 @@ public partial class CloudPage : UserControl
         foreach (var remote in _service.Remotes)
         {
             var row = new Grid { Margin = new Thickness(0, 6, 0, 6) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
+            var check = new CheckBox { IsChecked = _selected.Contains(remote.Name), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
+            check.Checked += (_, _) => { _selected.Add(remote.Name); UpdateSelectionText(); };
+            check.Unchecked += (_, _) => { _selected.Remove(remote.Name); UpdateSelectionText(); };
+            Grid.SetColumn(check, 0);
+            row.Children.Add(check);
+
             var infoStack = new StackPanel();
             infoStack.Children.Add(new System.Windows.Controls.TextBlock { Text = remote.Name, FontWeight = FontWeights.Bold });
             infoStack.Children.Add(new System.Windows.Controls.TextBlock { Text = remote.Type, Foreground = System.Windows.Media.Brushes.Gray, FontSize = 11 });
-            Grid.SetColumn(infoStack, 0);
+            Grid.SetColumn(infoStack, 1);
             row.Children.Add(infoStack);
 
             var isMounted = _service.MountedDriveLetters.ContainsKey(remote.Name);
@@ -60,15 +107,24 @@ public partial class CloudPage : UserControl
                 StatusText.Text = letter is not null ? $"✔ Montat pe {letter}" : "Nicio literă de disc liberă.";
                 Refresh();
             };
-            Grid.SetColumn(actionButton, 1);
+            Grid.SetColumn(actionButton, 2);
             row.Children.Add(actionButton);
 
             var deleteButton = new Wpf.Ui.Controls.Button { Content = "🗑" };
             deleteButton.Click += (_, _) => { _service.DeleteRemote(remote.Name); Refresh(); };
-            Grid.SetColumn(deleteButton, 2);
+            Grid.SetColumn(deleteButton, 3);
             row.Children.Add(deleteButton);
 
             RemotesList.Items.Add(row);
         }
+        UpdateSelectionText();
+    }
+
+    private void UpdateSelectionText()
+    {
+        SelectionText.Text = $"Selectate {_selected.Count} din {_service.Remotes.Count}";
+        SelectAllButton.Content = _selected.Count == _service.Remotes.Count && _service.Remotes.Count > 0 ? "Deselectează tot" : "Selectează tot";
+        MountSelectedButton.IsEnabled = _selected.Count > 0;
+        UnmountSelectedButton.IsEnabled = _selected.Count > 0;
     }
 }

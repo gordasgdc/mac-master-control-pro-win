@@ -5,26 +5,28 @@ namespace MacMasterControlPro.Core.Services;
 public sealed class NetworkService
 {
     public List<string> Adapters { get; private set; } = new();
-    public string SelectedAdapter { get; set; } = "";
 
     /// Scanare libera - permisa si in Trial.
     public void ScanAdapters()
     {
         var raw = Shell.Run("Get-NetAdapter | Where-Object Status -eq 'Up' | Select-Object -ExpandProperty Name");
         Adapters = raw.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        if (SelectedAdapter == "" && Adapters.Count > 0) SelectedAdapter = Adapters[0];
     }
 
     /// Actiune reala - necesita licenta activata (poarta de Trial in UI).
-    public bool ApplyTuning()
+    /// Aplica DNS pe FIECARE adaptor bifat (Bara de Actiune in Masa, regula
+    /// globala de multi-selectie 2026-08-30) - setarile TCP globale ruleaza
+    /// o singura data, nu per adaptor.
+    public bool ApplyTuning(IEnumerable<string> selectedAdapters)
     {
-        var commands = new[]
+        var commands = new List<string>
         {
             "netsh interface tcp set global autotuninglevel=normal",
             "netsh interface tcp set global rss=enabled",
             "netsh interface tcp set global chimney=enabled",
-            $"Set-DnsClientServerAddress -InterfaceAlias '{SelectedAdapter}' -ServerAddresses ('1.1.1.1','8.8.8.8')",
         };
+        commands.AddRange(selectedAdapters.Select(adapter =>
+            $"Set-DnsClientServerAddress -InterfaceAlias '{adapter}' -ServerAddresses ('1.1.1.1','8.8.8.8')"));
         return PrivilegedRunner.Run(commands);
     }
 }

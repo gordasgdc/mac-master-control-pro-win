@@ -1,5 +1,11 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.4.0 (2026-08-30)
+**Standard Global de Multi-Selecție**, port 1:1 din Mac v2.3.0:
+- **Spotlight Shield (Tweak-uri Sistem)**: `ProtectFromIndexing(un singur folder)` a devenit un manager cu listare automată a discurilor (`DriveInfo.GetDrives()`, exclus discul de sistem) + foldere adăugate multiplu (`OpenFolderDialog.Multiselect`), fiecare cu bifă „protejat" (`FileAttributes.NotContentIndexed`), Selectează/Deselectează tot, contor „Protejate X din Y".
+- **Rețea**: plăcile de rețea au bifă individuală (nu doar un `ComboBox` cu un singur adaptor); Tuning TCP/DNS se aplică pe toate plăcile bifate simultan.
+- **Cloud Manager**: conturile au bifă proprie, Selectează/Deselectează tot, „Montează selecția"/„Demontează selecția".
+
 ## v1.3.0 (2026-08-30)
 **Selecție granulară** (checkbox-uri per element), port 1:1 din Mac v2.2.0:
 - **Curățare & RAM**: fiecare cache (DaVinci/Adobe/%Temp%) are bifă proprie, Selectează/Deselectează tot, contor live „X GB din Y GB", ștergere doar pe elementele bifate.

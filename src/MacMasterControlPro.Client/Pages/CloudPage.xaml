@@ -14,8 +14,20 @@
             <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
         </Grid>
 
+        <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Click="OnSelectAllClicked" />
+        </Grid>
         <ItemsControl x:Name="RemotesList" />
         <TextBlock x:Name="EmptyText" Text="Niciun cont adăugat încă." Foreground="Gray" Visibility="Collapsed" />
+        <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,10" />
+        <StackPanel Orientation="Horizontal">
+            <ui:Button x:Name="MountSelectedButton" Content="Montează selecția" Appearance="Primary" Margin="0,0,8,0" Click="OnMountSelectedClicked" />
+            <ui:Button x:Name="UnmountSelectedButton" Content="Demontează selecția" Click="OnUnmountSelectedClicked" />
+        </StackPanel>
         <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
     </StackPanel>
 </UserControl>
