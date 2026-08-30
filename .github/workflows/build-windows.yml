@@ -1,0 +1,41 @@
+name: Build Mac Master Control Pro (Windows)
+
+# Se ruleaza automat la orice push pe main, si manual din tab-ul Actions.
+# `dotnet build` de pe Mac NU compileaza XAML->BAML - asta e SINGURA
+# verificare reala ca legaturile XAML chiar functioneaza.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Descarca codul din repo
+        uses: actions/checkout@v4
+
+      - name: Instaleaza .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Compileaza MacMasterControlPro.Core
+        run: dotnet build src/MacMasterControlPro.Core/MacMasterControlPro.Core.csproj -c Release
+
+      - name: Compileaza MacMasterControlPro.Client (verifica XAML/BAML real)
+        run: dotnet build src/MacMasterControlPro.Client/MacMasterControlPro.Client.csproj -c Release
+
+      - name: Publica exe-ul (self-contained, win-x64)
+        run: dotnet publish src/MacMasterControlPro.Client/MacMasterControlPro.Client.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
+
+      - name: Compileaza instalatorul (Inno Setup - preinstalat pe runner-ul windows-latest)
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Incarca instalatorul ca artefact descarcabil
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 1
+          name: MacMasterControlPro-Windows-Installer
+          path: Output/MacMasterControlProSetup.exe

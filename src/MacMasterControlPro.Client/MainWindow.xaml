@@ -1,0 +1,65 @@
+<ui:FluentWindow x:Class="MacMasterControlPro.Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Mac Master Control Pro" Height="680" Width="1000" MinWidth="820" MinHeight="520"
+        Icon="pack://application:,,,/Assets/app.ico"
+        WindowStartupLocation="CenterScreen">
+    <!-- x:Name RootGrid (Regula 24) - tinta LayoutTransform-ului din
+         ApplyTextScale() (code-behind), scaleaza uniform tot continutul. -->
+    <Grid x:Name="RootGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="Mac Master Control Pro" Icon="pack://application:,,,/Assets/app.ico" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Sidebar: lista module (frate cu footer-ul, Regula 24 - nu
+                 safeAreaInset/suprapunere) -->
+            <Grid Grid.Column="0" Background="#14161A">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListBox x:Name="ModuleList" Grid.Row="0" Margin="8"
+                         Background="Transparent" BorderThickness="0"
+                         SelectionChanged="OnModuleSelected">
+                    <ListBoxItem Content="📊 Dashboard" Tag="Dashboard" IsSelected="True" />
+                    <ListBoxItem Content="🌐 Rețea" Tag="Network" />
+                    <ListBoxItem Content="⚙️ Setări" Tag="Settings" />
+                </ListBox>
+
+                <!-- Sidebar Footer (Regula 12): profil, Machine ID + copy, versiune, update -->
+                <Border Grid.Row="1" BorderBrush="#2B2F36" BorderThickness="0,1,0,0" Padding="12,10">
+                    <StackPanel>
+                        <TextBlock x:Name="ProfileNameText" FontSize="12" FontWeight="Bold" />
+                        <TextBlock x:Name="ProfileEmailText" FontSize="10.5" Foreground="Gray" Margin="0,1,0,6" />
+                        <ui:Button x:Name="MachineIdButton" Content="Machine ID: …" FontSize="10.5"
+                                   Appearance="Transparent" Padding="0" HorizontalAlignment="Left"
+                                   Click="OnCopyMachineId" />
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="VersionText" FontSize="10.5" Foreground="Gray" VerticalAlignment="Center" />
+                            <ui:Button Grid.Column="1" Content="Caută actualizări" FontSize="10.5"
+                                       Appearance="Transparent" Click="OnCheckUpdatesClicked" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Continut modul curent -->
+            <ContentControl x:Name="PageHost" Grid.Column="1" Margin="24" />
+        </Grid>
+    </Grid>
+</ui:FluentWindow>
