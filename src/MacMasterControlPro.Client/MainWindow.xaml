@@ -92,7 +92,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="VersionText" FontSize="10.5" Foreground="Gray" VerticalAlignment="Center" />
                             <ui:Button x:Name="CheckUpdatesButton" Grid.Column="1" Content="Caută actualizări" FontSize="10.5"
-                                       Appearance="Transparent" Click="OnCheckUpdatesClicked" />
+                                       Appearance="Transparent" Foreground="#4EA1F5" Click="OnCheckUpdatesClicked" />
                         </Grid>
                     </StackPanel>
                 </Border>

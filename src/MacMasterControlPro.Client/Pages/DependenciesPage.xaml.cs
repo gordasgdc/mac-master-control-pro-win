@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -11,12 +9,11 @@ namespace MacMasterControlPro.Client.Pages;
 public partial class DependenciesPage : UserControl
 {
     /// Ce se poate instala de-aici — `winget` insusi vine cu Windows, nu are
-    /// sens o bifa de "instalare" pentru el, doar status.
+    /// sens un buton de "instalare" pentru el, doar status.
     private static readonly HashSet<string> Installable = new() { "rclone", "winfsp" };
 
     private readonly DependencyChecker _checker;
     private readonly MainWindow? _mainWindow;
-    private readonly HashSet<string> _selected = new();
 
     public DependenciesPage(DependencyChecker checker, MainWindow? mainWindow = null)
     {
@@ -29,21 +26,8 @@ public partial class DependenciesPage : UserControl
     private void OnRescanClicked(object sender, RoutedEventArgs e)
     {
         _checker.CheckAll();
-        _selected.RemoveWhere(id => _checker.Items.FirstOrDefault(i => i.Id == id)?.IsInstalled == true);
         Render();
         _mainWindow?.RefreshDependencyBadge();
-    }
-
-    private void OnInstallClicked(object sender, RoutedEventArgs e)
-    {
-        if (_selected.Count == 0) return;
-        InstallButton.IsEnabled = false;
-        LogText.Text = "Se instalează…";
-        LogText.Text = _checker.InstallSelected(_selected);
-        _selected.Clear();
-        Render();
-        _mainWindow?.RefreshDependencyBadge();
-        InstallButton.IsEnabled = true;
     }
 
     private void Render()
@@ -51,45 +35,54 @@ public partial class DependenciesPage : UserControl
         ItemsList.Items.Clear();
         foreach (var item in _checker.Items)
         {
-            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 4, 0, 4) };
+            var row = new Grid { Margin = new Thickness(0, 4, 0, 4) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            // Punctul de status (verde/rosu) ramane mereu vizibil, indiferent
-            // de bifa - fara el, un checkbox needit+dezactivat pentru un
-            // pachet deja instalat nu comunica vizual "e OK" (bug real,
-            // gasit 2026-08-30: "de ce nu apare cu verde?").
-            row.Children.Add(new Ellipse
+            var dot = new Ellipse
             {
-                Width = 9, Height = 9, Margin = new Thickness(2, 0, 10, 0),
+                Width = 9, Height = 9, Margin = new Thickness(2, 0, 10, 0), VerticalAlignment = VerticalAlignment.Center,
                 Fill = item.IsInstalled ? Brushes.LimeGreen : Brushes.OrangeRed,
-            });
+            };
+            Grid.SetColumn(dot, 0);
+            row.Children.Add(dot);
 
-            if (Installable.Contains(item.Id) && !item.IsInstalled)
+            var info = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+            info.Children.Add(new TextBlock { Text = item.Name, FontWeight = FontWeights.Bold });
+            info.Children.Add(new TextBlock { Text = item.IsInstalled ? (item.Version ?? "Instalat") : "Neinstalat", Foreground = Brushes.Gray, FontSize = 11 });
+            Grid.SetColumn(info, 1);
+            row.Children.Add(info);
+
+            // Buton propriu per componenta - rosu (neinstalat, apasabil) sau
+            // verde (instalat, doar informativ) - cerinta explicita Cristi
+            // 2026-08-30, inlocuieste selectia multipla folosita anterior
+            // aici (un singur pachet instalat per click e comportamentul
+            // firesc, nu un batch).
+            if (Installable.Contains(item.Id))
             {
-                var check = new CheckBox
+                var button = new Wpf.Ui.Controls.Button
                 {
-                    IsChecked = _selected.Contains(item.Id),
-                    Margin = new Thickness(0, 0, 8, 0),
-                    VerticalAlignment = VerticalAlignment.Center,
+                    Content = item.IsInstalled ? "Instalat ✔" : "Instalează",
+                    IsEnabled = !item.IsInstalled,
+                    Background = new SolidColorBrush(item.IsInstalled ? Color.FromRgb(0x1F, 0x6B, 0x2E) : Color.FromRgb(0x8B, 0x22, 0x1A)),
+                    Foreground = Brushes.White,
                 };
-                check.Checked += (_, _) => { _selected.Add(item.Id); UpdateSelectionText(); };
-                check.Unchecked += (_, _) => { _selected.Remove(item.Id); UpdateSelectionText(); };
-                row.Children.Add(check);
+                var id = item.Id;
+                button.Click += (_, _) => OnInstallOneClicked(id);
+                Grid.SetColumn(button, 2);
+                row.Children.Add(button);
             }
 
-            row.Children.Add(new TextBlock { Text = item.Name, FontWeight = FontWeights.Bold, Width = 190 });
-            row.Children.Add(new TextBlock { Text = item.IsInstalled ? (item.Version ?? "Instalat") : "Neinstalat", Foreground = Brushes.Gray, FontSize = 11 });
             ItemsList.Items.Add(row);
         }
-        UpdateSelectionText();
     }
 
-    private void UpdateSelectionText()
+    private void OnInstallOneClicked(string id)
     {
-        var installableCount = _checker.Items.Count(i => Installable.Contains(i.Id) && !i.IsInstalled);
-        SelectionText.Text = installableCount == 0
-            ? "Toate componentele instalabile de-aici sunt deja prezente."
-            : $"Selectat {_selected.Count} din {installableCount} componente neinstalate.";
-        InstallButton.IsEnabled = _selected.Count > 0;
-        InstallButton.Visibility = installableCount == 0 ? Visibility.Collapsed : Visibility.Visible;
+        Log.Clear();
+        _checker.InstallSelected(new HashSet<string> { id }, line => Log.Append(line));
+        Render();
+        _mainWindow?.RefreshDependencyBadge();
     }
 }

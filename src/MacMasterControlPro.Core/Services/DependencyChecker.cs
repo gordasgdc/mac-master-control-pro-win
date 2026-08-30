@@ -50,16 +50,18 @@ public sealed class DependencyChecker
     /// tot ce lipseste" fara control, ca sa nu blocheze sistemul cu instalari
     /// nedorite. `winget` nu e instalabil de aici (vine cu Windows) - orice id
     /// necunoscut e ignorat, nu aruncat.
-    public string InstallSelected(IReadOnlySet<string> selectedIds)
+    public void InstallSelected(IReadOnlySet<string> selectedIds, Action<string>? log = null)
     {
-        var log = "";
         foreach (var id in selectedIds)
         {
             if (!WingetIds.TryGetValue(id, out var wingetId)) continue;
             if (Items.FirstOrDefault(i => i.Id == id)?.IsInstalled == true) continue;
-            log += Shell.Run($"winget install --id {wingetId} -e --silent --accept-package-agreements --accept-source-agreements 2>&1") + "\n";
+            var name = Items.FirstOrDefault(i => i.Id == id)?.Name ?? id;
+            log?.Invoke($"$ winget install {wingetId}");
+            var output = Shell.Run($"winget install --id {wingetId} -e --silent --accept-package-agreements --accept-source-agreements 2>&1");
+            foreach (var line in output.Split('\n')) log?.Invoke(line);
+            log?.Invoke($"✔ {name}: comandă terminată.");
         }
         CheckAll();
-        return log;
     }
 }
