@@ -1,5 +1,11 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.6.1 (2026-08-30) — Donație actualizată la 17€
+
+Decizie Cristi: rămâne un singur nivel de licențiere — suma de referință a
+donației Lifetime crește de la 9€ la 17€. Actualizat în `TrialGateWindow`
+și mesajul WhatsApp de activare.
+
 ## v1.6.0 (2026-08-30) — Panou „terminal live” + butoane roșu/verde la Dependențe + fix buton actualizări invizibil
 
 - **Fix**: `CheckUpdatesButton` nu avea `Foreground` explicit — invizibil sub

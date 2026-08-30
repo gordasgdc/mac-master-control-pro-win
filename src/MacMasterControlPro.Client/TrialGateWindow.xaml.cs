@@ -25,7 +25,7 @@ public partial class TrialGateWindow : Window
 
     private void OnWhatsAppClicked(object sender, RoutedEventArgs e)
     {
-        var message = $"Salut! Doresc să achiziționez / activez licența Lifetime (9 EUR) pentru PC-ul meu — Master Control Studio Pro. Machine ID: {MachineID.Display}";
+        var message = $"Salut! Doresc să achiziționez / activez licența Lifetime (17 EUR) pentru PC-ul meu — Master Control Studio Pro. Machine ID: {MachineID.Display}";
         Process.Start(new ProcessStartInfo(WhatsAppLink.Url(message)) { UseShellExecute = true });
     }
 
