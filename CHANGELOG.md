@@ -1,5 +1,10 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.9.1 (2026-08-30) — Fereastra „Explorează” mărită + redimensionabilă
+
+Implicit 820×720 (era 560×480), `ResizeMode="CanResizeWithGrip"` — utilă
+pentru liste lungi de fișiere.
+
 ## v1.9.0 (2026-08-30) — Faza 4: Upload / Download / Sincronizare (paritate Mac)
 
 Cloud Manager, sistem complet de lucru cu fișiere — port 1:1 din Mac v2.7.0:

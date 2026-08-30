@@ -4,7 +4,8 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:MacMasterControlPro.Client"
         xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls"
-        Title="Explorare" Height="600" Width="560" WindowStartupLocation="CenterOwner">
+        Title="Explorare" Height="720" Width="820" MinHeight="420" MinWidth="560"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResizeWithGrip">
     <ui:FluentWindow.Resources>
         <local:RemoteEntryIconConverter x:Key="EntryIcon" />
         <local:RemoteEntrySizeConverter x:Key="EntrySize" />
