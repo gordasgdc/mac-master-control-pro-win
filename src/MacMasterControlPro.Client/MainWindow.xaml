@@ -32,7 +32,13 @@
                 <ListBox x:Name="ModuleList" Grid.Row="0" Margin="8"
                          Background="Transparent" BorderThickness="0"
                          SelectionChanged="OnModuleSelected">
-                    <ListBoxItem x:Name="ItemDashboard" Tag="Dashboard" IsSelected="True" />
+                    <!-- FARA IsSelected="True" aici (bug real, gasit 2026-08-30 din
+                         log-ul de la Cristi): ar declansa OnModuleSelected SINCRON
+                         in timpul InitializeComponent(), inainte ca PageHost (declarat
+                         mai jos in acest XAML) sa fie asignat -> NullReferenceException
+                         imediat la pornire. Constructorul seteaza deja explicit
+                         PageHost.Content = new DashboardPage() dupa InitializeComponent(). -->
+                    <ListBoxItem x:Name="ItemDashboard" Tag="Dashboard" />
                     <ListBoxItem x:Name="ItemNetwork" Tag="Network" />
                     <ListBoxItem x:Name="ItemCloud" Tag="Cloud" />
                     <ListBoxItem x:Name="ItemCleanup" Tag="Cleanup" />
