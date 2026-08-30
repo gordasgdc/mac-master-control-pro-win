@@ -39,17 +39,25 @@ public sealed class DependencyChecker
         Items = results;
     }
 
-    /// Rclone/WinFSP - instalare non-interactiva prin winget (necesita winget prezent).
-    public string InstallMissing()
+    private static readonly Dictionary<string, string> WingetIds = new()
+    {
+        ["rclone"] = "Rclone.Rclone",
+        ["winfsp"] = "WinFsp.WinFsp",
+    };
+
+    /// Instaleaza DOAR componentele bifate de user (Bara de Actiune in Masa,
+    /// regula globala de multi-selectie 2026-08-30) - niciodata un "instaleaza
+    /// tot ce lipseste" fara control, ca sa nu blocheze sistemul cu instalari
+    /// nedorite. `winget` nu e instalabil de aici (vine cu Windows) - orice id
+    /// necunoscut e ignorat, nu aruncat.
+    public string InstallSelected(IReadOnlySet<string> selectedIds)
     {
         var log = "";
-        if (Items.FirstOrDefault(i => i.Id == "rclone")?.IsInstalled == false)
+        foreach (var id in selectedIds)
         {
-            log += Shell.Run("winget install --id Rclone.Rclone -e --silent --accept-package-agreements --accept-source-agreements 2>&1") + "\n";
-        }
-        if (Items.FirstOrDefault(i => i.Id == "winfsp")?.IsInstalled == false)
-        {
-            log += Shell.Run("winget install --id WinFsp.WinFsp -e --silent --accept-package-agreements --accept-source-agreements 2>&1") + "\n";
+            if (!WingetIds.TryGetValue(id, out var wingetId)) continue;
+            if (Items.FirstOrDefault(i => i.Id == id)?.IsInstalled == true) continue;
+            log += Shell.Run($"winget install --id {wingetId} -e --silent --accept-package-agreements --accept-source-agreements 2>&1") + "\n";
         }
         CheckAll();
         return log;
