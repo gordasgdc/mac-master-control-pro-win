@@ -1,0 +1,26 @@
+TERMENI ȘI CONDIȚII — Mac Master Control Pro (Windows)
+Ultima actualizare: 30 august 2026
+
+1. LICENȚA
+Mac Master Control Pro este dezvoltat de Cristi Gordas ("GDC") — un
+proiect independent, nu o companie comercială. Prin instalarea și
+utilizarea aplicației, accepți acești termeni.
+
+2. TRIAL NELIMITAT
+Analizele și scanările sunt complet libere, nelimitat. Doar acțiunile
+care modifică efectiv sistemul necesită o licență activă.
+
+3. SUSȚINEREA DEZVOLTĂRII (DONAȚIE)
+O licență Lifetime se poate obține printr-o donație unică de sprijin
+(9€), prin GDC Plugin Manager sau direct din aplicație. Codul de licență
+e legat de Hardware Machine ID-ul calculatorului tău.
+
+4. FĂRĂ GARANȚIE ("AS IS")
+Aplicația este oferită ca atare, fără nicio garanție explicită sau
+implicită. Dezvoltatorul nu este responsabil pentru pierderi rezultate
+din utilizarea aplicației.
+
+5. gordas.dev
+gordas.dev este o platformă administrată de dezvoltatori independenți.
+Aplicațiile și resursele sunt furnizate ca atare (AS IS), iar susținerea
+proiectului se bazează pe contribuții opționale de sprijin și donații.

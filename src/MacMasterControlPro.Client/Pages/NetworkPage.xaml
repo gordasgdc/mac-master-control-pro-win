@@ -1,0 +1,24 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.NetworkPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <StackPanel MaxWidth="560">
+        <TextBlock Text="🌐 Rețea" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <ui:CardExpander Header="Adaptor selectat" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <ComboBox x:Name="AdapterCombo" Width="240" />
+                <ui:Button Content="Rescanează" Margin="10,0,0,0" Click="OnRescanClicked" />
+            </StackPanel>
+        </ui:CardExpander>
+
+        <ui:CardExpander Header="Tuning TCP" IsExpanded="True">
+            <StackPanel>
+                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google." Foreground="Gray" Margin="0,0,0,10" TextWrapping="Wrap" />
+                <ui:Button Content="Aplică Tuning" Appearance="Primary" Click="OnApplyTuningClicked" />
+            </StackPanel>
+        </ui:CardExpander>
+
+        <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" />
+    </StackPanel>
+</UserControl>
