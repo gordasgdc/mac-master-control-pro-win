@@ -1,5 +1,14 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.9.0 (2026-08-30) — Faza 4: Upload / Download / Sincronizare (paritate Mac)
+
+Cloud Manager, sistem complet de lucru cu fișiere — port 1:1 din Mac v2.7.0:
+fereastra „Explorează" primește butoane de încărcare fișiere/foldere,
+descărcare selecție, ștergere (cu confirmare explicită) și o fereastră nouă
+de sincronizare folder local ↔ cloud (implicit non-distructiv — „Oglindă
+exactă" opțională, explicit bifată). Ghidul PDF (comun cu Mac) documentează
+fluxul complet.
+
 ## v1.8.0 (2026-08-30) — Fazele 2+3: Statistici live + Explorare remote fără montare
 
 - **Faza 2**: fiecare cont montat afișează viteza de transfer live, bytes

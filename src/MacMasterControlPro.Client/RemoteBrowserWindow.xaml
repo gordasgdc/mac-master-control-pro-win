@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:MacMasterControlPro.Client"
-        Title="Explorare" Height="480" Width="520" WindowStartupLocation="CenterOwner">
+        xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls"
+        Title="Explorare" Height="600" Width="560" WindowStartupLocation="CenterOwner">
     <ui:FluentWindow.Resources>
         <local:RemoteEntryIconConverter x:Key="EntryIcon" />
         <local:RemoteEntrySizeConverter x:Key="EntrySize" />
@@ -14,6 +15,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="TitleText" FontSize="18" FontWeight="Bold" Margin="0,0,0,10" />
@@ -27,7 +30,7 @@
             <TextBlock Grid.Column="1" x:Name="BreadcrumbText" FontFamily="Consolas" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
         </Grid>
 
-        <ListBox Grid.Row="2" x:Name="EntriesList" MouseDoubleClick="OnEntryDoubleClick">
+        <ListBox Grid.Row="2" x:Name="EntriesList" MouseDoubleClick="OnEntryDoubleClick" SelectionChanged="OnSelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
@@ -39,5 +42,14 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
+            <ui:Button Content="⬆︎ Încarcă fișiere aici…" Margin="0,0,8,0" Click="OnUploadClicked" />
+            <ui:Button x:Name="DownloadButton" Content="⬇︎ Descarcă selecția" Margin="0,0,8,0" Click="OnDownloadClicked" IsEnabled="False" />
+            <ui:Button Content="🔄 Sincronizare folder…" Margin="0,0,8,0" Click="OnSyncClicked" />
+            <ui:Button x:Name="DeleteButton" Content="🗑 Șterge selecția" Click="OnDeleteClicked" IsEnabled="False" />
+        </StackPanel>
+
+        <controls:TerminalLogView Grid.Row="4" x:Name="Log" Margin="0,10,0,0" />
     </Grid>
 </ui:FluentWindow>
