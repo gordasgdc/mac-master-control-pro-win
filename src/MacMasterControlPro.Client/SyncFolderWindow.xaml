@@ -1,0 +1,32 @@
+<ui:FluentWindow x:Class="MacMasterControlPro.Client.SyncFolderWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls"
+        Title="Sincronizare folder" Height="420" Width="460" WindowStartupLocation="CenterOwner">
+    <StackPanel Margin="20">
+        <TextBlock Text="Sincronizare folder" FontSize="18" FontWeight="Bold" Margin="0,0,0,14" />
+
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="FolderText" Text="Niciun folder local ales" FontSize="11" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap" />
+            <ui:Button Grid.Column="1" Content="Alege folder local…" Click="OnPickFolderClicked" />
+        </Grid>
+
+        <RadioButton x:Name="UploadRadio" Content="Local → Cloud (încarcă)" IsChecked="True" Margin="0,4,0,4" />
+        <RadioButton x:Name="DownloadRadio" Content="Cloud → Local (descarcă)" Margin="0,0,0,10" />
+
+        <CheckBox x:Name="MirrorCheck" Content="Oglindă exactă (șterge la destinație ce lipsește la sursă)" Checked="OnMirrorChanged" Unchecked="OnMirrorChanged" />
+        <TextBlock x:Name="MirrorWarning" Text="⚠ Atenție: poate șterge fișiere ireversibil la destinație." FontSize="11" Foreground="Orange" Margin="0,4,0,10" Visibility="Collapsed" />
+
+        <controls:TerminalLogView x:Name="Log" Margin="0,0,0,10" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <ui:Button Content="Anulează" Margin="0,0,8,0" Click="OnCancelClicked" />
+            <ui:Button x:Name="RunButton" Content="Pornește sincronizarea" Appearance="Primary" Click="OnRunClicked" IsEnabled="False" />
+        </StackPanel>
+    </StackPanel>
+</ui:FluentWindow>

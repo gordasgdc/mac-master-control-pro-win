@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace MacMasterControlPro.Core.Services;
 
@@ -17,6 +18,9 @@ public sealed record CloudTransferStats(double SpeedBytesPerSec, long BytesTrans
 
 /// O intrare intr-un folder de pe remote (Faza 3 - explorare fara montare).
 public sealed record RemoteEntry(string Name, string Path, bool IsDir, long Size);
+
+/// Directia unei sincronizari folder local <-> remote (Faza 4).
+public enum SyncDirection { Upload, Download }
 
 /// Oglinda CloudProviderType (Mac) — acelasi set de provideri Rclone.
 public enum CloudProviderType { GoogleDrive, Dropbox, OneDrive, PCloud, Degoo, Mega, S3, WebDav, Sftp, Ftp }
@@ -319,6 +323,72 @@ public sealed class CloudManagerService
             return results.OrderByDescending(r => r.IsDir).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
         catch { return []; }
+    }
+
+    // MARK: - Faza 4: Upload / Download / Sincronizare / Stergere
+
+    /// Urca fisiere/foldere locale intr-un folder de pe remote - functioneaza
+    /// FIE ca remote-ul e montat, FIE nu (rclone lucreaza direct pe API-ul
+    /// providerului, nu are nevoie de mount pentru copy).
+    public void Upload(string remoteName, string remotePath, IEnumerable<string> localPaths, Action<string> log, Action<bool> completion)
+    {
+        var target = string.IsNullOrEmpty(remotePath) ? $"{remoteName}:" : $"{remoteName}:{remotePath}";
+        Task.Run(() =>
+        {
+            foreach (var path in localPaths)
+            {
+                log($"$ rclone copy \"{path}\" \"{target}\" --progress");
+                var output = Shell.Run($"rclone copy \"{path}\" \"{target}\" -P 2>&1");
+                if (!string.IsNullOrWhiteSpace(output)) log(output);
+            }
+            log("✔ Încărcare terminată.");
+            completion(true);
+        });
+    }
+
+    /// Descarca un fisier/folder de pe remote intr-un folder local.
+    public void Download(string remoteName, string remotePath, string localDestFolder, Action<string> log, Action<bool> completion)
+    {
+        var source = $"{remoteName}:{remotePath}";
+        Task.Run(() =>
+        {
+            log($"$ rclone copy \"{source}\" \"{localDestFolder}\" --progress");
+            var output = Shell.Run($"rclone copy \"{source}\" \"{localDestFolder}\" -P 2>&1");
+            if (!string.IsNullOrWhiteSpace(output)) log(output);
+            log($"✔ Descărcare terminată în {localDestFolder}.");
+            completion(true);
+        });
+    }
+
+    /// Sterge un fisier sau un folder (recursiv) de pe remote - IREVERSIBIL,
+    /// UI-ul trebuie sa ceara confirmare explicita inainte de a apela asta.
+    public void DeleteRemoteEntry(string remoteName, string remotePath, bool isDir, Action<string> log)
+    {
+        var target = $"{remoteName}:{remotePath}";
+        var command = isDir ? $"rclone purge \"{target}\"" : $"rclone deletefile \"{target}\"";
+        log($"$ {command}");
+        var output = Shell.Run($"{command} 2>&1");
+        if (!string.IsNullOrWhiteSpace(output)) log(output);
+        log($"✔ Șters: {remotePath}");
+    }
+
+    /// Sincronizare folder local <-> remote. `mirror: true` = oglinda EXACTA
+    /// (sterge la destinatie ce nu mai exista la sursa, `rclone sync`) -
+    /// implicit FALSE (`rclone copy`, doar adauga/actualizeaza) - standardul
+    /// GDC de "niciodata distructiv fara bifa explicita".
+    public void SyncFolder(string localFolder, string remoteName, string remotePath, SyncDirection direction, bool mirror, Action<string> log, Action<bool> completion)
+    {
+        var remoteTarget = string.IsNullOrEmpty(remotePath) ? $"{remoteName}:" : $"{remoteName}:{remotePath}";
+        var (source, dest) = direction == SyncDirection.Upload ? (localFolder, remoteTarget) : (remoteTarget, localFolder);
+        var verb = mirror ? "sync" : "copy";
+        Task.Run(() =>
+        {
+            log($"$ rclone {verb} \"{source}\" \"{dest}\" --progress" + (mirror ? "  (oglindă - șterge ce lipsește la sursă)" : ""));
+            var output = Shell.Run($"rclone {verb} \"{source}\" \"{dest}\" -P 2>&1");
+            if (!string.IsNullOrWhiteSpace(output)) log(output);
+            log("✔ Sincronizare terminată.");
+            completion(true);
+        });
     }
 
     private static string? FirstFreeDriveLetter()
