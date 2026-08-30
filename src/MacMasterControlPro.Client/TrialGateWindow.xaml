@@ -6,17 +6,18 @@
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
         Background="{DynamicResource ApplicationBackgroundBrush}">
     <StackPanel Margin="24" HorizontalAlignment="Stretch">
-        <TextBlock Text="Analiza este 100% completă" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-        <TextBlock Text="Susține dezvoltarea cu o donație (9€, o singură dată) pentru a debloca aplicarea modificărilor."
-                   TextWrapping="Wrap" TextAlignment="Center" Foreground="Gray" Margin="0,10,0,14" />
-        <ui:TextBox x:Name="KeyBox" PlaceholderText="Cheie de licență" Margin="0,0,0,6" />
+        <TextBlock x:Name="TitleText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
+        <TextBlock x:Name="BodyText" TextWrapping="Wrap" TextAlignment="Center" Foreground="Gray" Margin="0,10,0,14" />
+        <ui:TextBox x:Name="KeyBox" Margin="0,0,0,6" />
         <TextBlock x:Name="ErrorText" Foreground="OrangeRed" FontSize="11" Visibility="Collapsed" Margin="0,0,0,6" />
         <ui:Button x:Name="MachineIdButton" Appearance="Transparent" HorizontalAlignment="Left"
                    FontFamily="Consolas" FontSize="11" Click="OnCopyMachineId" Margin="0,0,0,14" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <ui:Button Content="Donează din GDC Plugin Manager" Click="OnDonateClicked" Margin="0,0,8,0" />
-            <ui:Button Content="Activează" Appearance="Primary" Click="OnActivateClicked" />
+            <ui:Button x:Name="DonateButton" Click="OnDonateClicked" Margin="0,0,8,0" />
+            <ui:Button x:Name="ActivateButton" Appearance="Primary" Click="OnActivateClicked" />
         </StackPanel>
-        <ui:Button Content="Anulează" Appearance="Transparent" HorizontalAlignment="Center" Margin="0,8,0,0" Click="OnCancelClicked" />
+        <ui:Button x:Name="WhatsAppButton" Content="Contact WhatsApp" Appearance="Transparent"
+                   Foreground="LimeGreen" HorizontalAlignment="Center" Margin="0,8,0,0" Click="OnWhatsAppClicked" />
+        <ui:Button x:Name="CancelButton" Appearance="Transparent" HorizontalAlignment="Center" Margin="0,4,0,0" Click="OnCancelClicked" />
     </StackPanel>
 </Window>

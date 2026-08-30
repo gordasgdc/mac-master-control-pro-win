@@ -1,4 +1,4 @@
-; Instalator Windows pentru Mac Master Control Pro, cu Inno Setup
+; Instalator Windows pentru Master Control Studio Pro, cu Inno Setup
 ; (https://jrsoftware.org/isinfo.php — gratuit).
 ;
 ; Compilare MANUALA, pe Windows, cu Inno Setup Compiler instalat:
@@ -7,8 +7,8 @@
 ;   3. Apasa "Compile" (sau F9)
 ;   4. Rezultatul apare in Output\MacMasterControlProSetup.exe
 
-#define MyAppName "Mac Master Control Pro"
-#define MyAppVersion "1.1.0"
+#define MyAppName "Master Control Studio Pro"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Cristi Gordas"
 #define MyAppExeName "MacMasterControlPro.exe"
 #define MyAppURL "https://gordas.dev/mac-master-control-pro"
@@ -20,8 +20,8 @@ AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\GDC\Mac Master Control Pro
-DefaultGroupName=Mac Master Control Pro
+DefaultDirName={autopf}\GDC\Master Control Studio Pro
+DefaultGroupName=Master Control Studio Pro
 DisableProgramGroupPage=yes
 OutputDir=Output
 OutputBaseFilename=MacMasterControlProSetup
@@ -59,5 +59,5 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}
 ; Regula de Clean Uninstall (gdc-plugin-manager-catalog-vendor/CLAUDE.md):
 ; sterge TOT ce a scris aplicatia, nu doar folderul din Program Files.
 [UninstallDelete]
-Type: filesandordirs; Name: "{localappdata}\Mac Master Control Pro"
+Type: filesandordirs; Name: "{localappdata}\Master Control Studio Pro"
 Type: filesandordirs; Name: "{userappdata}\MacMasterControlPro"

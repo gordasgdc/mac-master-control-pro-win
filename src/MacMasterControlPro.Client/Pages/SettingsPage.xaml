@@ -3,34 +3,41 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel MaxWidth="480">
-        <TextBlock Text="⚙️ Setări" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock x:Name="TitleText" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Aspect" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander x:Name="AppearanceCard" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock Text="Temă" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <TextBlock x:Name="ThemeLabel" FontWeight="SemiBold" Margin="0,0,0,4" />
                 <ComboBox x:Name="ThemeCombo" SelectionChanged="OnThemeChanged" Margin="0,0,0,12">
                     <ComboBoxItem Content="Sistem" Tag="System" />
                     <ComboBoxItem Content="Luminos" Tag="Light" />
                     <ComboBoxItem Content="Întunecat" Tag="Dark" />
                 </ComboBox>
 
-                <TextBlock Text="Mărime text" FontWeight="SemiBold" Margin="0,0,0,4" />
-                <ComboBox x:Name="TextScaleCombo" SelectionChanged="OnTextScaleChanged">
+                <TextBlock x:Name="TextScaleLabel" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <ComboBox x:Name="TextScaleCombo" SelectionChanged="OnTextScaleChanged" Margin="0,0,0,12">
                     <ComboBoxItem Content="Mic" Tag="Small" />
                     <ComboBoxItem Content="Normal" Tag="Normal" />
                     <ComboBoxItem Content="Mare" Tag="Large" />
                     <ComboBoxItem Content="Foarte mare" Tag="XLarge" />
                 </ComboBox>
+
+                <TextBlock x:Name="LanguageLabel" FontWeight="SemiBold" Margin="0,0,0,4" />
+                <ComboBox x:Name="LanguageCombo" SelectionChanged="OnLanguageChanged">
+                    <ComboBoxItem Content="Română" Tag="Ro" />
+                    <ComboBoxItem Content="English" Tag="En" />
+                    <ComboBoxItem Content="Español" Tag="Es" />
+                </ComboBox>
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Header="Profil" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander x:Name="ProfileCard" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <ui:TextBox x:Name="NameBox" PlaceholderText="Nume" Margin="0,0,0,8" TextChanged="OnProfileChanged" />
-                <ui:TextBox x:Name="EmailBox" PlaceholderText="Email" TextChanged="OnProfileChanged" />
+                <ui:TextBox x:Name="NameBox" Margin="0,0,0,8" TextChanged="OnProfileChanged" />
+                <ui:TextBox x:Name="EmailBox" TextChanged="OnProfileChanged" />
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:Button Content="Deschide Ghidul de Utilizare (PDF)" Click="OnOpenGuideClicked" />
+        <ui:Button x:Name="GuideButton" Click="OnOpenGuideClicked" />
     </StackPanel>
 </UserControl>

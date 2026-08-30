@@ -7,7 +7,7 @@ public partial class UpdateProgressWindow : Window
     public UpdateProgressWindow(string version)
     {
         InitializeComponent();
-        TitleText.Text = $"Mac Master Control Pro {version}";
+        TitleText.Text = $"Master Control Studio Pro {version}";
 
         var owner = Application.Current?.MainWindow;
         if (owner is not null && owner.IsLoaded && !ReferenceEquals(owner, this))

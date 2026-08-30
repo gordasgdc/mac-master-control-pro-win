@@ -1,4 +1,4 @@
-# Mac Master Control Pro - dezinstalare completa (Windows).
+# Master Control Studio Pro - dezinstalare completa (Windows).
 #
 # Regula permanenta ecosistem GDC: sterge ABSOLUT TOT ce a creat aplicatia
 # pe sistem - nu doar folderul din Program Files.
@@ -12,20 +12,20 @@ param(
 
 $ErrorActionPreference = "SilentlyContinue"
 
-Write-Host "Mac Master Control Pro - dezinstalare completa" -ForegroundColor Cyan
+Write-Host "Master Control Studio Pro - dezinstalare completa" -ForegroundColor Cyan
 Write-Host "================================================"
 
 Write-Host "[1/3] Opresc orice instanta ramasa in fundal..."
 Stop-Process -Name "MacMasterControlPro" -Force
 
 Write-Host "[2/3] Sterg datele din AppData..."
-Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Mac Master Control Pro"
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\Master Control Studio Pro"
 Remove-Item -Recurse -Force "$env:APPDATA\MacMasterControlPro"
 
 if ($RemoveProgramFiles) {
     Write-Host "[3/3] Sterg folderul din Program Files (poate cere elevare)..."
-    Remove-Item -Recurse -Force "${env:ProgramFiles}\GDC\Mac Master Control Pro"
-    Remove-Item -Recurse -Force "${env:ProgramFiles(x86)}\GDC\Mac Master Control Pro"
+    Remove-Item -Recurse -Force "${env:ProgramFiles}\GDC\Master Control Studio Pro"
+    Remove-Item -Recurse -Force "${env:ProgramFiles(x86)}\GDC\Master Control Studio Pro"
 } else {
     Write-Host "[3/3] Sarit (ruleaza cu -RemoveProgramFiles pentru a sterge si Program Files)."
 }
