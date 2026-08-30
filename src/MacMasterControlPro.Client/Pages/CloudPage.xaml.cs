@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using MacMasterControlPro.Core.Services;
 using Wpf.Ui.Controls;
@@ -12,12 +13,40 @@ public partial class CloudPage : UserControl
 {
     private readonly CloudManagerService _service = new();
     private readonly HashSet<string> _selected = new();
+    /// Faza 2: TextBlock-ul de statistici live per remote montat, actualizat
+    /// de timer fara sa reconstruiasca toata lista la fiecare 2 secunde.
+    private readonly Dictionary<string, System.Windows.Controls.TextBlock> _statsTextBlocks = new();
+    private readonly DispatcherTimer _statsTimer;
 
     public CloudPage()
     {
         InitializeComponent();
         RenderMountFolderText();
         Refresh();
+
+        _statsTimer = new DispatcherTimer { Interval = System.TimeSpan.FromSeconds(2) };
+        _statsTimer.Tick += (_, _) => RefreshStats();
+        _statsTimer.Start();
+        Unloaded += (_, _) => _statsTimer.Stop();
+    }
+
+    private void RefreshStats()
+    {
+        foreach (var (remoteName, textBlock) in _statsTextBlocks)
+        {
+            var stats = _service.FetchStats(remoteName);
+            textBlock.Text = stats is null
+                ? ""
+                : $"↕︎ {FormatBytes(stats.SpeedBytesPerSec)}/s · {FormatBytes(stats.BytesTransferred)} transferați · {stats.ActiveTransfers} active";
+        }
+    }
+
+    private static string FormatBytes(double bytes)
+    {
+        string[] units = { "B", "KB", "MB", "GB", "TB" };
+        var unit = 0;
+        while (bytes >= 1024 && unit < units.Length - 1) { bytes /= 1024; unit++; }
+        return $"{bytes:0.#} {units[unit]}";
     }
 
     private void OnRescanClicked(object sender, RoutedEventArgs e) => Refresh();
@@ -94,15 +123,23 @@ public partial class CloudPage : UserControl
     {
         _service.RefreshRemotes();
         RemotesList.Items.Clear();
+        _statsTextBlocks.Clear();
         EmptyText.Visibility = _service.Remotes.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         foreach (var remote in _service.Remotes)
         {
-            var row = new Grid { Margin = new Thickness(0, 6, 0, 6) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var container = new StackPanel { Margin = new Thickness(0, 6, 0, 6) };
+            var row = new Grid();
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // 0: checkbox
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // 1: nume+tip
+
+            void AddButton(System.Windows.FrameworkElement element)
+            {
+                var col = row.ColumnDefinitions.Count;
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                Grid.SetColumn(element, col);
+                row.Children.Add(element);
+            }
 
             var check = new CheckBox { IsChecked = _selected.Contains(remote.Name), VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 8, 0) };
             check.Checked += (_, _) => { _selected.Add(remote.Name); UpdateSelectionText(); };
@@ -117,6 +154,18 @@ public partial class CloudPage : UserControl
             row.Children.Add(infoStack);
 
             var isMounted = _service.MountedDriveLetters.ContainsKey(remote.Name);
+
+            if (isMounted)
+            {
+                var openButton = new Wpf.Ui.Controls.Button { Content = "Deschide", Margin = new Thickness(0, 0, 8, 0) };
+                openButton.Click += (_, _) => System.Diagnostics.Process.Start("explorer.exe", _service.MountedDriveLetters[remote.Name]);
+                AddButton(openButton);
+            }
+
+            var browseButton = new Wpf.Ui.Controls.Button { Content = "Explorează", Margin = new Thickness(0, 0, 8, 0) };
+            browseButton.Click += (_, _) => new RemoteBrowserWindow(_service, remote.Name) { Owner = Window.GetWindow(this) }.ShowDialog();
+            AddButton(browseButton);
+
             var actionButton = new Wpf.Ui.Controls.Button
             {
                 Content = isMounted ? $"Demontează ({_service.MountedDriveLetters[remote.Name]})" : "Montează",
@@ -135,17 +184,31 @@ public partial class CloudPage : UserControl
                 StatusText.Text = target is not null ? $"✔ Montat pe {target}" : "Nicio literă de disc liberă.";
                 Refresh();
             };
-            Grid.SetColumn(actionButton, 2);
-            row.Children.Add(actionButton);
+            AddButton(actionButton);
 
             var deleteButton = new Wpf.Ui.Controls.Button { Content = "🗑" };
             deleteButton.Click += (_, _) => { _service.DeleteRemote(remote.Name); Refresh(); };
-            Grid.SetColumn(deleteButton, 3);
-            row.Children.Add(deleteButton);
+            AddButton(deleteButton);
 
-            RemotesList.Items.Add(row);
+            container.Children.Add(row);
+
+            if (isMounted)
+            {
+                var statsText = new System.Windows.Controls.TextBlock
+                {
+                    FontFamily = new System.Windows.Media.FontFamily("Consolas"),
+                    FontSize = 10.5,
+                    Foreground = System.Windows.Media.Brushes.Gray,
+                    Margin = new Thickness(0, 2, 0, 0),
+                };
+                _statsTextBlocks[remote.Name] = statsText;
+                container.Children.Add(statsText);
+            }
+
+            RemotesList.Items.Add(container);
         }
         UpdateSelectionText();
+        RefreshStats();
     }
 
     private void UpdateSelectionText()

@@ -1,5 +1,16 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.8.0 (2026-08-30) — Fazele 2+3: Statistici live + Explorare remote fără montare
+
+- **Faza 2**: fiecare cont montat afișează viteza de transfer live, bytes
+  transferați și transferuri active (`rclone rc core/stats`, port RC unic
+  per montare — deja stabilit la fix-ul de demontare din v1.7.0).
+- **Faza 3**: fereastră nouă „Explorează" — răsfoiește conținutul unui cont
+  Cloud (`rclone lsjson`) FĂRĂ să-l montezi, cu navigare pe foldere. Buton
+  „Deschide" pe conturile montate — deschide direct în Explorer.
+- Cloud Manager complet, paritate cu Mac: locație de montare configurabilă
+  (v1.7.0), statistici live, explorare fără montare.
+
 ## v1.7.0 (2026-08-30) — Faza 1: Locație de montare configurabilă (disc extern)
 
 Cloud Manager permite acum alegerea unui folder (posibil pe disc extern)

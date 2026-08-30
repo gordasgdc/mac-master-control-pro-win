@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace MacMasterControlPro.Core.Services;
@@ -10,6 +11,12 @@ public sealed class CloudField
     public required string Label { get; init; }
     public bool IsSecure { get; init; }
 }
+
+/// Statistici live de transfer (Faza 2), citite din `rclone rc core/stats`.
+public sealed record CloudTransferStats(double SpeedBytesPerSec, long BytesTransferred, int ActiveTransfers);
+
+/// O intrare intr-un folder de pe remote (Faza 3 - explorare fara montare).
+public sealed record RemoteEntry(string Name, string Path, bool IsDir, long Size);
 
 /// Oglinda CloudProviderType (Mac) — acelasi set de provideri Rclone.
 public enum CloudProviderType { GoogleDrive, Dropbox, OneDrive, PCloud, Degoo, Mega, S3, WebDav, Sftp, Ftp }
@@ -267,6 +274,51 @@ public sealed class CloudManagerService
         }
         MountedDriveLetters.Remove(remoteName);
         log?.Invoke($"✔ {remoteName}: demontat.");
+    }
+
+    // MARK: - Faza 2: Statistici live de transfer
+
+    /// Citeste `core/stats` din API-ul local al montarii - `null` daca
+    /// remote-ul nu e montat.
+    public CloudTransferStats? FetchStats(string remoteName)
+    {
+        if (!_rcPorts.TryGetValue(remoteName, out var port)) return null;
+        var output = Shell.Run($"rclone rc core/stats --rc-addr 127.0.0.1:{port} 2>$null");
+        try
+        {
+            using var doc = JsonDocument.Parse(output);
+            var root = doc.RootElement;
+            var speed = root.TryGetProperty("speed", out var s) ? s.GetDouble() : 0;
+            var bytes = root.TryGetProperty("bytes", out var b) ? b.GetInt64() : 0;
+            var transfers = root.TryGetProperty("transfers", out var t) ? t.GetInt32() : 0;
+            return new CloudTransferStats(speed, bytes, transfers);
+        }
+        catch { return null; }
+    }
+
+    // MARK: - Faza 3: Explorare remote fara montare
+
+    /// Listeaza un folder de pe remote prin `rclone lsjson`, FARA sa
+    /// monteze nimic.
+    public List<RemoteEntry> ListRemoteFolder(string remoteName, string path)
+    {
+        var target = string.IsNullOrEmpty(path) ? $"{remoteName}:" : $"{remoteName}:{path}";
+        var output = Shell.Run($"rclone lsjson \"{target}\" 2>$null");
+        try
+        {
+            using var doc = JsonDocument.Parse(output);
+            var results = new List<RemoteEntry>();
+            foreach (var item in doc.RootElement.EnumerateArray())
+            {
+                var name = item.GetProperty("Name").GetString() ?? "";
+                var isDir = item.TryGetProperty("IsDir", out var d) && d.GetBoolean();
+                var size = item.TryGetProperty("Size", out var sz) ? sz.GetInt64() : 0;
+                var childPath = string.IsNullOrEmpty(path) ? name : $"{path}/{name}";
+                results.Add(new RemoteEntry(name, childPath, isDir, size));
+            }
+            return results.OrderByDescending(r => r.IsDir).ThenBy(r => r.Name, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch { return []; }
     }
 
     private static string? FirstFreeDriveLetter()
