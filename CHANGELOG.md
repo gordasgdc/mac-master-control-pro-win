@@ -1,5 +1,17 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.4.1 (2026-08-30) — FIX CRITIC: aplicația nu deschidea nicio fereastră
+
+**Bug real, raportat de Cristi după primul test pe Windows real**: aplicația
+pornea (apărea în Task Manager, era detectată corect de GDC Plugin Manager),
+dar NU se vedea nicio fereastră — `App.xaml` nu avea `StartupUri` și nicăieri
+în cod nu se apela `new MainWindow().Show()`. `dotnet build` nu prinde
+niciodată asta (XAML/BAML compilează identic cu sau fără StartupUri) — doar
+rularea reală pe Windows a arătat problema.
+
+- Fix: `App.xaml.cs` creează și afișează explicit `MainWindow` în `OnStartup`.
+- **Log de diagnostic nou** (`DiagnosticLog.cs`, port 1:1 din GDCPluginManagerWin) — scrie la `%TEMP%\mmcpro-crash.log`, cu handler global pentru excepții nehandled (`AppDomain.UnhandledException`/`DispatcherUnhandledException`) care arată și un `MessageBox` vizibil în loc să eșueze silențios.
+
 ## v1.4.0 (2026-08-30)
 **Standard Global de Multi-Selecție**, port 1:1 din Mac v2.3.0:
 - **Spotlight Shield (Tweak-uri Sistem)**: `ProtectFromIndexing(un singur folder)` a devenit un manager cu listare automată a discurilor (`DriveInfo.GetDrives()`, exclus discul de sistem) + foldere adăugate multiplu (`OpenFolderDialog.Multiselect`), fiecare cu bifă „protejat" (`FileAttributes.NotContentIndexed`), Selectează/Deselectează tot, contor „Protejate X din Y".
