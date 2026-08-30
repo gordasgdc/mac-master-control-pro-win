@@ -104,9 +104,9 @@ public static class L
         ["trial.title"] = new() { [AppLanguage.Ro] = "Analiza este 100% completă", [AppLanguage.En] = "Analysis is 100% complete", [AppLanguage.Es] = "El análisis está 100% completo" },
         ["trial.body"] = new()
         {
-            [AppLanguage.Ro] = "Susține dezvoltarea cu o donație (9€, o singură dată) pentru a debloca aplicarea modificărilor.",
-            [AppLanguage.En] = "Support development with a one-time 9€ donation to unlock applying changes.",
-            [AppLanguage.Es] = "Apoya el desarrollo con una donación única de 9€ para desbloquear la aplicación de cambios.",
+            [AppLanguage.Ro] = "Susține dezvoltarea cu o donație (17€, o singură dată) pentru a debloca aplicarea modificărilor.",
+            [AppLanguage.En] = "Support development with a one-time 17€ donation to unlock applying changes.",
+            [AppLanguage.Es] = "Apoya el desarrollo con una donación única de 17€ para desbloquear la aplicación de cambios.",
         },
         ["trial.donate"] = new() { [AppLanguage.Ro] = "Donează din GDC Plugin Manager", [AppLanguage.En] = "Donate via GDC Plugin Manager", [AppLanguage.Es] = "Donar desde GDC Plugin Manager" },
         ["trial.activate"] = new() { [AppLanguage.Ro] = "Activează", [AppLanguage.En] = "Activate", [AppLanguage.Es] = "Activar" },
