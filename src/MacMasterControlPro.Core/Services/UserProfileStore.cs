@@ -5,7 +5,7 @@ public static class UserProfileStore
 {
     private static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Mac Master Control Pro", "profile.txt");
+        "Master Control Studio Pro", "profile.txt");
 
     public static string Name
     {

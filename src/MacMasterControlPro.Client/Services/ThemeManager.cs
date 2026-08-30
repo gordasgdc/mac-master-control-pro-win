@@ -10,7 +10,7 @@ public static class ThemeManager
 {
     private static readonly string SettingsFilePath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Mac Master Control Pro", "theme.txt");
+        "Master Control Studio Pro", "theme.txt");
 
     public static AppTheme Current { get; private set; } = Load();
 

@@ -18,14 +18,31 @@ public partial class MainWindow
 
         VersionText.Text = $"v{UpdateChecker.CurrentVersion} Pro";
         RefreshProfile();
+        RefreshLicenseBadge();
         MachineIdButton.Content = $"Machine ID: {MachineID.Display[..Math.Min(13, MachineID.Display.Length)]}…";
 
         _dependencyChecker.CheckAll();
         RefreshDependencyBadge();
 
+        RenderSidebarLabels();
+        LanguageStore.Changed += RenderSidebarLabels;
+        LanguageStore.Changed += () => { if (PageHost.Content is DashboardPage) PageHost.Content = new DashboardPage(); };
+
         PageHost.Content = new DashboardPage();
 
         _ = MaybeShowUpdatePopupAsync(respectDismissal: true);
+    }
+
+    private void RenderSidebarLabels()
+    {
+        ItemDashboard.Content = "📊 " + L.T("sidebar.dashboard");
+        ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
+        ItemCloud.Content = "☁️ " + L.T("sidebar.cloud");
+        ItemCleanup.Content = "🧹 " + L.T("sidebar.cleanup");
+        ItemTweaks.Content = "🛠️ " + L.T("sidebar.tweaks");
+        DependenciesItem.Content = "🧩 " + L.T("sidebar.dependencies");
+        ItemSettings.Content = "⚙️ " + L.T("sidebar.settings");
+        CheckUpdatesButton.Content = L.T("sidebar.checkUpdates");
     }
 
     private void OnModuleSelected(object sender, SelectionChangedEventArgs e)
@@ -55,6 +72,20 @@ public partial class MainWindow
         var name = UserProfileStore.Name;
         ProfileNameText.Text = string.IsNullOrWhiteSpace(name) ? "Anonim" : name;
         ProfileEmailText.Text = UserProfileStore.Email;
+    }
+
+    private void RefreshLicenseBadge()
+    {
+        var unlocked = LicenseManager.Shared.IsUnlocked;
+        LicenseBadge.Content = unlocked ? "Pro" : "Trial — Activează";
+        LicenseBadge.Foreground = unlocked ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Orange;
+    }
+
+    private void OnLicenseBadgeClicked(object sender, RoutedEventArgs e)
+    {
+        if (LicenseManager.Shared.IsUnlocked) return;
+        var gate = new TrialGateWindow { Owner = this };
+        if (gate.ShowDialog() == true) RefreshLicenseBadge();
     }
 
     private void OnCopyMachineId(object sender, RoutedEventArgs e)
@@ -89,7 +120,7 @@ public partial class MainWindow
         var box = new Wpf.Ui.Controls.MessageBox
         {
             Title = "Este disponibilă o versiune nouă",
-            Content = $"Mac Master Control Pro {version} este disponibil (tu ai {UpdateChecker.CurrentVersion}).",
+            Content = $"Master Control Studio Pro {version} este disponibil (tu ai {UpdateChecker.CurrentVersion}).",
             PrimaryButtonText = "Actualizează acum",
             CloseButtonText = "Mai târziu",
         };

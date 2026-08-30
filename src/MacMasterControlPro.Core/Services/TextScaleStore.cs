@@ -37,7 +37,7 @@ public static class TextScaleStore
 {
     private static string FilePath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Mac Master Control Pro", "text-scale.txt");
+        "Master Control Studio Pro", "text-scale.txt");
 
     public static TextScalePreference Load()
     {

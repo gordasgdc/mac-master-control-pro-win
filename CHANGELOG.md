@@ -1,4 +1,10 @@
-# Changelog — Mac Master Control Pro (Windows)
+# Changelog — Master Control Studio Pro (Windows)
+
+## v1.2.0 (2026-08-30)
+- **Rebranding**: "Mac Master Control Pro" → "Master Control Studio Pro" în tot codul (afișare, căi AppData, installer). ProductID și nume repo rămân neschimbate.
+- **Localizare RO/EN/ES** completă în UI (Sidebar, Dashboard, Settings, TrialGateWindow) — `Localization.cs`, port 1:1 al Mac.
+- **Buton „Activează Licența"** persistent în Sidebar Footer (badge Pro/Trial apăsabil), nu doar la teasing.
+- **Contact WhatsApp** în fereastra de activare (`WhatsAppLink.cs`), mesaj pre-completat cu Machine ID.
 
 ## v1.1.0 (2026-08-30)
 Paritate de module cu Mac:

@@ -21,7 +21,7 @@ public sealed class LicenseManager
     private static string ActivationFilePath =>
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Mac Master Control Pro", "license.txt");
+            "Master Control Studio Pro", "license.txt");
 
     private LicenseManager() => LoadSavedLicense();
 

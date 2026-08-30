@@ -1,8 +1,8 @@
-# Mac Master Control Pro (Windows)
+# Master Control Studio Pro (Windows)
 
-Oglinda C#/.NET 8 WPF a [Mac Master Control Pro](https://github.com/gordasgdc/mac-master-control-pro) (Mac) — panou de tuning sistem, Cloud Manager, curățare cache media.
+Oglinda C#/.NET 8 WPF a [Master Control Studio Pro](https://github.com/gordasgdc/mac-master-control-pro) (Mac) — panou de tuning sistem, Cloud Manager, curățare cache media.
 
-**Stare curentă**: scaffold v1.0.0 — licențiere Ed25519 reală, temă System/Light/Dark, Mărime Text, Sidebar Footer, Self-Updater, modulul Rețea. Restul modulelor (Cloud Manager, Cleanup, Tweaks, Dependency Auto-Installer) urmează în etape viitoare, la paritate cu Mac.
+**Stare curentă**: v1.1.0 — paritate de module cu Mac (Rețea, Cloud Manager Universal, Curățare & RAM, Tweak-uri Sistem, Dependency Auto-Installer), licențiere Ed25519 reală, temă System/Light/Dark, Mărime Text, Sidebar Footer, Self-Updater. Rămâne: localizare RO/EN/ES completă în UI.
 
 ## Build local
 

@@ -1,6 +1,5 @@
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -20,6 +19,8 @@ public partial class SettingsPage : UserControl
         InitializeComponent();
         _mainWindow = mainWindow;
 
+        RenderLabels();
+
         ThemeCombo.SelectedItem = ThemeCombo.Items.Cast<ComboBoxItem>()
             .FirstOrDefault(i => (string)i.Tag == ThemeManager.Current.ToString()) ?? ThemeCombo.Items[0];
 
@@ -27,9 +28,25 @@ public partial class SettingsPage : UserControl
         TextScaleCombo.SelectedItem = TextScaleCombo.Items.Cast<ComboBoxItem>()
             .FirstOrDefault(i => (string)i.Tag == scale.ToString()) ?? TextScaleCombo.Items[1];
 
+        LanguageCombo.SelectedItem = LanguageCombo.Items.Cast<ComboBoxItem>()
+            .FirstOrDefault(i => (string)i.Tag == LanguageStore.Current.ToString()) ?? LanguageCombo.Items[0];
+
         NameBox.Text = UserProfileStore.Name;
         EmailBox.Text = UserProfileStore.Email;
         _loaded = true;
+    }
+
+    private void RenderLabels()
+    {
+        TitleText.Text = "⚙️ " + L.T("sidebar.settings");
+        AppearanceCard.Header = L.T("settings.appearance");
+        ThemeLabel.Text = L.T("settings.theme");
+        TextScaleLabel.Text = L.T("settings.textSize");
+        LanguageLabel.Text = L.T("settings.language");
+        ProfileCard.Header = L.T("settings.profile");
+        NameBox.PlaceholderText = L.T("settings.name");
+        EmailBox.PlaceholderText = L.T("settings.email");
+        GuideButton.Content = L.T("settings.guide");
     }
 
     private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
@@ -51,6 +68,16 @@ public partial class SettingsPage : UserControl
         }
     }
 
+    private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_loaded || LanguageCombo.SelectedItem is not ComboBoxItem item) return;
+        if (Enum.TryParse<AppLanguage>((string)item.Tag, out var lang))
+        {
+            LanguageStore.Current = lang;
+            RenderLabels();
+        }
+    }
+
     private void OnProfileChanged(object sender, TextChangedEventArgs e)
     {
         if (!_loaded) return;
@@ -61,13 +88,13 @@ public partial class SettingsPage : UserControl
 
     private void OnOpenGuideClicked(object sender, RoutedEventArgs e)
     {
-        var lang = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName switch
+        var suffix = LanguageStore.Current switch
         {
-            "es" => "ES",
-            "en" => "EN",
+            AppLanguage.Es => "ES",
+            AppLanguage.En => "EN",
             _ => "RO",
         };
-        var path = Path.Combine(AppContext.BaseDirectory, $"Instructiuni_Utilizare_{lang}.pdf");
+        var path = Path.Combine(AppContext.BaseDirectory, $"Instructiuni_Utilizare_{suffix}.pdf");
         if (!File.Exists(path)) path = Path.Combine(AppContext.BaseDirectory, "Instructiuni_Utilizare_RO.pdf");
         if (File.Exists(path))
         {
