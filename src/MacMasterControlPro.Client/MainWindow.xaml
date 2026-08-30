@@ -23,7 +23,27 @@
 
             <!-- Sidebar: lista module (frate cu footer-ul, Regula 24 - nu
                  safeAreaInset/suprapunere) -->
+            <!-- BUG REAL, gasit 2026-08-30 din screenshot-ul lui Cristi: textul din
+                 sidebar (ListBoxItem/TextBlock) nu avea Foreground explicit, deci
+                 mostenea culoarea din tema globala (Light/Dark, aleasa de
+                 ThemeManager conform Regulii 18) - cand tema rezolvata era Light,
+                 textul devenea aproape negru pe fundalul FIX intunecat (#14161A) al
+                 acestui sidebar, deci invizibil. Sidebar-ul e mereu intunecat
+                 (Regula 7), independent de tema aleasa pentru restul ferestrei -
+                 stilurile de mai jos fixeaza foreground-ul la o culoare deschisa
+                 CONSTANTA aici, nu legata de tema. Foreground-urile setate explicit
+                 in cod (DependenciesItem, LicenseBadge) raman neschimbate - o
+                 valoare locala are mereu prioritate peste un Style. -->
             <Grid Grid.Column="0" Background="#14161A">
+                <Grid.Resources>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Foreground" Value="#EDEFF2" />
+                        <Setter Property="Padding" Value="10,8" />
+                    </Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="#EDEFF2" />
+                    </Style>
+                </Grid.Resources>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
@@ -56,14 +76,14 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock x:Name="ProfileNameText" FontSize="12" FontWeight="Bold" />
+                                <TextBlock x:Name="ProfileNameText" FontSize="12" FontWeight="Bold" Foreground="#EDEFF2" />
                                 <TextBlock x:Name="ProfileEmailText" FontSize="10.5" Foreground="Gray" />
                             </StackPanel>
                             <ui:Button x:Name="LicenseBadge" Grid.Column="1" FontSize="10.5" Padding="6,2"
                                        Appearance="Transparent" VerticalAlignment="Top" Click="OnLicenseBadgeClicked" />
                         </Grid>
                         <ui:Button x:Name="MachineIdButton" Content="Machine ID: …" FontSize="10.5" Margin="0,6,0,0"
-                                   Appearance="Transparent" Padding="0" HorizontalAlignment="Left"
+                                   Appearance="Transparent" Padding="0" HorizontalAlignment="Left" Foreground="#EDEFF2"
                                    Click="OnCopyMachineId" />
                         <Grid Margin="0,8,0,0">
                             <Grid.ColumnDefinitions>

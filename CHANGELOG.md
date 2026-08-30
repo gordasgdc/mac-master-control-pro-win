@@ -1,5 +1,26 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.5.0 (2026-08-30) — Fix meniu invizibil (temă Light) + selecție granulară Dependențe
+
+**Fix real, raportat de Cristi**: sidebar-ul (Panel/Rețea/Cloud/etc.) avea
+fundal fix întunecat (`#14161A`), dar textul n-avea `Foreground` explicit —
+moștenea tema globală (Light/Dark). Când sistemul era pe Light, textul
+devenea aproape negru pe fundalul întunecat = invizibil. Fix: sidebar-ul are
+acum text mereu deschis (`#EDEFF2`), independent de tema aleasă pentru
+restul ferestrei.
+
+**Dependențe & Cerințe Sistem — rescris complet**:
+- Bifă individuală per componentă instalabilă (Rclone, WinFSP) — NU mai
+  există buton „instalează tot ce lipsește"; Selectează exact ce vrei,
+  nimic nu pornește fără bifă explicită.
+- **Fix cauza reală a erorii de instalare**: după un `winget install`
+  reușit, verificarea imediată tot raporta „Neinstalat" — procesul GUI e de
+  lungă durată, deci PATH-ul moștenit de orice comandă pornită de el rămâne
+  cel de la lansarea aplicației; winget actualizează PATH doar în Registry,
+  nu și în procesele deja pornite. `Shell.cs` citește acum PATH-ul proaspăt
+  (Machine+User) din Registry la fiecare comandă — un CLI nou instalat e
+  văzut instant, fără repornirea aplicației.
+
 ## v1.4.2 (2026-08-30) — FIX CRITIC (cauza reală): NullReferenceException la pornire
 
 Log-ul de diagnostic din v1.4.1 a prins imediat cauza reală: `ItemDashboard`

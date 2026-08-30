@@ -7,9 +7,12 @@
 
         <ui:CardExpander Header="Status pachete" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,8"
+                           Text="Bifează exact ce vrei să instalezi — nimic nu se instalează automat, ca să nu-ți încarce sistemul cu pachete nedorite." />
                 <ItemsControl x:Name="ItemsList" Margin="0,0,0,10" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,0,0,10" />
                 <ui:Button Content="Rescanează" Margin="0,0,0,8" Click="OnRescanClicked" />
-                <ui:Button x:Name="InstallButton" Content="Instalează Dependențele Lipsă" Appearance="Primary" Click="OnInstallClicked" />
+                <ui:Button x:Name="InstallButton" Content="Instalează selecția" Appearance="Primary" Click="OnInstallClicked" />
             </StackPanel>
         </ui:CardExpander>
 
