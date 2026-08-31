@@ -1,0 +1,27 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.RenderModePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
+    <StackPanel MaxWidth="560">
+        <TextBlock Text="⚡️ Mod Randare" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+
+        <ui:CardExpander Header="Optimizare temporară pentru export/randare" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11" Margin="0,0,0,10"
+                           Text="Pentru export-uri/randări lungi: oprește indexarea Windows Search, pune pe pauză File History, și ridică prioritatea procesului DaVinci Resolve, dacă rulează." />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="StatusIndicator" Grid.Column="0" Text="Mod Randare inactiv" VerticalAlignment="Center" FontWeight="Bold" />
+                    <ui:ToggleSwitch x:Name="RenderModeToggle" Grid.Column="1" Checked="OnToggled" Unchecked="OnToggled" />
+                </Grid>
+            </StackPanel>
+        </ui:CardExpander>
+
+        <TextBlock x:Name="StatusText" Margin="0,0,0,8" Foreground="Gray" FontSize="11" />
+        <controls:TerminalLogView x:Name="Log" />
+    </StackPanel>
+</UserControl>

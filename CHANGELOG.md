@@ -1,5 +1,38 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.10.0 (2026-08-31) — Port complet al celor 7 module noi de pe Mac
+
+Port 1:1 al celor 7 funcționalități noi din Mac (v2.8.0+), toate cu
+echivalent Windows real, nu doar UI gol:
+- **⚡️ Mod Randare** — oprește Windows Search + File History, ridică
+  prioritatea `Resolve.exe`, un singur comutator UAC (`RenderModeService.cs`).
+- **🔌 Pornire Sistem** — auditor Registry Run (HKCU+HKLM) + folder
+  Startup, dezactivare reversibilă (carantină, nu ștergere).
+- **💽 Sănătate Discuri** — spațiu liber, SMART prin WMI
+  (`MSStorageDriver_FailurePredictStatus`), test de viteză de scriere.
+- **🎬 DaVinci Resolve** — Auditor Media Pool (offline/duplicat, prin
+  Scripting API oficial DaVinci, aceeași punte Python ca pe Mac) +
+  Notificare la final de randare (`NotifyIcon`, balloon tip) + Sincronizare
+  LUT-uri/Fusion prin Cloud Manager (PowerGrade-urile rămân TODO — trăiesc
+  în baza de date internă Resolve).
+- **📧 Notificare pe email** (cerută separat, ca să ajungă și pe telefon —
+  WhatsApp nu poate trimite automat fără click manual) — `SmtpClient`,
+  configurabil (server/port/cont/parolă aplicație/destinatar).
+- **🪟 Layout Ferestre** — salvează/restaurează poziții de ferestre per
+  aplicație prin Win32 API (`EnumWindows`/`SetWindowPos`) — nu necesită
+  nicio permisiune specială (spre deosebire de Accessibility pe Mac).
+
+**Fix conex găsit la implementare**: `UseWindowsForms` (necesar doar pentru
+`NotifyIcon`) intra în conflict de namespace cu WPF (`UserControl`/
+`Application`/`Brushes`/`Color` ambigue) — rezolvat cu `<Using Remove>`
+explicit în `.csproj`, nu s-a atins niciun fișier existent.
+
+**WARNING (Regula 20/standard)**: verificat doar `dotnet build` (C# +
+XAML→BAML) de pe Mac — 0 erori. NU s-a testat încă REAL pe Windows
+(UAC-ul de la Mod Randare/Pornire Sistem, notificarea nativă, scripting-ul
+Resolve cu python.exe real instalat) — necesită confirmare manuală, o dată,
+de Cristi, înainte de a declara portul complet dovedit.
+
 ## v1.9.1 (2026-08-30) — Fereastra „Explorează” mărită + redimensionabilă
 
 Implicit 820×720 (era 560×480), `ResizeMode="CanResizeWithGrip"` — utilă
