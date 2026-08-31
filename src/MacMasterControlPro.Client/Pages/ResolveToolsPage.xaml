@@ -90,6 +90,27 @@
                 </StackPanel>
             </ui:CardExpander>
 
+            <ui:CardExpander Header="Backup bază de date proiecte" IsExpanded="True" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock x:Name="DbStatusText" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                    <TextBlock Text="Închide Resolve înainte de backup — o copiere „la cald” poate corupe arhiva." FontSize="10" Foreground="Orange" Margin="0,0,0,8" />
+                    <ui:Button x:Name="BackupButton" Content="Backup acum" Click="OnBackupClicked" />
+                    <TextBlock x:Name="BackupStatusText" FontSize="11" Margin="0,6,0,8" />
+                    <ItemsControl x:Name="BackupsList" />
+                </StackPanel>
+            </ui:CardExpander>
+
+            <ui:CardExpander Header="Resolve blocat (zombie)" IsExpanded="True" Margin="0,0,0,12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" x:Name="ZombieStatusText" FontSize="11" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <ui:Button Grid.Column="1" x:Name="ForceQuitButton" Content="Închide forțat" Foreground="OrangeRed" Click="OnForceQuitClicked" Visibility="Collapsed" />
+                </Grid>
+            </ui:CardExpander>
+
             <controls:TerminalLogView x:Name="Log" />
         </StackPanel>
     </ScrollViewer>
