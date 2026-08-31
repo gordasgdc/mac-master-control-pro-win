@@ -1,5 +1,13 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.12.0 (2026-08-31) — Pagini UI: Dezinstalator, Monitor Procese, Fișiere mari, Coș de reciclare
+
+Port complet de UI, paritate cu Mac: modul „Dezinstalator" (Registry
+Uninstall + AppData/LocalAppData/ProgramData, rulează și dezinstalatorul
+oficial din „Apps & Features"), „Monitor Procese" (RAM live, închidere
+proces), „Fișiere mari" (Downloads/Desktop/Documents/Videos) și „Golește
+Coșul de reciclare" (API nativ Shell32) — toate în meniul lateral.
+
 ## v1.11.0 (2026-08-31) — Module noi: Securitate + Dezinstalator (Core)
 
 Port 1:1 al modulelor Mac: verificări 🔴/🟢 BitLocker, Windows Defender,

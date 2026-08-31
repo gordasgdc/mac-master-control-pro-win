@@ -85,6 +85,8 @@ public static class L
         ["sidebar.cloud"] = new() { [AppLanguage.Ro] = "Cloud Manager", [AppLanguage.En] = "Cloud Manager", [AppLanguage.Es] = "Gestor Cloud" },
         ["sidebar.cleanup"] = new() { [AppLanguage.Ro] = "Curățare & RAM", [AppLanguage.En] = "Cleanup & RAM", [AppLanguage.Es] = "Limpieza y RAM" },
         ["sidebar.security"] = new() { [AppLanguage.Ro] = "Securitate", [AppLanguage.En] = "Security", [AppLanguage.Es] = "Seguridad" },
+        ["sidebar.processMonitor"] = new() { [AppLanguage.Ro] = "Procese", [AppLanguage.En] = "Processes", [AppLanguage.Es] = "Procesos" },
+        ["sidebar.uninstaller"] = new() { [AppLanguage.Ro] = "Dezinstalator", [AppLanguage.En] = "Uninstaller", [AppLanguage.Es] = "Desinstalador" },
         ["sidebar.tweaks"] = new() { [AppLanguage.Ro] = "Tweak-uri Sistem", [AppLanguage.En] = "System Tweaks", [AppLanguage.Es] = "Ajustes del Sistema" },
         ["sidebar.dependencies"] = new() { [AppLanguage.Ro] = "Dependențe", [AppLanguage.En] = "Dependencies", [AppLanguage.Es] = "Dependencias" },
         ["sidebar.settings"] = new() { [AppLanguage.Ro] = "Setări", [AppLanguage.En] = "Settings", [AppLanguage.Es] = "Ajustes" },

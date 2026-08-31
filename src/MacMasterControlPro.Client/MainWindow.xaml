@@ -61,6 +61,8 @@
                     <ListBoxItem x:Name="ItemDashboard" Tag="Dashboard" />
                     <ListBoxItem x:Name="ItemRenderMode" Tag="RenderMode" />
                     <ListBoxItem x:Name="ItemLoginItems" Tag="LoginItems" />
+                    <ListBoxItem x:Name="ItemProcessMonitor" Tag="ProcessMonitor" />
+                    <ListBoxItem x:Name="ItemUninstaller" Tag="Uninstaller" />
                     <ListBoxItem x:Name="ItemDiskHealth" Tag="DiskHealth" />
                     <ListBoxItem x:Name="ItemResolveTools" Tag="ResolveTools" />
                     <ListBoxItem x:Name="ItemWindowLayouts" Tag="WindowLayouts" />
