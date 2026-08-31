@@ -23,8 +23,26 @@
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Header="RAM &amp; DNS" IsExpanded="True">
+        <ui:CardExpander Header="Fișiere mari (Downloads/Desktop/Documents/Videos)" IsExpanded="False" Margin="0,0,0,12">
+            <StackPanel>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:Button Grid.Column="1" Content="Scanează (&gt; 200 MB)" Click="OnScanBigFilesClicked" />
+                </Grid>
+                <StackPanel x:Name="BigFilesPanel" />
+                <ui:Button x:Name="DeleteBigFilesButton" Content="Șterge fișierele selectate" Appearance="Danger" Margin="0,8,0,0" Click="OnDeleteBigFilesClicked" IsEnabled="False" />
+            </StackPanel>
+        </ui:CardExpander>
+
+        <ui:CardExpander Header="RAM &amp; DNS" IsExpanded="True" Margin="0,0,0,12">
             <ui:Button Content="Purjare RAM + Flush DNS" Click="OnPurgeClicked" />
+        </ui:CardExpander>
+
+        <ui:CardExpander Header="Coș de reciclare" IsExpanded="True">
+            <ui:Button Content="Golește Coșul de reciclare" Click="OnEmptyRecycleBinClicked" />
         </ui:CardExpander>
 
         <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="Gray" FontSize="11" />

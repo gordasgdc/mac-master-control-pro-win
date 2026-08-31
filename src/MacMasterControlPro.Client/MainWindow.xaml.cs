@@ -43,6 +43,8 @@ public partial class MainWindow
         ItemDashboard.Content = "📊 " + L.T("sidebar.dashboard");
         ItemRenderMode.Content = "⚡️ " + L.T("sidebar.renderMode");
         ItemLoginItems.Content = "🔌 " + L.T("sidebar.loginItems");
+        ItemProcessMonitor.Content = "⚙️ " + L.T("sidebar.processMonitor");
+        ItemUninstaller.Content = "🗑️ " + L.T("sidebar.uninstaller");
         ItemDiskHealth.Content = "💽 " + L.T("sidebar.diskHealth");
         ItemResolveTools.Content = "🎬 " + L.T("sidebar.resolveTools");
         ItemWindowLayouts.Content = "🪟 " + L.T("sidebar.windowLayouts");
@@ -63,6 +65,8 @@ public partial class MainWindow
         {
             "RenderMode" => new Pages.RenderModePage(),
             "LoginItems" => new Pages.LoginItemsPage(),
+            "ProcessMonitor" => new Pages.ProcessMonitorPage(),
+            "Uninstaller" => new Pages.UninstallerPage(),
             "DiskHealth" => new Pages.DiskHealthPage(),
             "ResolveTools" => new Pages.ResolveToolsPage(),
             "WindowLayouts" => new Pages.WindowLayoutsPage(),

@@ -18,6 +18,15 @@ public sealed class CleanupService
     [DllImport("psapi.dll")]
     private static extern bool EmptyWorkingSet(IntPtr hProcess);
 
+    // Coșul de reciclare NU e un folder normal ($Recycle.Bin e sistem,
+    // ACL speciale) — golirea corectă e prin API-ul nativ Shell32, nu prin
+    // stergere directa de fisiere (risc de coruptie a indexului).
+    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+    private static extern int SHEmptyRecycleBin(IntPtr hwnd, string? pszRootPath, uint dwFlags);
+    private const uint SHERB_NOCONFIRMATION = 0x00000001;
+    private const uint SHERB_NOPROGRESSUI = 0x00000002;
+    private const uint SHERB_NOSOUND = 0x00000004;
+
     public List<CleanableItem> Items { get; private set; } = new();
 
     private static readonly (string name, string path)[] CachePaths =
@@ -25,6 +34,9 @@ public sealed class CleanupService
         ("DaVinci Resolve CacheClip", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Blackmagic Design", "DaVinci Resolve", "CacheClip")),
         ("Adobe Media Cache", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe", "Common", "Media Cache Files")),
         ("Fișiere temporare (%Temp%)", Path.GetTempPath()),
+        // Categorii tip CleanMyMac (2026-08-31) — Delivery Optimization
+        // (cache Windows Update, se reface automat, sigur de golit).
+        ("Delivery Optimization (cache Windows Update)", @"C:\Windows\SoftwareDistribution\DeliveryOptimization"),
     };
 
     /// Scanare libera (Trial) - calculeaza GB per item, fara sa stearga nimic.
@@ -92,5 +104,13 @@ public sealed class CleanupService
             try { EmptyWorkingSet(process.Handle); } catch { /* procese de sistem, fara acces */ }
         }
         Shell.Run("ipconfig /flushdns");
+    }
+
+    /// Golește Coșul de reciclare pe toate discurile — API nativ, fără
+    /// promptul de confirmare Windows (avem deja propria confirmare în UI).
+    public bool EmptyRecycleBin()
+    {
+        var result = SHEmptyRecycleBin(IntPtr.Zero, null, SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
+        return result == 0; // S_OK
     }
 }

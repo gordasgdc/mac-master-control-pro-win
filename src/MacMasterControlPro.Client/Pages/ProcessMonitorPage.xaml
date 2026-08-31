@@ -1,0 +1,19 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.ProcessMonitorPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <StackPanel MaxWidth="560">
+        <Grid Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="⚙️ Procese active" FontSize="22" FontWeight="Bold" />
+            <ui:Button Grid.Column="1" Content="Actualizează" Click="OnRefreshClicked" />
+        </Grid>
+        <TextBlock Text="Top 20 după consum RAM, actualizat automat la 3 secunde." Foreground="Gray" FontSize="11" Margin="0,0,0,10" />
+        <ScrollViewer MaxHeight="480">
+            <StackPanel x:Name="ItemsPanel" />
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>
