@@ -717,6 +717,68 @@ automat — doar descarcarea reala (HTTP 200, executabil PE32 valid,
 57MB) e confirmata. Instalarea + auto-update-ul efectiv TREBUIE
 confirmate manual, o data, de Cristi.
 
+## Etapa 2026-08-31 — Port complet al 7 module noi de pe Mac (v1.10.0)
+
+Portate 1:1 toate cele 7 functionalitati noi construite pe Mac in aceeasi
+sesiune (Nivel 1: Mod Randare, Pornire Sistem, Sanatate Discuri; Nivel 2:
+Auditor Media Pool + Notificare Randare; Nivel 3: Sincronizare LUT/Fusion,
+Layout Ferestre) - vezi `~/Developer/MacMasterControlPro/CLAUDE.md` pentru
+rationamentul original al fiecareia.
+
+**Adaptari reale de platforma (nu doar redenumiri 1:1):**
+- **Mod Randare**: `sc config WSearch`/`sc stop fhsvc` in loc de
+  `mdutil`/`tmutil` - Windows Search + File History sunt echivalentele
+  Windows ale Spotlight/Time Machine.
+- **Pornire Sistem**: Registry `Run` (HKCU+HKLM) + folder Startup, nu
+  LaunchAgents/.plist - dezactivare HKLM cere UAC (`PrivilegedRunner`),
+  HKCU nu.
+- **Sanatate Discuri**: SMART prin WMI (`root\WMI`,
+  `MSStorageDriver_FailurePredictStatus`) - nu toate discurile externe USB
+  expun asta prin punte, degradeaza elegant (camp `null`, nu eroare).
+- **DaVinci Resolve (Audit + Notificare)**: ACEEASI punte Python catre
+  Scripting API-ul oficial ca pe Mac (`import DaVinciResolveScript`), doar
+  caile difera: `RESOLVE_SCRIPT_API` = `%PROGRAMDATA%\Blackmagic Design\
+  DaVinci Resolve\Support\Developer\Scripting\`, `RESOLVE_SCRIPT_LIB` =
+  `fusionscript.dll` (nu `.so`). `python.exe` gasit prin `where`, nu cai
+  hardcodate - Windows nu are un python de sistem implicit ca Mac.
+- **Layout Ferestre**: Win32 API (`EnumWindows`/`GetWindowRect`/
+  `MoveWindow`) - SPRE DEOSEBIRE de Mac, NU necesita nicio permisiune
+  speciala (Accessibility) - un proces poate repozitiona ferestrele altui
+  proces al ACELUIASI utilizator fara UAC.
+
+**Notificare pe email (cerinta separata, aparuta in aceeasi sesiune)**:
+Cristi a intrebat explicit "nu inteleg cum functioneaza daca nu vad sa pun
+nr de telefon" dupa ce a vazut doar notificarea nativa pe ecran - clarificat
+ca WhatsApp NU poate trimite automat fara interactiune (doar deschide o
+conversatie pre-completata, la fel ca la activarea licentei), email fiind
+SINGURA varianta cu adevarat automata catre telefon. Adaugat
+`EmailNotifierService.cs` (`System.Net.Mail.SmtpClient`, marcat obsolet in
+.NET dar functional pentru acest caz simplu sincron - fara dependinta noua
+tip MailKit), stocare LOCALA in clar (JSON in AppData) - recomanda explicit
+in UI o "parola de aplicatie" Gmail/Outlook, nu parola reala a contului.
+
+**Bug real gasit la implementare (nu doar port, fix propriu acestei
+platforme)**: activarea `UseWindowsForms=true` (necesara STRICT pentru
+`NotifyIcon`, balloon tip-ul de notificare) a stricat compilarea INTREGULUI
+proiect existent - SDK-ul .NET adauga automat, prin `ImplicitUsings`,
+using-uri globale pentru `System.Windows.Forms`/`System.Drawing`, care intra
+in conflict de nume cu WPF (`UserControl`, `Application`, `TextBox`,
+`Brushes`, `Color` exista identic in ambele namespace-uri) - a rupt
+COMPILAREA a peste 10 fisiere existente, nu doar codul nou. Fix: 
+`<Using Remove="System.Windows.Forms" />` + `<Using Remove="System.Drawing" />`
+in `.csproj`, fara sa se atinga niciun fisier existent (codul foloseste
+`System.Windows.Forms.NotifyIcon` complet calificat oricum). **Regula
+practica noua**: orice proiect WPF existent care activeaza `UseWindowsForms`
+pentru prima data trebuie sa verifice explicit acest conflict, nu doar sa
+presupuna ca merge.
+
+**Verificat**: `dotnet build` (Core + Client, C# + XAML->BAML, de pe Mac
+via `EnableWindowsTargeting`) - 0 erori, 0 avertismente. **NU verificat
+REAL pe Windows** (WARNING standard, Regula 20) - UAC-ul efectiv de la Mod
+Randare/Pornire Sistem, notificarea nativa (NotifyIcon), scripting-ul
+Resolve cu un `python.exe` real instalat, toate necesita confirmare
+manuala, o data, de Cristi, inainte de a declara portul complet dovedit.
+
 ## Rebuild local (verificare sintaxa, NU echivalent build Windows real)
 
 ```bash

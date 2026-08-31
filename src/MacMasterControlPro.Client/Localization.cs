@@ -76,6 +76,11 @@ public static class L
     private static readonly Dictionary<string, Dictionary<AppLanguage, string>> Strings = new()
     {
         ["sidebar.dashboard"] = new() { [AppLanguage.Ro] = "Dashboard", [AppLanguage.En] = "Dashboard", [AppLanguage.Es] = "Panel" },
+        ["sidebar.renderMode"] = new() { [AppLanguage.Ro] = "Mod Randare", [AppLanguage.En] = "Render Mode", [AppLanguage.Es] = "Modo Renderizado" },
+        ["sidebar.loginItems"] = new() { [AppLanguage.Ro] = "Pornire Sistem", [AppLanguage.En] = "Startup Apps", [AppLanguage.Es] = "Apps de Inicio" },
+        ["sidebar.diskHealth"] = new() { [AppLanguage.Ro] = "Sănătate Discuri", [AppLanguage.En] = "Disk Health", [AppLanguage.Es] = "Salud de Discos" },
+        ["sidebar.resolveTools"] = new() { [AppLanguage.Ro] = "DaVinci Resolve", [AppLanguage.En] = "DaVinci Resolve", [AppLanguage.Es] = "DaVinci Resolve" },
+        ["sidebar.windowLayouts"] = new() { [AppLanguage.Ro] = "Layout Ferestre", [AppLanguage.En] = "Window Layouts", [AppLanguage.Es] = "Diseños de Ventanas" },
         ["sidebar.network"] = new() { [AppLanguage.Ro] = "Rețea", [AppLanguage.En] = "Network", [AppLanguage.Es] = "Red" },
         ["sidebar.cloud"] = new() { [AppLanguage.Ro] = "Cloud Manager", [AppLanguage.En] = "Cloud Manager", [AppLanguage.Es] = "Gestor Cloud" },
         ["sidebar.cleanup"] = new() { [AppLanguage.Ro] = "Curățare & RAM", [AppLanguage.En] = "Cleanup & RAM", [AppLanguage.Es] = "Limpieza y RAM" },

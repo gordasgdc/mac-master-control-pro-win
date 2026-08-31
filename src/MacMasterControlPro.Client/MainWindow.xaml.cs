@@ -41,6 +41,11 @@ public partial class MainWindow
     private void RenderSidebarLabels()
     {
         ItemDashboard.Content = "📊 " + L.T("sidebar.dashboard");
+        ItemRenderMode.Content = "⚡️ " + L.T("sidebar.renderMode");
+        ItemLoginItems.Content = "🔌 " + L.T("sidebar.loginItems");
+        ItemDiskHealth.Content = "💽 " + L.T("sidebar.diskHealth");
+        ItemResolveTools.Content = "🎬 " + L.T("sidebar.resolveTools");
+        ItemWindowLayouts.Content = "🪟 " + L.T("sidebar.windowLayouts");
         ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
         ItemCloud.Content = "☁️ " + L.T("sidebar.cloud");
         ItemCleanup.Content = "🧹 " + L.T("sidebar.cleanup");
@@ -55,6 +60,11 @@ public partial class MainWindow
         if (ModuleList.SelectedItem is not ListBoxItem item) return;
         PageHost.Content = (item.Tag as string) switch
         {
+            "RenderMode" => new Pages.RenderModePage(),
+            "LoginItems" => new Pages.LoginItemsPage(),
+            "DiskHealth" => new Pages.DiskHealthPage(),
+            "ResolveTools" => new Pages.ResolveToolsPage(),
+            "WindowLayouts" => new Pages.WindowLayoutsPage(),
             "Network" => new NetworkPage(),
             "Cloud" => new Pages.CloudPage(),
             "Cleanup" => new Pages.CleanupPage(),

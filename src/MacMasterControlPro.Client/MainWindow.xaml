@@ -59,6 +59,11 @@
                          imediat la pornire. Constructorul seteaza deja explicit
                          PageHost.Content = new DashboardPage() dupa InitializeComponent(). -->
                     <ListBoxItem x:Name="ItemDashboard" Tag="Dashboard" />
+                    <ListBoxItem x:Name="ItemRenderMode" Tag="RenderMode" />
+                    <ListBoxItem x:Name="ItemLoginItems" Tag="LoginItems" />
+                    <ListBoxItem x:Name="ItemDiskHealth" Tag="DiskHealth" />
+                    <ListBoxItem x:Name="ItemResolveTools" Tag="ResolveTools" />
+                    <ListBoxItem x:Name="ItemWindowLayouts" Tag="WindowLayouts" />
                     <ListBoxItem x:Name="ItemNetwork" Tag="Network" />
                     <ListBoxItem x:Name="ItemCloud" Tag="Cloud" />
                     <ListBoxItem x:Name="ItemCleanup" Tag="Cleanup" />

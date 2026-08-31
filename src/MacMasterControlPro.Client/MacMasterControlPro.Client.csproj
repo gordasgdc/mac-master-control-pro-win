@@ -4,6 +4,9 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- Doar pentru NotifyIcon (notificare la final de randare, Nivel 2 #7) -
+         nu adauga nicio dependinta noua, e parte din .NET SDK. -->
+    <UseWindowsForms>true</UseWindowsForms>
     <!-- Permite dotnet restore/build sa rezolve TFM-ul windows si de pe
          macOS (XAML->BAML nu compileaza real decat pe Windows). -->
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -15,13 +18,23 @@
     <Nullable>enable</Nullable>
     <RootNamespace>MacMasterControlPro.Client</RootNamespace>
     <AssemblyName>MacMasterControlPro</AssemblyName>
-    <Version>1.9.1</Version>
+    <Version>1.10.0</Version>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
     <PackageReference Include="WPF-UI" Version="3.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- UseWindowsForms (doar pentru NotifyIcon, Nivel 2 #7) adauga implicit
+         using-uri globale pentru System.Windows.Forms care intra in conflict
+         cu WPF (UserControl/Application/TextBox exista in ambele namespace-uri).
+         Codul foloseste System.Windows.Forms.NotifyIcon complet calificat -
+         nu are nevoie de using-ul implicit, doar il elimina pe cel ambiguu. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
