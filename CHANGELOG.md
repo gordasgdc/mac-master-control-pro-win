@@ -1,5 +1,12 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.13.0 (2026-08-31) — DaVinci Resolve: Backup bază de date + detectare proces blocat
+
+Port 1:1 al modulului Mac: backup .zip cu un click al bazei de date de
+proiecte (ProgramData\Blackmagic Design\...\Resolve Disk Database), blocat
+dacă Resolve rulează; detectare „Resolve blocat" (proces fără fereastră
+principală vizibilă) cu buton de închidere forțată.
+
 ## v1.12.0 (2026-08-31) — Pagini UI: Dezinstalator, Monitor Procese, Fișiere mari, Coș de reciclare
 
 Port complet de UI, paritate cu Mac: modul „Dezinstalator" (Registry

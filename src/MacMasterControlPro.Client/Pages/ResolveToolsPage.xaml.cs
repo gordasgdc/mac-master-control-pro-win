@@ -21,6 +21,69 @@ public partial class ResolveToolsPage : UserControl
         LoadEmailSettings();
         LoadConfigFolders();
         LoadRemotes();
+        RefreshResolveHealth();
+    }
+
+    // MARK: - Backup bază de date + detectare "Resolve zombie"
+
+    private void RefreshResolveHealth()
+    {
+        var exists = ResolveDatabaseBackupService.DatabaseExists();
+        DbStatusText.Text = exists
+            ? $"Bază de date găsită — {FormatBytes(ResolveDatabaseBackupService.DatabaseSizeBytes())}"
+            : "Nicio bază de date locală găsită pe acest PC.";
+        BackupButton.IsEnabled = exists;
+
+        BackupsList.Items.Clear();
+        foreach (var entry in ResolveDatabaseBackupService.ListBackups().Take(5))
+        {
+            var row = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.Children.Add(new TextBlock { Text = entry.Date.ToString("g"), FontSize = 11 });
+            var openButton = new Wpf.Ui.Controls.Button { Content = "Arată în Explorer", Padding = new Thickness(6, 1, 6, 1) };
+            openButton.Click += (_, _) => ResolveDatabaseBackupService.RevealInExplorer(entry.Path);
+            Grid.SetColumn(openButton, 1);
+            row.Children.Add(openButton);
+            BackupsList.Items.Add(row);
+        }
+
+        var zombie = ResolveDatabaseBackupService.IsResolveZombie();
+        ZombieStatusText.Text = zombie
+            ? "Proces DaVinci Resolve activ, dar fără fereastră vizibilă — probabil blocat."
+            : "Fără proces Resolve blocat detectat.";
+        ForceQuitButton.Visibility = zombie ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void OnBackupClicked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var path = ResolveDatabaseBackupService.CreateBackup();
+            BackupStatusText.Text = $"✔ Backup creat: {System.IO.Path.GetFileName(path)}";
+            BackupStatusText.Foreground = System.Windows.Media.Brushes.LightGreen;
+        }
+        catch (Exception ex)
+        {
+            BackupStatusText.Text = $"✘ {ex.Message}";
+            BackupStatusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
+        }
+        RefreshResolveHealth();
+    }
+
+    private void OnForceQuitClicked(object sender, RoutedEventArgs e)
+    {
+        ResolveDatabaseBackupService.ForceQuitResolve();
+        RefreshResolveHealth();
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        double b = bytes;
+        string[] units = { "B", "KB", "MB", "GB" };
+        int i = 0;
+        while (b >= 1024 && i < units.Length - 1) { b /= 1024; i++; }
+        return $"{b:0.#} {units[i]}";
     }
 
     // MARK: - Notificare la final de randare
