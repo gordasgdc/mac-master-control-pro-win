@@ -1,0 +1,27 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.SecurityPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+    <StackPanel MaxWidth="560">
+        <Grid Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="🛡️ Securitate &amp; Confidențialitate" FontSize="22" FontWeight="Bold" />
+            <ui:Button Grid.Column="1" Content="Rescanează" Click="OnRescanClicked" />
+        </Grid>
+        <ui:CardExpander Header="Verificări sistem" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel x:Name="ChecksPanel" />
+        </ui:CardExpander>
+        <ui:CardExpander Header="Acțiuni rapide" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <ui:Button Content="Activează Firewall (toate profilurile)" Margin="0,0,0,8" Click="OnEnableFirewallClicked" />
+                <ui:Button Content="Cere parolă imediat la trezire" Click="OnRequirePasswordClicked" />
+                <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="LightGreen" FontSize="11" />
+            </StackPanel>
+        </ui:CardExpander>
+        <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11"
+                   Text="BitLocker (cere cheie de recuperare confirmată manual) și dezactivarea protecțiilor de sistem rămân decizii luate direct din Windows Settings, niciodată dintr-un buton." />
+    </StackPanel>
+</UserControl>

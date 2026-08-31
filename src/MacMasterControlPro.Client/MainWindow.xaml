@@ -67,6 +67,7 @@
                     <ListBoxItem x:Name="ItemNetwork" Tag="Network" />
                     <ListBoxItem x:Name="ItemCloud" Tag="Cloud" />
                     <ListBoxItem x:Name="ItemCleanup" Tag="Cleanup" />
+                    <ListBoxItem x:Name="ItemSecurity" Tag="Security" />
                     <ListBoxItem x:Name="ItemTweaks" Tag="Tweaks" />
                     <ListBoxItem x:Name="DependenciesItem" Tag="Dependencies" />
                     <ListBoxItem x:Name="ItemSettings" Tag="Settings" />

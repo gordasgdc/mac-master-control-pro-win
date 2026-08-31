@@ -1,5 +1,13 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.11.0 (2026-08-31) — Module noi: Securitate + Dezinstalator (Core)
+
+Port 1:1 al modulelor Mac: verificări 🔴/🟢 BitLocker, Windows Defender,
+Firewall, Secure Boot + 2 acțiuni sigure (activare Firewall pe toate
+profilurile, parolă imediată la trezire). Nucleul dezinstalatorului
+complet (scanare Registry Uninstall + AppData/LocalAppData/ProgramData)
+e portat în Core — pagina UI dedicată urmează într-o versiune viitoare.
+
 ## v1.10.1 (2026-08-31) — Preț dinamic din Furnizor
 Suma de donație din mesajul WhatsApp de la modalul de Trial se citește
 acum din `pricing.json` (Furnizor), nu mai e fixă în cod — orice ofertă
