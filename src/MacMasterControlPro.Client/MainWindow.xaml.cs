@@ -49,6 +49,7 @@ public partial class MainWindow
         ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
         ItemCloud.Content = "☁️ " + L.T("sidebar.cloud");
         ItemCleanup.Content = "🧹 " + L.T("sidebar.cleanup");
+        ItemSecurity.Content = "🛡️ " + L.T("sidebar.security");
         ItemTweaks.Content = "🛠️ " + L.T("sidebar.tweaks");
         DependenciesItem.Content = "🧩 " + L.T("sidebar.dependencies");
         ItemSettings.Content = "⚙️ " + L.T("sidebar.settings");
@@ -68,6 +69,7 @@ public partial class MainWindow
             "Network" => new NetworkPage(),
             "Cloud" => new Pages.CloudPage(),
             "Cleanup" => new Pages.CleanupPage(),
+            "Security" => new Pages.SecurityPage(),
             "Tweaks" => new Pages.TweaksPage(),
             "Dependencies" => new Pages.DependenciesPage(_dependencyChecker, this),
             "Settings" => new SettingsPage(this),
