@@ -23,9 +23,12 @@ public partial class TrialGateWindow : Window
     private void OnDonateClicked(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("https://gordas.dev/mac-master-control-pro") { UseShellExecute = true });
 
+    // Preț dinamic (Regula 27) - vezi PricingChecker. Fail-open pe 17 €
+    // (valoarea hardcodata anterior) daca pricing.json nu e accesibil.
     private void OnWhatsAppClicked(object sender, RoutedEventArgs e)
     {
-        var message = $"Salut! Doresc să achiziționez / activez licența Lifetime (17 EUR) pentru PC-ul meu — Master Control Studio Pro. Machine ID: {MachineID.Display}";
+        var priceText = PricingChecker.Shared.DisplayText;
+        var message = $"Salut! Doresc să donez {priceText} pentru licența Lifetime — Master Control Studio Pro. Machine ID: {MachineID.Display}";
         Process.Start(new ProcessStartInfo(WhatsAppLink.Url(message)) { UseShellExecute = true });
     }
 

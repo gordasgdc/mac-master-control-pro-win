@@ -1,5 +1,10 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.10.1 (2026-08-31) — Preț dinamic din Furnizor
+Suma de donație din mesajul WhatsApp de la modalul de Trial se citește
+acum din `pricing.json` (Furnizor), nu mai e fixă în cod — orice ofertă
+programată apare automat, fără recompilare.
+
 ## v1.10.0 (2026-08-31) — Port complet al celor 7 module noi de pe Mac
 
 Port 1:1 al celor 7 funcționalități noi din Mac (v2.8.0+), toate cu
