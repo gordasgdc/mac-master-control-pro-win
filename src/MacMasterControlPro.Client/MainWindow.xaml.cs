@@ -56,6 +56,24 @@ public partial class MainWindow
         DependenciesItem.Content = "🧩 " + L.T("sidebar.dependencies");
         ItemSettings.Content = "⚙️ " + L.T("sidebar.settings");
         CheckUpdatesButton.Content = L.T("sidebar.checkUpdates");
+
+        // Cerinta directa (2026-09-01): "cand te duci cu mouse-ul peste un
+        // buton, sa-ti apara o descriere de ce face".
+        ItemDashboard.ToolTip = "Privire de ansamblu — starea generală a PC-ului dintr-o privire.";
+        ItemRenderMode.ToolTip = "Oprește temporar Windows Search/File History cât randezi în DaVinci Resolve.";
+        ItemLoginItems.ToolTip = "Vezi și oprești aplicațiile care pornesc automat odată cu Windows.";
+        ItemProcessMonitor.ToolTip = "Procesele active acum, sortabile după RAM — închide ce consumă prea mult.";
+        ItemUninstaller.ToolTip = "Dezinstalează complet una sau mai multe aplicații, cu toate urmele lor.";
+        ItemDiskHealth.ToolTip = "Spațiu liber, status SMART și test de viteză pentru discurile montate.";
+        ItemResolveTools.ToolTip = "Notificare la final de randare, verificare Media Pool, sincronizare LUT-uri, backup bază de date.";
+        ItemWindowLayouts.ToolTip = "Salvează și restaurează aranjamentul ferestrelor pe ecran.";
+        ItemNetwork.ToolTip = "Configurare și optimizare rețea, persistentă la repornire.";
+        ItemCloud.ToolTip = "Conectează și gestionează conturi Cloud (Drive, Dropbox, S3 și altele).";
+        ItemCleanup.ToolTip = "Șterge cache-uri recuperabile, fișiere mari uitate, eliberează RAM.";
+        ItemSecurity.ToolTip = "Verifică setările de securitate ale PC-ului, cu ghid pas-cu-pas pentru ce lipsește.";
+        ItemTweaks.ToolTip = "Ajustări rapide de sistem.";
+        DependenciesItem.ToolTip = "Componentele externe de care aplicația are nevoie — instalare cu un click.";
+        ItemSettings.ToolTip = "Temă, limbă, licență și alte preferințe ale aplicației.";
     }
 
     private void OnModuleSelected(object sender, SelectionChangedEventArgs e)

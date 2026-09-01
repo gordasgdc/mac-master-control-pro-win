@@ -5,15 +5,26 @@
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="380" />
             <ColumnDefinition Width="16" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0">
-            <TextBlock Text="🗑️ Dezinstalator" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" />
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="🗑️ Dezinstalator" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
+                <ui:Button Grid.Column="1" x:Name="BulkDeleteButton" Content="Dezinstalează selectate"
+                           Appearance="Danger" Visibility="Collapsed" Click="OnBulkDeleteClicked"
+                           ToolTip="Șterge complet toate aplicațiile bifate mai jos — bundle-ul + toate urmele lor, într-un singur pas." />
+            </Grid>
             <ui:TextBox x:Name="SearchBox" PlaceholderText="Caută aplicație…" Margin="0,0,0,8" TextChanged="OnSearchChanged" />
-            <ListBox x:Name="AppsList" MaxHeight="480" SelectionChanged="OnAppSelected" />
+            <ScrollViewer MaxHeight="560" VerticalScrollBarVisibility="Auto">
+                <StackPanel x:Name="AppsPanel" />
+            </ScrollViewer>
         </StackPanel>
 
         <StackPanel Grid.Column="2" x:Name="DetailsPanel">

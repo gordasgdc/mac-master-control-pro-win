@@ -58,7 +58,11 @@ public partial class ProcessMonitorPage : UserControl
             Grid.SetColumn(mem, 1);
             row.Children.Add(mem);
 
-            var closeButton = new Wpf.Ui.Controls.Button { Content = "Închide", Padding = new Thickness(8, 2, 8, 2) };
+            var closeButton = new Wpf.Ui.Controls.Button
+            {
+                Content = "Închide", Padding = new Thickness(8, 2, 8, 2),
+                ToolTip = "Cere procesului să se închidă normal.",
+            };
             closeButton.Click += (_, _) => { ProcessMonitorService.Terminate(process.Pid, force: false); Refresh(); };
             Grid.SetColumn(closeButton, 2);
             row.Children.Add(closeButton);

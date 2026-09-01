@@ -12,6 +12,14 @@ public partial class UninstallerPage : UserControl
     private readonly HashSet<string> _selectedCategoryIds = new();
     private readonly Controls.TerminalLogView _log = new();
 
+    /// Selecție separată de "aplicația deschisă în detaliu" — cerință
+    /// directă (2026-09-01): "vreau sa pot selecta mai multe si sa le
+    /// dezinstalez, nu una cate una". Bifa de pe fiecare rând adaugă
+    /// aplicația la ștergerea în masă; click pe numele ei tot deschide
+    /// detaliul individual, ca înainte.
+    private readonly HashSet<string> _bulkSelected = new();
+    private bool _isBulkBusy;
+
     public UninstallerPage()
     {
         InitializeComponent();
@@ -24,18 +32,54 @@ public partial class UninstallerPage : UserControl
     private void RenderAppsList()
     {
         var filter = SearchBox.Text?.Trim() ?? "";
-        AppsList.ItemsSource = _apps
+        var filtered = _apps
             .Where(a => filter.Length == 0 || a.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase))
-            .Select(a => a.DisplayName)
             .ToList();
+
+        AppsPanel.Children.Clear();
+        foreach (var app in filtered)
+        {
+            var row = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+            var check = new CheckBox
+            {
+                IsChecked = _bulkSelected.Contains(app.DisplayName),
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 0, 6, 0),
+                ToolTip = $"Bifează ca să incluzi {app.DisplayName} la o ștergere în masă a mai multor aplicații deodată.",
+            };
+            check.Checked += (_, _) => { _bulkSelected.Add(app.DisplayName); UpdateBulkButton(); };
+            check.Unchecked += (_, _) => { _bulkSelected.Remove(app.DisplayName); UpdateBulkButton(); };
+            Grid.SetColumn(check, 0);
+            row.Children.Add(check);
+
+            var name = new TextBlock
+            {
+                Text = app.DisplayName,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                Cursor = System.Windows.Input.Cursors.Hand,
+            };
+            name.MouseLeftButtonUp += (_, _) => SelectApp(app);
+            Grid.SetColumn(name, 1);
+            row.Children.Add(name);
+
+            AppsPanel.Children.Add(row);
+        }
     }
 
-    private void OnAppSelected(object sender, SelectionChangedEventArgs e)
+    private void UpdateBulkButton()
     {
-        if (AppsList.SelectedItem is not string name) return;
-        _selectedApp = _apps.FirstOrDefault(a => a.DisplayName == name);
-        if (_selectedApp is null) return;
-        _categories = UninstallerService.ScanRelatedFiles(_selectedApp);
+        BulkDeleteButton.Visibility = _bulkSelected.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        BulkDeleteButton.Content = $"Dezinstalează selectate ({_bulkSelected.Count})";
+    }
+
+    private void SelectApp(InstalledAppWin app)
+    {
+        _selectedApp = app;
+        _categories = UninstallerService.ScanRelatedFiles(app);
         _selectedCategoryIds.Clear();
         foreach (var c in _categories) _selectedCategoryIds.Add(c.Id);
         RenderDetails();
@@ -78,7 +122,13 @@ public partial class UninstallerPage : UserControl
             }
         }
 
-        var deleteButton = new Wpf.Ui.Controls.Button { Content = "Șterge selectate", Appearance = Wpf.Ui.Controls.ControlAppearance.Danger, Margin = new Thickness(0, 12, 0, 8) };
+        var deleteButton = new Wpf.Ui.Controls.Button
+        {
+            Content = "Șterge selectate",
+            Appearance = Wpf.Ui.Controls.ControlAppearance.Danger,
+            Margin = new Thickness(0, 12, 0, 8),
+            ToolTip = $"Șterge doar categoriile bifate mai sus pentru {_selectedApp.DisplayName} — folosește asta ca să păstrezi ceva anume.",
+        };
         deleteButton.Click += (_, _) => PerformDelete();
         DetailsPanel.Children.Add(deleteButton);
         DetailsPanel.Children.Add(_log);
@@ -101,6 +151,54 @@ public partial class UninstallerPage : UserControl
         _log.Append("Gata.");
         _apps = UninstallerService.ScanInstalledApps();
         RenderAppsList();
+    }
+
+    /// Ștergere în masă — cerință directă (2026-09-01): "vreau sa pot
+    /// selecta mai multe si sa le dezinstalez, nu una cate una". Fiecare
+    /// aplicație bifată e scanată din nou chiar înainte de ștergere și
+    /// ștearsă COMPLET (toate categoriile găsite + dezinstalatorul
+    /// oficial), la fel de riguros ca fluxul individual.
+    private void OnBulkDeleteClicked(object sender, RoutedEventArgs e)
+    {
+        if (_isBulkBusy || !RequireLicense()) return;
+        var targets = _apps.Where(a => _bulkSelected.Contains(a.DisplayName)).ToList();
+        if (targets.Count == 0) return;
+
+        var confirm = System.Windows.MessageBox.Show(
+            $"Ștergi definitiv {targets.Count} aplicații, cu toate urmele lor?",
+            "Confirmare", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (confirm != MessageBoxResult.Yes) return;
+
+        _isBulkBusy = true;
+        _log.Clear();
+        _log.Append($"Încep ștergerea în masă pentru {targets.Count} aplicații…");
+        DetailsPanel.Children.Clear();
+        DetailsPanel.Children.Add(_log);
+
+        Task.Run(() =>
+        {
+            foreach (var app in targets)
+            {
+                Dispatcher.Invoke(() => _log.Append($"— {app.DisplayName} —"));
+                var found = UninstallerService.ScanRelatedFiles(app);
+                UninstallerService.Delete(found, line => Dispatcher.Invoke(() => _log.Append(line)));
+                if (!string.IsNullOrWhiteSpace(app.UninstallString))
+                {
+                    var ok = UninstallerService.RunOfficialUninstaller(app);
+                    Dispatcher.Invoke(() => _log.Append(ok ? "✔ Dezinstalator oficial rulat." : "EROARE la rularea dezinstalatorului oficial."));
+                }
+            }
+            Dispatcher.Invoke(() =>
+            {
+                _log.Append("Gata.");
+                _apps = UninstallerService.ScanInstalledApps();
+                _bulkSelected.Clear();
+                _selectedApp = null;
+                RenderAppsList();
+                UpdateBulkButton();
+                _isBulkBusy = false;
+            });
+        });
     }
 
     private bool RequireLicense()
