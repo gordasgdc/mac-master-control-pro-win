@@ -1,5 +1,17 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.16.0 (2026-09-01) — Dezinstalare în masă, scanare mult mai completă, tooltips
+
+- **Dezinstalator** — poți acum bifa mai multe aplicații deodată și le
+  dezinstalezi complet dintr-un singur click, nu una câte una. Lista de
+  aplicații e mult mai lată, ca numele lungi să nu mai fie tăiate.
+- **Scanare de resturi mult mai completă** — pe lângă AppData/ProgramData,
+  verifică acum și Registry HKLM (32-bit + 64-bit), comenzi rapide din
+  Start Menu și Desktop, și sarcini programate (Task Scheduler).
+- **Descrieri la hover (tooltips)** — pe toate elementele din meniul
+  lateral și pe câteva butoane mai puțin evidente, explică ce fac înainte
+  să apeși.
+
 ## v1.15.0 (2026-09-01) — Fereastra era prea îngustă în toate paginile
 
 Fiecare pagină avea o lățime maximă fixă, mult mai îngustă decât fereastra

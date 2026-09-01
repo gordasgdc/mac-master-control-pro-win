@@ -35,7 +35,11 @@ public partial class DiskHealthPage : UserControl
                 headerRow.Children.Add(new TextBlock { Text = "⚠ Spațiu redus", Foreground = System.Windows.Media.Brushes.Orange, FontSize = 11, Margin = new Thickness(0, 0, 12, 0) });
             if (disk.IsFailing)
                 headerRow.Children.Add(new TextBlock { Text = "✘ SMART: posibilă defecțiune", Foreground = System.Windows.Media.Brushes.OrangeRed, FontSize = 11, Margin = new Thickness(0, 0, 12, 0) });
-            var testButton = new Wpf.Ui.Controls.Button { Content = "Testează viteza" };
+            var testButton = new Wpf.Ui.Controls.Button
+            {
+                Content = "Testează viteza",
+                ToolTip = "Scrie temporar 256 MB pe acest disc și măsoară cât durează — un test real de viteză.",
+            };
             var speedText = new TextBlock { FontSize = 11, Foreground = System.Windows.Media.Brushes.Gray, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
             testButton.Click += (_, _) =>
             {

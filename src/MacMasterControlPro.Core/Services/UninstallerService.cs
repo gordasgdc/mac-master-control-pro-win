@@ -78,16 +78,65 @@ public static class UninstallerService
             categories.Add(new UninstallCategoryWin(id, title, matches, total, RequiresPrivilege: false));
         }
 
-        // Registry HKCU\Software\<Nume> — enumerare read-only, fara privilegiu.
-        using (var software = Registry.CurrentUser.OpenSubKey(@"Software"))
+        // Registry — cerinta (2026-09-01): "sa elimine tot tot tot, sa
+        // scaneze resturi". Pana acum doar HKCU\Software era verificat;
+        // multe aplicatii (mai ales cele instalate pentru toti userii)
+        // scriu si in HKLM (32-bit + 64-bit).
+        var registryRoots = new (Microsoft.Win32.RegistryKey hive, string hiveLabel, string subPath)[]
         {
-            var match = software?.GetSubKeyNames().FirstOrDefault(n => n.Contains(name, StringComparison.OrdinalIgnoreCase));
+            (Registry.CurrentUser, "HKCU", @"Software"),
+            (Registry.LocalMachine, "HKLM", @"Software"),
+            (Registry.LocalMachine, "HKLM", @"Software\WOW6432Node"),
+        };
+        foreach (var (hive, hiveLabel, subPath) in registryRoots)
+        {
+            using var root = hive.OpenSubKey(subPath);
+            var match = root?.GetSubKeyNames().FirstOrDefault(n => n.Contains(name, StringComparison.OrdinalIgnoreCase));
             if (match != null)
             {
-                categories.Add(new UninstallCategoryWin("registry", $"Registry: HKCU\\Software\\{match}",
-                    new List<string> { $@"HKCU\Software\{match}" }, 0, RequiresPrivilege: true));
+                categories.Add(new UninstallCategoryWin($"registry-{hiveLabel}", $"Registry: {hiveLabel}\\{subPath}\\{match}",
+                    new List<string> { $@"{hiveLabel}\{subPath}\{match}" }, 0, RequiresPrivilege: true));
             }
         }
+
+        // Comenzi rapide (Start Menu + Desktop) — raman orfane dupa o
+        // dezinstalare care nu le-a curatat singura.
+        var shortcutRoots = new (string id, string title, string root)[]
+        {
+            ("startmenu-user", "Comenzi rapide (Start Menu, user)", Environment.GetFolderPath(Environment.SpecialFolder.StartMenu)),
+            ("startmenu-common", "Comenzi rapide (Start Menu, toți userii)", Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu)),
+            ("desktop-user", "Comenzi rapide (Desktop)", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)),
+        };
+        foreach (var (id, title, root) in shortcutRoots)
+        {
+            if (!Directory.Exists(root)) continue;
+            List<string> matches;
+            try
+            {
+                matches = Directory.GetFiles(root, "*.lnk", SearchOption.AllDirectories)
+                    .Where(f => Path.GetFileNameWithoutExtension(f).Contains(name, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            catch { continue; }
+            if (matches.Count == 0) continue;
+            categories.Add(new UninstallCategoryWin(id, title, matches, matches.Sum(f => new FileInfo(f).Length), RequiresPrivilege: id == "startmenu-common"));
+        }
+
+        // Sarcini programate (Scheduled Tasks) — unele aplicatii isi
+        // inregistreaza propriul updater/telemetrie acolo.
+        try
+        {
+            var taskNames = Shell.Run("schtasks /query /fo LIST | findstr /B \"TaskName:\"");
+            var matchingTasks = taskNames.Split('\n')
+                .Select(l => l.Replace("TaskName:", "").Trim())
+                .Where(t => t.Length > 0 && t.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (matchingTasks.Count > 0)
+            {
+                categories.Add(new UninstallCategoryWin("scheduledtasks", "Sarcini programate (Task Scheduler)", matchingTasks, 0, RequiresPrivilege: true));
+            }
+        }
+        catch { /* schtasks indisponibil - degradeaza elegant */ }
 
         return categories;
     }
@@ -107,6 +156,10 @@ public static class UninstallerService
         return PrivilegedRunner.Run($"Start-Process -FilePath cmd.exe -ArgumentList '/c {app.UninstallString.Replace("'", "''")}' -Wait");
     }
 
+    /// Cerinta (2026-09-01): "sa elimine tot tot tot" — extins sa recunoasca
+    /// si categoriile noi (comenzi rapide = fisiere individuale, nu foldere;
+    /// sarcini programate = nume, nu cale de disc/Registry), fiecare cu
+    /// comanda de stergere corecta pentru tipul ei, nu doar Registry.
     public static void Delete(List<UninstallCategoryWin> categories, Action<string> log)
     {
         var privileged = new List<string>();
@@ -114,29 +167,41 @@ public static class UninstallerService
         {
             foreach (var path in category.Paths)
             {
-                if (category.RequiresPrivilege)
+                if (category.Id == "scheduledtasks")
+                {
+                    privileged.Add($"schtasks /delete /tn \"{path}\" /f");
+                    continue;
+                }
+                if (category.Id.StartsWith("registry"))
                 {
                     privileged.Add($"Remove-Item -Path 'Registry::{path}' -Recurse -Force -ErrorAction SilentlyContinue");
+                    continue;
                 }
-                else
+                if (category.RequiresPrivilege)
                 {
-                    try
-                    {
-                        Directory.Delete(path, recursive: true);
-                        log($"Șters: {path}");
-                    }
-                    catch (Exception ex)
-                    {
-                        log($"EROARE la ștergerea {path}: {ex.Message}");
-                    }
+                    var isFile = File.Exists(path);
+                    privileged.Add(isFile
+                        ? $"Remove-Item -Path '{path}' -Force -ErrorAction SilentlyContinue"
+                        : $"Remove-Item -Path '{path}' -Recurse -Force -ErrorAction SilentlyContinue");
+                    continue;
+                }
+                try
+                {
+                    if (File.Exists(path)) File.Delete(path);
+                    else Directory.Delete(path, recursive: true);
+                    log($"Șters: {path}");
+                }
+                catch (Exception ex)
+                {
+                    log($"EROARE la ștergerea {path}: {ex.Message}");
                 }
             }
         }
         if (privileged.Count > 0)
         {
-            log($"Solicit privilegii de administrator pentru {privileged.Count} chei de Registry…");
+            log($"Solicit privilegii de administrator pentru {privileged.Count} elemente (Registry/sarcini programate/comenzi rapide de sistem)…");
             var ok = PrivilegedRunner.Run(privileged);
-            log(ok ? "Registry curățat." : "EROARE la curățarea Registry.");
+            log(ok ? "Elemente privilegiate curățate." : "EROARE la curățarea elementelor privilegiate.");
         }
     }
 }
