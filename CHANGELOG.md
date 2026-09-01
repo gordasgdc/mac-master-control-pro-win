@@ -1,5 +1,15 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.17.0 (2026-09-01) — Duplicate, căutare în meniu
+
+- **Modul nou „Duplicate”** — alegi ce foldere se caută, aplicația
+  compară fișierele pe conținutul lor real (nu doar nume/dată), îți arată
+  grupurile de copii identice, poți deschide fiecare fișier în Explorer
+  ca să te asiguri, și alegi manual ce rămâne și ce se șterge.
+- **Căutare în meniul lateral** — un câmp de căutare deasupra listei
+  găsește rapid un modul după nume sau cuvinte uzuale (ex. „dezinstalare”,
+  „duplicate”, „reglare”).
+
 ## v1.16.0 (2026-09-01) — Dezinstalare în masă, scanare mult mai completă, tooltips
 
 - **Dezinstalator** — poți acum bifa mai multe aplicații deodată și le

@@ -45,11 +45,30 @@
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <ListBox x:Name="ModuleList" Grid.Row="0" Margin="8"
+                <!-- Cautare in meniu (cerinta directa, 2026-09-01: "sa pot cauta
+                     ... reglare, duplicate, dezinstalare ... prin toata
+                     aplicatia") - filtreaza randurile din ModuleList mai jos,
+                     nu deschide o pagina separata. -->
+                <Border Grid.Row="0" Background="#1E2128" CornerRadius="6" Margin="8,8,8,4" Padding="8,4">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <ui:TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0"
+                                    Foreground="#EDEFF2" CaretBrush="#EDEFF2"
+                                    PlaceholderText="Caută (duplicate, dezinstalare, reglare)…"
+                                    TextChanged="OnSearchTextChanged" />
+                    </Grid>
+                </Border>
+
+                <ListBox x:Name="ModuleList" Grid.Row="1" Margin="8,0,8,8"
                          Background="Transparent" BorderThickness="0"
                          SelectionChanged="OnModuleSelected">
                     <!-- FARA IsSelected="True" aici (bug real, gasit 2026-08-30 din
@@ -69,6 +88,7 @@
                     <ListBoxItem x:Name="ItemNetwork" Tag="Network" />
                     <ListBoxItem x:Name="ItemCloud" Tag="Cloud" />
                     <ListBoxItem x:Name="ItemCleanup" Tag="Cleanup" />
+                    <ListBoxItem x:Name="ItemDuplicates" Tag="Duplicates" />
                     <ListBoxItem x:Name="ItemSecurity" Tag="Security" />
                     <ListBoxItem x:Name="ItemTweaks" Tag="Tweaks" />
                     <ListBoxItem x:Name="DependenciesItem" Tag="Dependencies" />
@@ -76,7 +96,7 @@
                 </ListBox>
 
                 <!-- Sidebar Footer (Regula 12): profil, Machine ID + copy, versiune, update -->
-                <Border Grid.Row="1" BorderBrush="#2B2F36" BorderThickness="0,1,0,0" Padding="12,10">
+                <Border Grid.Row="2" BorderBrush="#2B2F36" BorderThickness="0,1,0,0" Padding="12,10">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
