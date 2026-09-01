@@ -161,6 +161,21 @@ public partial class ResolveToolsPage : UserControl
 
     private void OnSaveEmailSettings(object sender, RoutedEventArgs e) => SaveEmailSettings();
 
+    // Cerinta (oglinda fix-ului Mac, 2026-08-31: "nu stie cum sa isi
+    // configureze parola de aplicatie, ar trebui un buton rapid catre
+    // pagina Google/Microsoft unde o genereaza").
+    private void OnOpenGmailAppPasswordClicked(object sender, RoutedEventArgs e) =>
+        OpenUrl("https://myaccount.google.com/apppasswords");
+
+    private void OnOpenOutlookAppPasswordClicked(object sender, RoutedEventArgs e) =>
+        OpenUrl("https://account.live.com/proofs/AppPassword");
+
+    private static void OpenUrl(string url)
+    {
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { /* browserul implicit poate lipsi in medii izolate - nu blocam UI-ul */ }
+    }
+
     private void SaveEmailSettings()
     {
         EmailNotifierService.Settings = new EmailNotifierSettings

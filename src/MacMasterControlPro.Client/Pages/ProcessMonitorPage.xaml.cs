@@ -8,6 +8,10 @@ namespace MacMasterControlPro.Client.Pages;
 public partial class ProcessMonitorPage : UserControl
 {
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(3) };
+    // Cerinta (oglinda fix-ului Mac, 2026-08-31: "sa pot selecta cel mai
+    // mare SAU cel mai mic consumator") - lista e deja sortata descrescator
+    // de TopProcesses(); acest toggle doar o inverseaza pentru RAM.
+    private bool _largestFirst = true;
 
     public ProcessMonitorPage()
     {
@@ -20,9 +24,17 @@ public partial class ProcessMonitorPage : UserControl
 
     private void OnRefreshClicked(object sender, RoutedEventArgs e) => Refresh();
 
+    private void OnToggleSortClicked(object sender, RoutedEventArgs e)
+    {
+        _largestFirst = !_largestFirst;
+        SortOrderButton.Content = _largestFirst ? "Cel mai mare întâi" : "Cel mai mic întâi";
+        Refresh();
+    }
+
     private void Refresh()
     {
         var processes = ProcessMonitorService.TopProcesses();
+        if (!_largestFirst) processes.Reverse();
         ItemsPanel.Children.Clear();
         foreach (var process in processes)
         {

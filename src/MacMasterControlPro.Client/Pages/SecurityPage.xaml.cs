@@ -50,7 +50,54 @@ public partial class SecurityPage : UserControl
             row.Children.Add(detail);
 
             ChecksPanel.Children.Add(row);
+
+            // BUG REAL/cerinta (oglinda fix-ului Mac, 2026-08-31: "doar
+            // imi arata rosu/verde, nu ma ajuta cu nimic sa rezolv") -
+            // buton "Cum rezolv?" pentru orice verificare rosie cu pasi
+            // expliciti disponibili.
+            if (!check.IsGood && check.ManualSteps.Count > 0)
+            {
+                var guideButton = new Wpf.Ui.Controls.Button { Content = "Cum rezolv?", Margin = new Thickness(16, 0, 0, 8), HorizontalAlignment = HorizontalAlignment.Left };
+                guideButton.Click += (_, _) => ShowGuide(check);
+                ChecksPanel.Children.Add(guideButton);
+            }
         }
+    }
+
+    private void ShowGuide(SecurityCheck check)
+    {
+        var stack = new StackPanel { Margin = new Thickness(20) };
+        stack.Children.Add(new TextBlock { Text = $"Cum activez: {check.Title}", FontSize = 16, FontWeight = FontWeights.Bold, Margin = new Thickness(0, 0, 0, 12) });
+        for (var i = 0; i < check.ManualSteps.Count; i++)
+        {
+            var row = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 0, 0, 8) };
+            row.Children.Add(new TextBlock { Text = $"{i + 1}.", FontWeight = FontWeights.Bold, Width = 20 });
+            row.Children.Add(new TextBlock { Text = check.ManualSteps[i], TextWrapping = TextWrapping.Wrap, MaxWidth = 360 });
+            stack.Children.Add(row);
+        }
+        if (check.SettingsUri != null)
+        {
+            var openButton = new Wpf.Ui.Controls.Button { Content = "Deschide Settings", Appearance = Wpf.Ui.Controls.ControlAppearance.Primary, Margin = new Thickness(0, 12, 0, 0) };
+            openButton.Click += (_, _) =>
+            {
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(check.SettingsUri!) { UseShellExecute = true }); }
+                catch { /* utilizatorul poate naviga manual daca link-ul nu porneste */ }
+            };
+            stack.Children.Add(openButton);
+        }
+        var closeButton = new Wpf.Ui.Controls.Button { Content = "Închide", Margin = new Thickness(0, 8, 0, 0) };
+        var window = new Window
+        {
+            Title = check.Title,
+            Content = stack,
+            SizeToContent = SizeToContent.WidthAndHeight,
+            Owner = Window.GetWindow(this),
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+            ResizeMode = ResizeMode.NoResize,
+        };
+        closeButton.Click += (_, _) => window.Close();
+        stack.Children.Add(closeButton);
+        window.ShowDialog();
     }
 
     private void OnEnableFirewallClicked(object sender, RoutedEventArgs e)

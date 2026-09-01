@@ -7,11 +7,13 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="⚙️ Procese active" FontSize="22" FontWeight="Bold" />
-            <ui:Button Grid.Column="1" Content="Actualizează" Click="OnRefreshClicked" />
+            <ui:Button Grid.Column="1" x:Name="SortOrderButton" Content="Cel mai mare întâi" Margin="0,0,8,0" Click="OnToggleSortClicked" />
+            <ui:Button Grid.Column="2" Content="Actualizează" Click="OnRefreshClicked" />
         </Grid>
-        <TextBlock Text="Top 20 după consum RAM, actualizat automat la 3 secunde." Foreground="Gray" FontSize="11" Margin="0,0,0,10" />
+        <TextBlock Text="Top 20 după consum RAM, actualizat automat la 3 secunde — crescător sau descrescător." Foreground="Gray" FontSize="11" Margin="0,0,0,10" />
         <ScrollViewer MaxHeight="480">
             <StackPanel x:Name="ItemsPanel" />
         </ScrollViewer>

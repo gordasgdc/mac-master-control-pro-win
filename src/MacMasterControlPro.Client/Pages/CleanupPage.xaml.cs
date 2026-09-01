@@ -17,6 +17,7 @@ public partial class CleanupPage : UserControl
     {
         InitializeComponent();
         Rescan();
+        RenderScanFolders();
     }
 
     private void OnRescanClicked(object sender, RoutedEventArgs e) => Rescan();
@@ -99,9 +100,56 @@ public partial class CleanupPage : UserControl
         StatusText.Text = "✔ RAM eliberat, DNS golit.";
     }
 
+    /// BUG REAL/cerinta (oglinda fix-ului Mac, 2026-08-31: "se duce singur
+    /// in toate astea, nu pot sa selectez eu ce vreau sa scanez") — randam
+    /// cele 4 foldere implicite ca checkbox-uri (bifate/debifate persistent
+    /// via BigFileScanFolders), plus folderele custom adaugate, fiecare cu
+    /// buton de eliminare.
+    private void RenderScanFolders()
+    {
+        var store = BigFileScanFolders.Shared;
+        ScanFoldersPanel.Children.Clear();
+        foreach (var path in BigFileFinderService.DefaultRoots())
+        {
+            var check = new CheckBox { Content = System.IO.Path.GetFileName(path), IsChecked = store.EnabledDefaults.Contains(path), Margin = new Thickness(0, 2, 0, 2) };
+            check.Checked += (_, _) => { store.ToggleDefault(path); UpdateScanButtonState(); };
+            check.Unchecked += (_, _) => { store.ToggleDefault(path); UpdateScanButtonState(); };
+            ScanFoldersPanel.Children.Add(check);
+        }
+        foreach (var path in store.CustomFolders)
+        {
+            var row = new Grid { Margin = new Thickness(0, 2, 0, 2) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            var label = new TextBlock { Text = path, TextTrimming = TextTrimming.CharacterEllipsis, ToolTip = path };
+            Grid.SetColumn(label, 0);
+            row.Children.Add(label);
+            var remove = new Wpf.Ui.Controls.Button { Content = "✕", Padding = new Thickness(6, 0, 6, 0) };
+            remove.Click += (_, _) => { store.RemoveCustomFolder(path); RenderScanFolders(); };
+            Grid.SetColumn(remove, 1);
+            row.Children.Add(remove);
+            ScanFoldersPanel.Children.Add(row);
+        }
+        UpdateScanButtonState();
+    }
+
+    private void UpdateScanButtonState() => ScanBigFilesButton.IsEnabled = BigFileScanFolders.Shared.ActiveRoots().Count > 0;
+
+    private void OnAddCustomFolderClicked(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Alege un folder de scanat" };
+        if (dialog.ShowDialog() == true)
+        {
+            BigFileScanFolders.Shared.AddCustomFolder(dialog.FolderName);
+            RenderScanFolders();
+        }
+    }
+
     private void OnScanBigFilesClicked(object sender, RoutedEventArgs e)
     {
-        _bigFiles = BigFileFinderService.Scan();
+        var roots = BigFileScanFolders.Shared.ActiveRoots();
+        if (roots.Count == 0) return;
+        _bigFiles = BigFileFinderService.Scan(roots);
         _selectedBigFiles.Clear();
         RenderBigFiles();
     }
@@ -140,7 +188,7 @@ public partial class CleanupPage : UserControl
         Log.Clear();
         var toDelete = _bigFiles.Where(f => _selectedBigFiles.Contains(f.Path)).ToList();
         BigFileFinderService.Delete(toDelete, line => Log.Append(line));
-        _bigFiles = BigFileFinderService.Scan();
+        _bigFiles = BigFileFinderService.Scan(BigFileScanFolders.Shared.ActiveRoots());
         _selectedBigFiles.Clear();
         RenderBigFiles();
         DeleteBigFilesButton.IsEnabled = false;

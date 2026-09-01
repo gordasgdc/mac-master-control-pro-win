@@ -26,6 +26,10 @@
                     <StackPanel x:Name="EmailFieldsPanel" Visibility="Collapsed">
                         <TextBlock TextWrapping="Wrap" FontSize="10.5" Foreground="Gray" Margin="0,0,0,6"
                                    Text="Recomandat: folosește o „parolă de aplicație” Gmail/Outlook, NU parola reală a contului — se salvează local, în clar." />
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <ui:Button Content="Generează parolă Gmail" Click="OnOpenGmailAppPasswordClicked" Margin="0,0,8,0" />
+                            <ui:Button Content="Generează parolă Outlook" Click="OnOpenOutlookAppPasswordClicked" />
+                        </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="120" />
