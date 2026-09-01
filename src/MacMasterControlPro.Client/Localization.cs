@@ -84,6 +84,7 @@ public static class L
         ["sidebar.network"] = new() { [AppLanguage.Ro] = "Rețea", [AppLanguage.En] = "Network", [AppLanguage.Es] = "Red" },
         ["sidebar.cloud"] = new() { [AppLanguage.Ro] = "Cloud Manager", [AppLanguage.En] = "Cloud Manager", [AppLanguage.Es] = "Gestor Cloud" },
         ["sidebar.cleanup"] = new() { [AppLanguage.Ro] = "Curățare & RAM", [AppLanguage.En] = "Cleanup & RAM", [AppLanguage.Es] = "Limpieza y RAM" },
+        ["sidebar.duplicates"] = new() { [AppLanguage.Ro] = "Duplicate", [AppLanguage.En] = "Duplicates", [AppLanguage.Es] = "Duplicados" },
         ["sidebar.security"] = new() { [AppLanguage.Ro] = "Securitate", [AppLanguage.En] = "Security", [AppLanguage.Es] = "Seguridad" },
         ["sidebar.processMonitor"] = new() { [AppLanguage.Ro] = "Procese", [AppLanguage.En] = "Processes", [AppLanguage.Es] = "Procesos" },
         ["sidebar.uninstaller"] = new() { [AppLanguage.Ro] = "Dezinstalator", [AppLanguage.En] = "Uninstaller", [AppLanguage.Es] = "Desinstalador" },

@@ -1,0 +1,43 @@
+<UserControl x:Class="MacMasterControlPro.Client.Pages.DuplicateFinderPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+             xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel>
+        <TextBlock Text="🧬 Duplicate" FontSize="22" FontWeight="Bold" Margin="0,0,0,4" />
+        <TextBlock Text="Comparație REALĂ pe conținut (hash SHA256), nu doar nume/dată — două fișiere apar ca duplicate doar dacă sunt identice byte-cu-byte." FontSize="11" Foreground="Gray" Margin="0,0,0,16" TextWrapping="Wrap" />
+
+        <ui:CardExpander Header="Foldere de căutat" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <StackPanel x:Name="FoldersPanel" Margin="0,0,0,4" />
+                <ui:Button Content="+ Adaugă folder…" Click="OnAddFolderClicked" HorizontalAlignment="Left" Margin="0,0,0,10" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" x:Name="ScanStatusText" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
+                    <ui:Button Grid.Column="1" x:Name="ScanButton" Content="Caută duplicate" Appearance="Primary" Click="OnScanClicked"
+                               ToolTip="Scanează folderele alese și grupează fișierele identice ca și conținut." />
+                </Grid>
+            </StackPanel>
+        </ui:CardExpander>
+
+        <TextBlock x:Name="SummaryText" FontSize="12" Margin="0,0,0,10" />
+
+        <StackPanel x:Name="GroupsPanel" />
+
+        <Grid x:Name="DeleteRow" Visibility="Collapsed" Margin="0,8,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" x:Name="MarkedText" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
+            <ui:Button Grid.Column="1" x:Name="DeleteMarkedButton" Appearance="Danger" Click="OnDeleteMarkedClicked" IsEnabled="False" />
+        </Grid>
+
+        <controls:TerminalLogView x:Name="Log" />
+    </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -51,6 +53,7 @@ public partial class MainWindow
         ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
         ItemCloud.Content = "☁️ " + L.T("sidebar.cloud");
         ItemCleanup.Content = "🧹 " + L.T("sidebar.cleanup");
+        ItemDuplicates.Content = "🧬 " + L.T("sidebar.duplicates");
         ItemSecurity.Content = "🛡️ " + L.T("sidebar.security");
         ItemTweaks.Content = "🛠️ " + L.T("sidebar.tweaks");
         DependenciesItem.Content = "🧩 " + L.T("sidebar.dependencies");
@@ -70,10 +73,50 @@ public partial class MainWindow
         ItemNetwork.ToolTip = "Configurare și optimizare rețea, persistentă la repornire.";
         ItemCloud.ToolTip = "Conectează și gestionează conturi Cloud (Drive, Dropbox, S3 și altele).";
         ItemCleanup.ToolTip = "Șterge cache-uri recuperabile, fișiere mari uitate, eliberează RAM.";
+        ItemDuplicates.ToolTip = "Găsește fișiere identice ca și conținut și te lasă să alegi ce ștergi.";
         ItemSecurity.ToolTip = "Verifică setările de securitate ale PC-ului, cu ghid pas-cu-pas pentru ce lipsește.";
         ItemTweaks.ToolTip = "Ajustări rapide de sistem.";
         DependenciesItem.ToolTip = "Componentele externe de care aplicația are nevoie — instalare cu un click.";
         ItemSettings.ToolTip = "Temă, limbă, licență și alte preferințe ale aplicației.";
+    }
+
+    /// Cuvinte-cheie suplimentare de cautare, pe langa nume/tooltip -
+    /// cerinta directa (Cristi, 2026-09-01): "sa pot cauta ... reglare,
+    /// duplicate, dezinstalare ... prin toata aplicatia".
+    private static readonly Dictionary<string, string> SearchKeywords = new()
+    {
+        ["Tweaks"] = "reglare setari sistem",
+        ["Uninstaller"] = "dezinstalare sterge aplicatii",
+        ["Duplicates"] = "duplicate copii identice fisiere",
+        ["Cleanup"] = "curatare ram cache fisiere mari",
+        ["DiskHealth"] = "disc viteza smart",
+        ["Security"] = "securitate firewall defender",
+        ["Cloud"] = "cloud drive dropbox onedrive rclone",
+        ["Network"] = "retea wifi dns",
+        ["ResolveTools"] = "davinci resolve randare email",
+        ["ProcessMonitor"] = "procese ram inchide",
+    };
+
+    /// Filtreaza randurile din ModuleList dupa nume+tooltip+sinonime -
+    /// diacritice ignorate (userul scrie des fara diacritice).
+    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    {
+        var query = RemoveDiacritics(SearchBox.Text).ToLowerInvariant().Trim();
+        foreach (var obj in ModuleList.Items)
+        {
+            if (obj is not ListBoxItem item) continue;
+            if (string.IsNullOrEmpty(query)) { item.Visibility = Visibility.Visible; continue; }
+            var tag = item.Tag as string ?? "";
+            var haystack = RemoveDiacritics($"{item.Content} {item.ToolTip} {(SearchKeywords.TryGetValue(tag, out var kw) ? kw : "")}").ToLowerInvariant();
+            item.Visibility = haystack.Contains(query) ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    private static string RemoveDiacritics(string text)
+    {
+        var normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var chars = normalized.Where(c => System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.NonSpacingMark);
+        return new string(chars.ToArray()).Normalize(System.Text.NormalizationForm.FormC);
     }
 
     private void OnModuleSelected(object sender, SelectionChangedEventArgs e)
@@ -91,6 +134,7 @@ public partial class MainWindow
             "Network" => new NetworkPage(),
             "Cloud" => new Pages.CloudPage(),
             "Cleanup" => new Pages.CleanupPage(),
+            "Duplicates" => new Pages.DuplicateFinderPage(),
             "Security" => new Pages.SecurityPage(),
             "Tweaks" => new Pages.TweaksPage(),
             "Dependencies" => new Pages.DependenciesPage(_dependencyChecker, this),
