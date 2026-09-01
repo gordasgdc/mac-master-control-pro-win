@@ -9,7 +9,7 @@
          restul paginii in afara ecranului vizibil, fara nicio bara de
          scroll care sa arate ca mai exista continut. -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel MaxWidth="560">
+    <StackPanel>
         <TextBlock Text="🧹 Curățare &amp; RAM" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
         <ui:CardExpander Header="Cache-uri recuperabile" IsExpanded="True" Margin="0,0,0,12">

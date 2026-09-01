@@ -4,7 +4,7 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel MaxWidth="640">
+        <StackPanel>
             <TextBlock Text="🎬 DaVinci Resolve" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
             <ui:CardExpander Header="Notificare la final de randare" IsExpanded="True" Margin="0,0,0,12">

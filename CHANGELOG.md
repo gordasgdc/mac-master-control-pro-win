@@ -1,5 +1,12 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.15.0 (2026-09-01) — Fereastra era prea îngustă în toate paginile
+
+Fiecare pagină avea o lățime maximă fixă, mult mai îngustă decât fereastra
+reală — de asta rămânea o zonă goală enormă în dreapta, iar unele liste/
+butoane păreau înghesuite sau tăiate. Acum conținutul se întinde pe toată
+lățimea disponibilă a ferestrei, în toate cele 14 pagini.
+
 ## v1.14.0 (2026-08-31) — Sănătate Discuri, Fișiere mari, Securitate
 
 - **„Testează viteza” nu arăta niciun motiv la eșec** — acum arată clar
