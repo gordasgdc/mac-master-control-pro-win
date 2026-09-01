@@ -1,5 +1,19 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.14.0 (2026-08-31) — Sănătate Discuri, Fișiere mari, Securitate
+
+- **„Testează viteza” nu arăta niciun motiv la eșec** — acum arată clar
+  eroarea (inclusiv scriere corectă pe discul de sistem).
+- **„Fișiere mari” — foldere selectabile** — cele 4 foldere implicite pot
+  fi bifate/debifate, plus buton „+ Adaugă folder…” pentru orice folder
+  propriu; pagina are acum scroll complet, ca lista lungă să nu ascundă
+  butonul de ștergere.
+- **Securitate — verificările roșii au acum buton „Cum rezolv?”** cu pași
+  expliciți + link direct către panoul corect din Windows Settings.
+- **Procese** — buton „Cel mai mare/mic întâi” pentru inversarea sortării.
+- **DaVinci Resolve → notificare email** — butoane rapide pentru generarea
+  parolei de aplicație Gmail/Outlook.
+
 ## v1.13.0 (2026-08-31) — DaVinci Resolve: Backup bază de date + detectare proces blocat
 
 Port 1:1 al modulului Mac: backup .zip cu un click al bazei de date de

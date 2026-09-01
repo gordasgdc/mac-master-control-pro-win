@@ -3,6 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
+    <!-- BUG REAL (oglinda fix-ului Mac, 2026-08-31: "vad lista, dar nu si
+         butonul de sters/inapoi") - fara ScrollViewer, o lista lunga de
+         fisiere mari (pana la 100) putea impinge butonul de stergere si
+         restul paginii in afara ecranului vizibil, fara nicio bara de
+         scroll care sa arate ca mai exista continut. -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel MaxWidth="560">
         <TextBlock Text="🧹 Curățare &amp; RAM" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
@@ -23,14 +29,17 @@
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Header="Fișiere mari (Downloads/Desktop/Documents/Videos)" IsExpanded="False" Margin="0,0,0,12">
+        <ui:CardExpander Header="Fișiere mari" IsExpanded="False" Margin="0,0,0,12">
             <StackPanel>
+                <TextBlock Text="Foldere de scanat — alege ce vrei, adaugă orice folder propriu:" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                <StackPanel x:Name="ScanFoldersPanel" Margin="0,0,0,4" />
+                <ui:Button Content="+ Adaugă folder…" Click="OnAddCustomFolderClicked" HorizontalAlignment="Left" Margin="0,0,0,8" />
                 <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" Content="Scanează (&gt; 200 MB)" Click="OnScanBigFilesClicked" />
+                    <ui:Button Grid.Column="1" x:Name="ScanBigFilesButton" Content="Scanează (&gt; 200 MB)" Click="OnScanBigFilesClicked" />
                 </Grid>
                 <StackPanel x:Name="BigFilesPanel" />
                 <ui:Button x:Name="DeleteBigFilesButton" Content="Șterge fișierele selectate" Appearance="Danger" Margin="0,8,0,0" Click="OnDeleteBigFilesClicked" IsEnabled="False" />
@@ -48,4 +57,5 @@
         <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="Gray" FontSize="11" />
         <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
+    </ScrollViewer>
 </UserControl>

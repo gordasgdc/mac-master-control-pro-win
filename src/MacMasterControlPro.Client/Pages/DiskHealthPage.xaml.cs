@@ -43,10 +43,11 @@ public partial class DiskHealthPage : UserControl
                 speedText.Text = "Se testează…";
                 Task.Run(() =>
                 {
-                    var speed = DiskHealthService.MeasureWriteSpeed(disk.DriveLetter);
+                    var (speed, error) = DiskHealthService.MeasureWriteSpeed(disk.DriveLetter);
                     Dispatcher.Invoke(() =>
                     {
-                        speedText.Text = speed.HasValue ? $"Scriere: {speed:F0} MB/s" : "Eroare la test";
+                        speedText.Text = speed.HasValue ? $"Scriere: {speed:F0} MB/s" : (error ?? "Eroare la test");
+                        speedText.Foreground = speed.HasValue ? System.Windows.Media.Brushes.Gray : System.Windows.Media.Brushes.OrangeRed;
                         testButton.IsEnabled = true;
                     });
                 });

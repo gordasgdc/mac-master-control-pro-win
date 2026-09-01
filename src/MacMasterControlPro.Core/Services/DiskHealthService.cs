@@ -67,10 +67,18 @@ public static class DiskHealthService
         return map;
     }
 
-    /// Test de scriere real - 256 MB de date aleatorii, masurat direct.
-    public static double? MeasureWriteSpeed(string driveLetter)
+    /// BUG REAL (oglinda fix-ului Mac, 2026-08-31: "apas Testeaza viteza si
+    /// nu se intampla nimic") - scrierea putea esua silentios (disc plin,
+    /// litera de sistem fara drept de scriere direct la radacina pentru
+    /// userul curent) si `null` nu ajungea niciodata vizibil in UI. Acum
+    /// returnam mesajul de eroare explicit, si scriem in discul de sistem
+    /// (C:\) in %TEMP% (aceeasi unitate fizica, dar zona mereu scriabila),
+    /// nu la radacina.
+    public static (double? Speed, string? Error) MeasureWriteSpeed(string driveLetter)
     {
-        var testFile = Path.Combine(driveLetter, $".mmc_speedtest_{Guid.NewGuid()}.bin");
+        var isSystemDrive = string.Equals(Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows)), driveLetter, StringComparison.OrdinalIgnoreCase);
+        var writeDir = isSystemDrive ? Path.GetTempPath() : driveLetter;
+        var testFile = Path.Combine(writeDir, $".mmc_speedtest_{Guid.NewGuid()}.bin");
         const int sizeBytes = 256 * 1024 * 1024;
         var data = new byte[sizeBytes];
         Random.Shared.NextBytes(data);
@@ -79,13 +87,13 @@ public static class DiskHealthService
         {
             File.WriteAllBytes(testFile, data);
         }
-        catch
+        catch (Exception ex)
         {
-            return null;
+            return (null, $"Scrierea a eșuat: {ex.Message}");
         }
         sw.Stop();
         try { File.Delete(testFile); } catch { /* best-effort */ }
-        if (sw.Elapsed.TotalSeconds <= 0) return null;
-        return (sizeBytes / 1_048_576.0) / sw.Elapsed.TotalSeconds;
+        if (sw.Elapsed.TotalSeconds <= 0) return (null, "Măsurătoarea a fost prea rapidă ca să fie exactă — încearcă din nou.");
+        return ((sizeBytes / 1_048_576.0) / sw.Elapsed.TotalSeconds, null);
     }
 }
