@@ -1,5 +1,17 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.17.4 (2026-09-03) — Paritate fix Mac: risc de blocare la operații de sistem, eliminat
+
+Port al unui fix real găsit pe partea de Mac: unele acțiuni care rulează
+comenzi de sistem (Cloud, verificarea proiectelor DaVinci Resolve) puteau
+rămâne blocate la nesfârșit dacă acea comandă producea foarte mult text —
+un risc similar celui reparat recent pe scanarea de fișiere mari.
+Rezolvat la sursă, pentru toate acțiunile afectate.
+
+**TODO paritate Windows**: modulul nou „Analiză Disc" (vizualizare
+DaisyDisk-style a spațiului ocupat pe disc), adăugat pe Mac în v2.26.0,
+NU e încă portat pe Windows — rămâne de implementat separat.
+
 ## v1.17.3 (2026-09-03) — Protecție de administrator la Fișiere mari/Duplicate
 
 Ștergerea din „Fișiere mari" și „Duplicate" trece acum automat pe ștergere

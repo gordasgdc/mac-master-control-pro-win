@@ -202,12 +202,26 @@ public sealed class CloudManagerService
 
         try
         {
-            using var process = Process.Start(psi);
-            if (process is null) return (false, "Nu s-a putut porni rclone.");
-            var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
+            using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
+            if (!process.Start()) return (false, "Nu s-a putut porni rclone.");
+            // [2026-09-03] FIX REAL, port 1:1 de pe Mac (Shell.swift) - vezi
+            // acelasi fix in Shell.cs. `ReadToEnd()` pe stdout, urmat de
+            // `ReadToEnd()` pe stderr, se poate bloca la nesfarsit daca
+            // rclone scrie mult pe stderr (progres/erori) INAINTE sa inchida
+            // stdout - fara niciun timeout aici, deadlock-ul era permanent,
+            // nu doar o intarziere. Citire asincrona pe ambele fluxuri,
+            // niciodata secvential dupa asteptare.
+            var output = new System.Text.StringBuilder();
+            var sync = new object();
+            process.OutputDataReceived += (_, e) => { if (e.Data is not null) lock (sync) output.AppendLine(e.Data); };
+            process.ErrorDataReceived += (_, e) => { if (e.Data is not null) lock (sync) output.AppendLine(e.Data); };
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
             process.WaitForExit();
             RefreshRemotes();
-            return (process.ExitCode == 0, output);
+            string result;
+            lock (sync) result = output.ToString();
+            return (process.ExitCode == 0, result);
         }
         catch (Exception ex)
         {

@@ -692,6 +692,38 @@ clase, cauze tehnice) unei audiențe publice necunoscute.
   `MediaFlow-Monitor` (v1.0.0/v1.0.1) — restul release-urilor mai vechi din
   ecosistem rămân de verificat incremental, nu toate dintr-o dată.
 
+**30. Zero cod "impur" sau nelalocul lui — orice implementare TREBUIE
+finalizată complet, nu doar compilată (2026-09-03).** Cerință explicită de
+la Cristi, după un incident real: un fix scris în cod dar nepropagat peste
+tot unde era nevoie (versiune, `update.json`, ambele platforme, ambele
+aplicații) a lăsat sistemul într-o stare pe jumătate — "să nu rămână nimic
+inpur și nelalocul lui, să se implementeze tot ce am actualizat și am
+creat, să nu mai avem probleme". Regulă practică, obligatorie la orice
+schimbare de cod:
+- Orice constantă/valoare copiată dintr-un alt fișier/repo (chei, ID-uri,
+  praguri, URL-uri) se verifică ACTIV cu `grep`, nu se presupune corectă
+  doar pentru că a fost copiată — un audit se oprește abia când TOATE
+  aparițiile au fost verificate, nu doar cea raportată inițial.
+- O funcționalitate nouă/modificată se declară "gata" abia după ce
+  TOATE piesele ei sunt implementate și verificate — cod, rebuild+reinstall
+  (Regula 0), versiune sincronizată peste tot unde trebuie (Regula 14),
+  paritate Mac/Windows dacă aplică (regula de mai jos), `CHANGELOG.md`
+  (Regula 25). O piesă lăsată "pentru mai târziu" se spune EXPLICIT, nu se
+  ascunde într-un răspuns care sună ca "gata".
+- Orice implementare/îmbunătățire nouă a acestei Părți 1 se scrie DIN
+  START în `CLAUDE.md`-ul TUTUROR proiectelor din `~/Developer/` (Regula
+  11) — nu doar în repo-ul unde a pornit discuția.
+
+**31. Paritate Mac/Windows imediată, în aceeași sesiune (2026-09-03).**
+Completare la Regula 30: orice schimbare de cod livrată pe Mac care are un
+echivalent Windows în ecosistem (și invers) se portează 1:1 ÎN ACEEAȘI
+SESIUNE, fără să aștepți o cerere separată de la Cristi — portul e parte
+integrantă a schimbării, nu un TODO ulterior. Dacă portul chiar nu poate
+fi făcut acum (acces la mediul Windows indisponibil, testare reală
+imposibilă), se spune EXPLICIT ce lipsește și de ce, marcat clar în
+`CHANGELOG.md` ca "TODO paritate Windows/Mac" (Regula existentă de
+documentație) — nu se lasă nemenționat.
+
 ## [PARTEA 2: SPECIFICATII TEHNICE PROIECT]
 
 ## Structura repo-ului
@@ -817,6 +849,45 @@ REAL pe Windows** (WARNING standard, Regula 20) - UAC-ul efectiv de la Mod
 Randare/Pornire Sistem, notificarea nativa (NotifyIcon), scripting-ul
 Resolve cu un `python.exe` real instalat, toate necesita confirmare
 manuala, o data, de Cristi, inainte de a declara portul complet dovedit.
+
+## v1.17.4 (2026-09-03) — Paritate: fix deadlock Process/Pipe de pe Mac
+
+Port declanșat de auditul de pe Mac (Shell.swift): `Process`/`Pipe` din
+.NET are EXACT același risc de deadlock ca `Process`/`NSTask` pe Mac,
+documentat chiar de Microsoft (remarks-urile clasei `Process`) — dacă
+`RedirectStandardOutput` ȘI `RedirectStandardError` sunt ambele `true`
+dar doar unul e citit sincron (`ReadToEnd()`), iar procesul copil scrie
+destul pe fluxul necitit, bufferul acelui pipe se umple, copilul se
+blochează la scriere, și părintele așteaptă la nesfârșit un proces care
+nu mai poate ieși.
+
+Găsite 3 apariții reale, prin `grep` explicit pe tot repo-ul (Regula 30
+— nu ne oprim la primul loc găsit):
+- `Shell.cs` (`Run`) — `RedirectStandardError = true` dar stderr
+  niciodată citit. Cea mai frecvent apelată funcție din tot Core-ul.
+- `CloudManagerService.cs` (creare remote rclone) — `ReadToEnd()` pe
+  stdout, apoi pe stderr, SECVENȚIAL, FĂRĂ niciun timeout — cel mai grav
+  dintre cele 3, un `rclone` cu mult output pe stderr putea bloca
+  aplicația definitiv.
+- `ResolveMediaAuditService.cs` (`RunPython`) — stderr redirectat dar
+  necitit; are timeout (nu blochează definitiv), dar un script cu mult
+  output pe stderr consuma tot timeout-ul degeaba și returna eșec
+  silențios, deși scriptul ar fi mers normal.
+
+**Fix, identic la toate 3**: citire ASINCRONĂ a ambelor fluxuri
+(`OutputDataReceived`/`ErrorDataReceived` + `BeginOutputReadLine`/
+`BeginErrorReadLine`), niciodată `ReadToEnd()` sincron după `WaitForExit()`
+— părintele golește mereu ambele buffere pe măsură ce sosesc date.
+
+**TODO paritate Windows**: modulul „Analiză Disc" (Mac v2.26.0) — vezi
+`MacMasterControlPro/CLAUDE.md` — nu e portat aici, rămâne de implementat
+separat (drill-down pe niveluri + `du`/`find`-echivalent Windows, probabil
+`Get-ChildItem` recursiv per nivel prin PowerShell).
+
+**Verificat**: `dotnet build` — 0 erori, 0 avertismente. **NU verificat
+REAL pe Windows** (WARNING standard, Regula 20) — comportamentul cu output
+mare (ex. o scanare rclone reală de sute de fișiere) necesită confirmare
+manuală, o dată, de Cristi.
 
 ## Rebuild local (verificare sintaxa, NU echivalent build Windows real)
 
