@@ -1,5 +1,17 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.17.3 (2026-09-03) — Protecție de administrator la Fișiere mari/Duplicate
+
+Ștergerea din „Fișiere mari" și „Duplicate" trece acum automat pe ștergere
+cu drepturi de administrator când un fișier e protejat de sistem, în loc
+să raporteze doar eroare.
+
+## v1.17.2 (2026-09-03) — Fix: dezinstalarea închide acum aplicația, chiar forțat
+
+Dacă aplicația (sau un proces de fundal al ei) era încă deschisă, ștergerea
+eșua silențios și aplicația rămânea instalată. Acum se închide automat
+înainte de ștergere, forțat dacă e nevoie.
+
 ## v1.17.1 (2026-09-03) — Fix: Dezinstalator, mesaje reale de eroare, mărime text
 
 - **Dezinstalatorul lăsa aplicații "instalate" în continuare** — scanarea

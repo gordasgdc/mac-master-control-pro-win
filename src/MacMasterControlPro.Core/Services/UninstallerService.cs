@@ -80,6 +80,42 @@ public static class UninstallerService
     public static bool IsStillRegistered(string displayName) =>
         ScanInstalledApps().Any(a => string.Equals(a.DisplayName, displayName, StringComparison.OrdinalIgnoreCase));
 
+    /// [2026-09-03] Cerinta directa a lui Cristi (port 1:1 al fix-ului de pe
+    /// Mac): "trebuie sa poata sa-l stearga chiar daca ruleaza... sa-l oprim
+    /// chiar fortat". Un fisier executabil deschis (chiar dacă aplicația
+    /// mamă e altceva - un helper de fundal e la fel de blocant) nu poate fi
+    /// șters de dezinstalatorul oficial nici de ștergerea manuală a
+    /// resturilor - Windows raporteaza "File in use"/acces refuzat. Inchide
+    /// FORTAT (`Kill()`, echivalent SIGKILL) orice proces al carui
+    /// executabil traieste sub `installLocation`, indiferent de nume -
+    /// acopera si helper-e/servicii de fundal ale aceleiasi aplicatii, nu
+    /// doar procesul principal.
+    public static void TerminateIfRunning(string? installLocation)
+    {
+        if (string.IsNullOrWhiteSpace(installLocation)) return;
+        string normalizedRoot;
+        try { normalizedRoot = Path.GetFullPath(installLocation).TrimEnd('\\') + "\\"; }
+        catch { return; }
+
+        foreach (var process in System.Diagnostics.Process.GetProcesses())
+        {
+            try
+            {
+                var path = process.MainModule?.FileName;
+                if (path is null) continue;
+                if (!Path.GetFullPath(path).StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase)) continue;
+                process.Kill(entireProcessTree: true);
+                process.WaitForExit(2000);
+            }
+            catch
+            {
+                // Proces de sistem fara acces la MainModule, deja iesit
+                // intre timp, sau Kill() a esuat - continuam cu urmatorul,
+                // nu blocam toata dezinstalarea pe un singur proces problematic.
+            }
+        }
+    }
+
     /// Locatiile standard unde Windows lasa urme dupa o dezinstalare
     /// normala — %APPDATA%/%LOCALAPPDATA%/%PROGRAMDATA%, Registry HKCU,
     /// Scheduled Tasks. Cerinta directa (2026-08-31): "sa nu ramana nimica

@@ -139,6 +139,7 @@ public partial class UninstallerPage : UserControl
         if (_selectedApp is null || !RequireLicense()) return;
         _log.Clear();
         _log.Append($"Încep ștergerea urmelor pentru {_selectedApp.DisplayName}…");
+        UninstallerService.TerminateIfRunning(_selectedApp.InstallLocation);
         var toDelete = _categories.Where(c => _selectedCategoryIds.Contains(c.Id)).ToList();
         UninstallerService.Delete(toDelete, line => _log.Append(line));
 
@@ -191,6 +192,7 @@ public partial class UninstallerPage : UserControl
             foreach (var app in targets)
             {
                 Dispatcher.Invoke(() => _log.Append($"— {app.DisplayName} —"));
+                UninstallerService.TerminateIfRunning(app.InstallLocation);
                 var found = UninstallerService.ScanRelatedFiles(app);
                 UninstallerService.Delete(found, line => Dispatcher.Invoke(() => _log.Append(line)));
                 if (!string.IsNullOrWhiteSpace(app.UninstallString))
