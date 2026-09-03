@@ -850,6 +850,87 @@ Randare/Pornire Sistem, notificarea nativa (NotifyIcon), scripting-ul
 Resolve cu un `python.exe` real instalat, toate necesita confirmare
 manuala, o data, de Cristi, inainte de a declara portul complet dovedit.
 
+## v1.18.0 (2026-09-04) — Modul nou: Analiză Disc (port complet, de la zero)
+
+Portul cerut explicit de Cristi al refactorizării complete de pe Mac
+(`MacMasterControlPro/CLAUDE.md`, v2.30.0) — modulul nu exista DELOC pe
+Windows înainte de asta (confirmat prin `grep` — doar `DiskHealthService`/
+`DiskHealthPage`, sănătate SMART, complet altceva), TODO-ul rămas deschis
+explicit în v1.17.4 de mai jos.
+
+**4 fișiere noi în Core** (`DiskNode.cs`, `DiskCacheStore.cs`,
+`DiskScanEngine.cs`, `DiskAnalyzerService.cs`) + `Pages/DiskAnalyzerPage.
+xaml(.cs)` (nou) — port 1:1 al arhitecturii Mac, cu adaptările reale de
+platformă:
+
+- **Enumerare nativă**: `DirectoryInfo.EnumerateFileSystemInfos()`
+  (cheamă intern `FindFirstFile`/`FindNextFile`, Win32 nivel jos) în loc
+  de `fts(3)` — o singură trecere pe director dă nume+mărime+dată direct,
+  fără `stat()` separat per fișier. Citirea directă a MFT (menționată ca
+  opțiune în cerința inițială) respinsă pentru ACELAȘI motiv ca pe Mac
+  (`getattrlistbulk` respins acolo în favoarea `fts`): complexitate/risc
+  disproporționate față de câștig — specific NTFS, cere Administrator, nu
+  merge pe FAT32/exFAT/ReFS/unități de rețea.
+- **Paralelizare**: `Parallel.For` peste subfolderele de prim nivel —
+  echivalentul .NET al `DispatchQueue.concurrentPerform`.
+- **Cache persistent**: JSON (`System.Text.Json`, deja folosit în acest
+  Core — `BigFileScanFolders`) în loc de `PropertyListEncoder` (Mac) —
+  .NET nu are un echivalent binar la fel de simplu fără dependință nouă.
+  Nume de fișier stabil prin SHA256 al căii rădăcinii, hash-uită ÎN
+  MINUSCULE ÎNTÂI — Windows e case-insensitive la căi, `C:\Date` și
+  `c:\date` trebuie să rezolve la ACELAȘI cache.
+- **Scanare incrementală**: mtime de folder (`Directory.GetLastWriteTimeUtc`)
+  — exact strategia explicit menționată ca portabilă în jurnalul Mac.
+
+**Capcană reală de platformă, verificată ÎNAINTE de a scrie codul (Regula
+30 — nu presupunem)**: spre deosebire de `stat()` pe Mac (eșuează cu cod
+de eroare pe o cale lipsă), `Directory.GetLastWriteTimeUtc` pe .NET NU
+aruncă pe o cale inexistentă — întoarce tăcut sentinela `1601-01-01`. Orice
+verificare „a dispărut folderul?" foloseşte explicit `Directory.Exists`,
+niciodată o excepție presupusă de la `GetLastWriteTimeUtc`.
+
+**A doua adaptare reală, deliberată**: `DiskNode.Children` folosește
+`Dictionary<string, DiskNode>(StringComparer.OrdinalIgnoreCase)` — spre
+deosebire de Mac (dicționar Swift implicit case-sensitiv), sistemul de
+fișiere Windows compară numele case-INsensitiv; fără asta, o rescanare
+incrementală ar putea crea un nod duplicat dacă un folder e listat cu altă
+capitalizare între două scanări.
+
+**UI** (`DiskAnalyzerPage`): breadcrumb + bară proporțională (implementată
+ca `Grid` cu coloane `Star`, proporționale cu mărimea fiecărei intrări —
+WPF distribuie automat lățimea, fără nicio matematică manuală de pixeli,
+spre deosebire de `GeometryReader`/`frame(width:)` pe Mac) + listă cu
+buton Explorer/Șterge, TerminalLogView, banner cu data ultimei analize +
+„Re-scanează doar modificările"/„Resetare Cache & Scanare Completă".
+Butonul de lângă un folder deschide o fereastră Explorer NAVIGATĂ DIRECT
+în el (`Process.Start("explorer.exe", "\"<cale>\"")`, fără `/select,`) —
+echivalentul Windows al `NSWorkspace.open` de pe Mac, cerința explicită a
+lui Cristi de a putea vedea efectiv ce e într-un folder, nu doar
+evidențiat în părinte.
+
+Ștergerea rămâne în spatele `RequireLicense()` — spre deosebire de Mac
+(unde `delete(_:)` din `DiskAnalyzerViewModel` nu verifică nicio licență
+deloc), pentru consistență cu TOATE celelalte acțiuni distructive din
+clientul Windows (Duplicate, Fișiere mari, Dezinstalator, Tweaks etc. —
+verificat prin `grep`, toate 8 pagini cu ștergere/acțiune de sistem
+folosesc acest gate). Semnalat explicit aici ca o DIVERGENȚĂ deliberată
+față de Mac, nu o eroare de portare — decizia de produs stabilită deja pe
+Windows (orice ștergere din urma unei scanări cere licență) a avut
+prioritate față de portarea strictă 1:1 a unei omisiuni Mac neverificate.
+
+**Adăugat în navigare**: `ListBoxItem` nou în `MainWindow.xaml` +
+etichetă/tooltip/cuvinte-cheie de căutare/switch de pagină în
+`MainWindow.xaml.cs`, cheie nouă `sidebar.diskAnalyzer` (RO/EN/ES) în
+`Localization.cs`.
+
+**Verificat**: `dotnet build` (Core + Client, C# + XAML→BAML compilat
+efectiv, de pe Mac via `EnableWindowsTargeting`) — 0 erori, 0
+avertismente. **NU verificat REAL pe Windows** (WARNING standard, Regula
+20) — scanarea efectivă pe un disc mare, comportamentul `Parallel.For` sub
+încărcare reală, și fereastra Explorer deschisă efectiv necesită
+confirmare manuală, o dată, de Cristi, înainte ca portul să fie declarat
+complet dovedit.
+
 ## v1.17.4 (2026-09-03) — Paritate: fix deadlock Process/Pipe de pe Mac
 
 Port declanșat de auditul de pe Mac (Shell.swift): `Process`/`Pipe` din

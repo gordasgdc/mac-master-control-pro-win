@@ -1,5 +1,14 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.18.0 (2026-09-04) — Modul nou: Analiză Disc
+
+Modul complet nou — vezi ce ocupă spațiul pe disc, folder cu folder,
+la fel ca DaisyDisk/TreeSize. Indexează o singură dată, apoi navigarea în
+orice subfolder e instantă. Rezultatul rămâne salvat: la redeschiderea
+aplicației apare imediat, cu opțiunea „Re-scanează doar modificările"
+pentru un update rapid, sau o reindexare completă dacă vrei. Butonul de
+lângă un folder îl deschide direct într-o fereastră Explorer.
+
 ## v1.17.4 (2026-09-03) — Paritate fix Mac: risc de blocare la operații de sistem, eliminat
 
 Port al unui fix real găsit pe partea de Mac: unele acțiuni care rulează
