@@ -74,7 +74,7 @@ public static class LoginItemsService
         {
             var cmd = $"Remove-ItemProperty -Path 'HKLM:\\{RunKeyPath}' -Name '{item.Name}' -ErrorAction SilentlyContinue";
             log($"$ {cmd}");
-            if (!PrivilegedRunner.Run(cmd)) { log("✘ Promptul UAC a fost respins."); return; }
+            if (!PrivilegedRunner.Run(cmd, line => log("  " + line))) { log("✘ Promptul UAC a fost respins."); return; }
         }
         else
         {
@@ -104,7 +104,7 @@ public static class LoginItemsService
         {
             var cmd = $"Set-ItemProperty -Path 'HKLM:\\{RunKeyPath}' -Name '{item.Name}' -Value '{value}'";
             log($"$ {cmd}");
-            if (!PrivilegedRunner.Run(cmd)) { log("✘ Promptul UAC a fost respins."); return; }
+            if (!PrivilegedRunner.Run(cmd, line => log("  " + line))) { log("✘ Promptul UAC a fost respins."); return; }
         }
         else
         {

@@ -21,7 +21,7 @@ public sealed class RenderModeService
         commands.Add(resolveCommand);
 
         log("$ " + string.Join(" ; ", commands));
-        var ok = PrivilegedRunner.Run(commands);
+        var ok = PrivilegedRunner.Run(commands, line => log("  " + line));
         if (ok)
         {
             log("✔ Indexare Windows Search oprită.");
@@ -32,7 +32,7 @@ public sealed class RenderModeService
         }
         else
         {
-            log("✘ Eroare la activare — promptul UAC a fost respins sau comanda a eșuat.");
+            log("✘ Promptul UAC a fost respins — nicio comandă nu a rulat.");
         }
     }
 
@@ -45,7 +45,7 @@ public sealed class RenderModeService
             "sc start fhsvc",
         };
         log("$ " + string.Join(" ; ", commands));
-        var ok = PrivilegedRunner.Run(commands);
+        var ok = PrivilegedRunner.Run(commands, line => log("  " + line));
         if (ok)
         {
             log("✔ Windows Search reactivat.");
@@ -55,7 +55,7 @@ public sealed class RenderModeService
         }
         else
         {
-            log("✘ Eroare la dezactivare — promptul UAC a fost respins sau comanda a eșuat.");
+            log("✘ Promptul UAC a fost respins — nicio comandă nu a rulat.");
         }
     }
 }
