@@ -132,21 +132,17 @@ public static class BigFileFinderService
         return results.OrderByDescending(f => f.SizeBytes).Take(limit).ToList();
     }
 
+    /// [2026-09-03] `PrivilegedFileOps.Delete` cade automat pe stergere
+    /// privilegiata (drepturi de administrator) daca fisierul e protejat
+    /// de sistem - vezi comentariul din PrivilegedFileOps.cs.
     public static void Delete(IEnumerable<BigFileWin> files, Action<string> log)
     {
         foreach (var file in files)
         {
-            try
-            {
-                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(
-                    file.Path, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs,
-                    Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
-                log($"Mutat la Coșul de reciclare ({file.SizeDescription}): {file.Path}");
-            }
-            catch (Exception ex)
-            {
-                log($"EROARE, nu s-a putut șterge: {file.Path} ({ex.Message})");
-            }
+            var error = PrivilegedFileOps.Delete(file.Path);
+            log(error is null
+                ? $"Mutat/șters ({file.SizeDescription}): {file.Path}"
+                : $"EROARE, nu s-a putut șterge {file.Path}: {error}");
         }
     }
 }
