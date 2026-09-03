@@ -8,7 +8,7 @@
 ;   4. Rezultatul apare in Output\MacMasterControlProSetup.exe
 
 #define MyAppName "Master Control Studio Pro"
-#define MyAppVersion "1.17.3"
+#define MyAppVersion "1.17.4"
 #define MyAppPublisher "Cristi Gordas"
 #define MyAppExeName "MacMasterControlPro.exe"
 #define MyAppURL "https://gordas.dev/mac-master-control-pro"

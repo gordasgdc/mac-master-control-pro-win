@@ -148,13 +148,25 @@ public static class ResolveMediaAuditService
         psi.Environment["RESOLVE_SCRIPT_LIB"] = ScriptLibPath;
         psi.Environment["PYTHONPATH"] = ScriptModulesPath;
 
-        using var process = Process.Start(psi);
-        if (process is null) return null;
+        // [2026-09-03] FIX REAL, port 1:1 de pe Mac (Shell.swift) — `stderr`
+        // era redirectat dar NICIODATA citit; un script Python cu mult
+        // output pe stderr putea umple bufferul, blocand scriptul si
+        // consumand tot cele `timeoutSeconds` degeaba inainte de kill —
+        // eșec silențios ("null"), desi scriptul ar fi mers normal daca
+        // cineva ii citea stderr-ul. Citire asincrona pe ambele fluxuri.
+        using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
+        var stdout = new System.Text.StringBuilder();
+        var sync = new object();
+        process.OutputDataReceived += (_, e) => { if (e.Data is not null) lock (sync) stdout.AppendLine(e.Data); };
+        process.ErrorDataReceived += (_, __) => { /* drenam, doar ca sa nu se umple bufferul */ };
+        if (!process.Start()) return null;
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
         if (!process.WaitForExit(timeoutSeconds * 1000))
         {
             try { process.Kill(); } catch { /* best-effort */ }
             return null;
         }
-        return process.ExitCode == 0 ? process.StandardOutput.ReadToEnd().Trim() : null;
+        lock (sync) return process.ExitCode == 0 ? stdout.ToString().Trim() : null;
     }
 }
