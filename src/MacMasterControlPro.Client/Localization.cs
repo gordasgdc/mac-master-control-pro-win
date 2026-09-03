@@ -79,6 +79,7 @@ public static class L
         ["sidebar.renderMode"] = new() { [AppLanguage.Ro] = "Mod Randare", [AppLanguage.En] = "Render Mode", [AppLanguage.Es] = "Modo Renderizado" },
         ["sidebar.loginItems"] = new() { [AppLanguage.Ro] = "Pornire Sistem", [AppLanguage.En] = "Startup Apps", [AppLanguage.Es] = "Apps de Inicio" },
         ["sidebar.diskHealth"] = new() { [AppLanguage.Ro] = "Sănătate Discuri", [AppLanguage.En] = "Disk Health", [AppLanguage.Es] = "Salud de Discos" },
+        ["sidebar.diskAnalyzer"] = new() { [AppLanguage.Ro] = "Analiză Disc", [AppLanguage.En] = "Disk Analyzer", [AppLanguage.Es] = "Analizador de Disco" },
         ["sidebar.resolveTools"] = new() { [AppLanguage.Ro] = "DaVinci Resolve", [AppLanguage.En] = "DaVinci Resolve", [AppLanguage.Es] = "DaVinci Resolve" },
         ["sidebar.windowLayouts"] = new() { [AppLanguage.Ro] = "Layout Ferestre", [AppLanguage.En] = "Window Layouts", [AppLanguage.Es] = "Diseños de Ventanas" },
         ["sidebar.network"] = new() { [AppLanguage.Ro] = "Rețea", [AppLanguage.En] = "Network", [AppLanguage.Es] = "Red" },

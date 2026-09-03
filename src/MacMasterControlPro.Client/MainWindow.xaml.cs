@@ -48,6 +48,7 @@ public partial class MainWindow
         ItemProcessMonitor.Content = "⚙️ " + L.T("sidebar.processMonitor");
         ItemUninstaller.Content = "🗑️ " + L.T("sidebar.uninstaller");
         ItemDiskHealth.Content = "💽 " + L.T("sidebar.diskHealth");
+        ItemDiskAnalyzer.Content = "📊 " + L.T("sidebar.diskAnalyzer");
         ItemResolveTools.Content = "🎬 " + L.T("sidebar.resolveTools");
         ItemWindowLayouts.Content = "🪟 " + L.T("sidebar.windowLayouts");
         ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
@@ -68,6 +69,7 @@ public partial class MainWindow
         ItemProcessMonitor.ToolTip = "Procesele active acum, sortabile după RAM — închide ce consumă prea mult.";
         ItemUninstaller.ToolTip = "Dezinstalează complet una sau mai multe aplicații, cu toate urmele lor.";
         ItemDiskHealth.ToolTip = "Spațiu liber, status SMART și test de viteză pentru discurile montate.";
+        ItemDiskAnalyzer.ToolTip = "Vezi ce ocupă spațiul pe disc, folder cu folder — indexare o singură dată, apoi navigare instantă.";
         ItemResolveTools.ToolTip = "Notificare la final de randare, verificare Media Pool, sincronizare LUT-uri, backup bază de date.";
         ItemWindowLayouts.ToolTip = "Salvează și restaurează aranjamentul ferestrelor pe ecran.";
         ItemNetwork.ToolTip = "Configurare și optimizare rețea, persistentă la repornire.";
@@ -90,6 +92,7 @@ public partial class MainWindow
         ["Duplicates"] = "duplicate copii identice fisiere",
         ["Cleanup"] = "curatare ram cache fisiere mari",
         ["DiskHealth"] = "disc viteza smart",
+        ["DiskAnalyzer"] = "analiza disc spatiu ocupat folder mare daisydisk treesize",
         ["Security"] = "securitate firewall defender",
         ["Cloud"] = "cloud drive dropbox onedrive rclone",
         ["Network"] = "retea wifi dns",
@@ -129,6 +132,7 @@ public partial class MainWindow
             "ProcessMonitor" => new Pages.ProcessMonitorPage(),
             "Uninstaller" => new Pages.UninstallerPage(),
             "DiskHealth" => new Pages.DiskHealthPage(),
+            "DiskAnalyzer" => new Pages.DiskAnalyzerPage(),
             "ResolveTools" => new Pages.ResolveToolsPage(),
             "WindowLayouts" => new Pages.WindowLayoutsPage(),
             "Network" => new NetworkPage(),

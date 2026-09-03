@@ -83,6 +83,7 @@
                     <ListBoxItem x:Name="ItemProcessMonitor" Tag="ProcessMonitor" />
                     <ListBoxItem x:Name="ItemUninstaller" Tag="Uninstaller" />
                     <ListBoxItem x:Name="ItemDiskHealth" Tag="DiskHealth" />
+                    <ListBoxItem x:Name="ItemDiskAnalyzer" Tag="DiskAnalyzer" />
                     <ListBoxItem x:Name="ItemResolveTools" Tag="ResolveTools" />
                     <ListBoxItem x:Name="ItemWindowLayouts" Tag="WindowLayouts" />
                     <ListBoxItem x:Name="ItemNetwork" Tag="Network" />
