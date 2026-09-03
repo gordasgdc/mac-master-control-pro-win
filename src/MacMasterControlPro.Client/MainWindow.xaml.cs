@@ -216,9 +216,30 @@ public partial class MainWindow
     }
 
     /// Regula 24 - LayoutTransform pe RootGrid, nu FontSize brut per control.
+    ///
+    /// [2026-09-03] FIX REAL, raportat de Cristi: la "Mărime Text" mare,
+    /// anumite pagini (ex. Curățare & RAM) "nu se încărcau total, se
+    /// blocau, fără slider lateral" - cauza reala: `LayoutTransform` pe
+    /// `RootGrid` mareste vizual TOT continutul, dar fereastra insasi
+    /// (`Width="1000" Height="680"`, fixa) NU se marea odata cu el -
+    /// continutul scalat (inclusiv bara de scroll din dreapta unui
+    /// `ScrollViewer`) ajungea pur si simplu in afara marginii fizice a
+    /// ferestrei, invizibil si inaccesibil, desi ScrollViewer-ul insusi
+    /// functiona corect intern. Fix: fereastra se redimensioneaza acum
+    /// odata cu scala (limitata la ecranul disponibil), ca intreg
+    /// continutul scalat sa ramana efectiv vizibil.
+    private static readonly double BaseWidth = 1000;
+    private static readonly double BaseHeight = 680;
+
     public void ApplyTextScale(TextScalePreference preference)
     {
         var scale = preference.ScaleFactor();
         RootGrid.LayoutTransform = scale == 1.0 ? Transform.Identity : new ScaleTransform(scale, scale);
+
+        var workArea = SystemParameters.WorkArea;
+        Width = Math.Min(BaseWidth * scale, workArea.Width);
+        Height = Math.Min(BaseHeight * scale, workArea.Height);
+        MinWidth = Math.Min(820 * scale, workArea.Width);
+        MinHeight = Math.Min(520 * scale, workArea.Height);
     }
 }

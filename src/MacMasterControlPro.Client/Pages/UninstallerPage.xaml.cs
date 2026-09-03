@@ -146,7 +146,18 @@ public partial class UninstallerPage : UserControl
         {
             _log.Append("Rulez dezinstalatorul oficial (Apps & Features)…");
             var ok = UninstallerService.RunOfficialUninstaller(_selectedApp);
-            _log.Append(ok ? "✔ Dezinstalator oficial rulat." : "EROARE la rularea dezinstalatorului oficial.");
+            if (!ok)
+            {
+                _log.Append("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).");
+            }
+            else if (UninstallerService.IsStillRegistered(_selectedApp.DisplayName))
+            {
+                _log.Append("⚠ Aplicația a rulat comanda de dezinstalare, dar tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click (Next/Uninstall/Finish). Verifică dacă a apărut o fereastră pe ecran.");
+            }
+            else
+            {
+                _log.Append("✔ Dezinstalator oficial rulat — aplicația a dispărut din Programe și caracteristici.");
+            }
         }
         _log.Append("Gata.");
         _apps = UninstallerService.ScanInstalledApps();
@@ -185,7 +196,12 @@ public partial class UninstallerPage : UserControl
                 if (!string.IsNullOrWhiteSpace(app.UninstallString))
                 {
                     var ok = UninstallerService.RunOfficialUninstaller(app);
-                    Dispatcher.Invoke(() => _log.Append(ok ? "✔ Dezinstalator oficial rulat." : "EROARE la rularea dezinstalatorului oficial."));
+                    string status;
+                    if (!ok) status = "EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).";
+                    else if (UninstallerService.IsStillRegistered(app.DisplayName))
+                        status = "⚠ Tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click.";
+                    else status = "✔ Dezinstalator oficial rulat — dispărută din Programe și caracteristici.";
+                    Dispatcher.Invoke(() => _log.Append(status));
                 }
             }
             Dispatcher.Invoke(() =>

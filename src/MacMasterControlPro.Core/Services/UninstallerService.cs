@@ -5,7 +5,7 @@ namespace MacMasterControlPro.Core.Services;
 /// Oglinda UninstallerService.swift (Mac) — scaneaza Registry (Uninstall
 /// keys, sursa oficiala Windows a listei de aplicatii instalate) + toate
 /// locatiile standard unde o aplicatie isi lasa urme.
-public sealed record InstalledAppWin(string DisplayName, string? UninstallString, string? InstallLocation);
+public sealed record InstalledAppWin(string DisplayName, string? UninstallString, string? InstallLocation, string? QuietUninstallString = null);
 
 public sealed record UninstallCategoryWin(string Id, string Title, List<string> Paths, long TotalBytes, bool RequiresPrivilege)
 {
@@ -28,12 +28,31 @@ public static class UninstallerService
         @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
     };
 
+    /// [2026-09-03] FIX REAL, raportat de Cristi: aplicații ștergeau
+    /// "cu succes" (dezinstalatorul oficial rula, exit code 0), dar tot
+    /// apăreau în listă la re-scanare. O cauză reală, găsită direct în
+    /// cod: se citea DOAR `Registry.LocalMachine` — multe aplicații (orice
+    /// instalate per-utilizator, fără admin: Chrome, Discord, VS Code,
+    /// Slack etc.) se înregistrează sub `HKEY_CURRENT_USER`, niciodată sub
+    /// HKLM — lipseau complet din scanare pe acea cale, SAU (mai frecvent)
+    /// aveau o intrare Registry DUBLĂ (HKLM + HKCU pentru aceeași
+    /// aplicație) — ștergeai una, cealaltă rămânea, dând impresia că
+    /// "nu s-a șters nimic".
+    private static IEnumerable<(RegistryKey Hive, string Path)> AllUninstallRoots()
+    {
+        foreach (var path in UninstallRegistryKeys)
+        {
+            yield return (Registry.LocalMachine, path);
+            yield return (Registry.CurrentUser, path);
+        }
+    }
+
     public static List<InstalledAppWin> ScanInstalledApps()
     {
         var results = new List<InstalledAppWin>();
-        foreach (var keyPath in UninstallRegistryKeys)
+        foreach (var (hive, keyPath) in AllUninstallRoots())
         {
-            using var key = Registry.LocalMachine.OpenSubKey(keyPath);
+            using var key = hive.OpenSubKey(keyPath);
             if (key is null) continue;
             foreach (var subName in key.GetSubKeyNames())
             {
@@ -43,13 +62,23 @@ public static class UninstallerService
                 results.Add(new InstalledAppWin(
                     name,
                     sub?.GetValue("UninstallString") as string,
-                    sub?.GetValue("InstallLocation") as string));
+                    sub?.GetValue("InstallLocation") as string,
+                    sub?.GetValue("QuietUninstallString") as string));
             }
         }
         return results.DistinctBy(a => a.DisplayName)
             .OrderBy(a => a.DisplayName, StringComparer.OrdinalIgnoreCase)
             .ToList();
     }
+
+    /// Verificare REALĂ post-dezinstalare — nu ne mai bazăm doar pe codul
+    /// de ieșire al dezinstalatorului (mulți dezinstalatori de tip
+    /// wizard/NSIS se auto-relansează dintr-o copie temporară și procesul
+    /// original iese aproape instant, MULT înainte ca userul să apuce să
+    /// dea click prin fereastra reală) — verificăm dacă intrarea chiar a
+    /// dispărut din Registry.
+    public static bool IsStillRegistered(string displayName) =>
+        ScanInstalledApps().Any(a => string.Equals(a.DisplayName, displayName, StringComparison.OrdinalIgnoreCase));
 
     /// Locatiile standard unde Windows lasa urme dupa o dezinstalare
     /// normala — %APPDATA%/%LOCALAPPDATA%/%PROGRAMDATA%, Registry HKCU,
@@ -150,10 +179,45 @@ public static class UninstallerService
     /// Ruleaza dezinstalatorul oficial (din Registry `UninstallString`) —
     /// singura cale corectă de a scoate aplicația din "Apps & Features",
     /// nu doar ștergerea folderului.
+    ///
+    /// [2026-09-03] FIX REAL: `UninstallString` brut deschide de multe ori
+    /// un WIZARD interactiv (Next/Uninstall/Finish) — mai ales dezastruos
+    /// în ștergerea în masă (mai multe fereastre, fără nimeni să dea click
+    /// prin ele). Multe dezinstalatoare NSIS/Inno se auto-relansează
+    /// dintr-o copie temporară și procesul original iese aproape instant —
+    /// `-Wait` se termină mult înainte ca ștergerea reală să se fi
+    /// întâmplat, dând un fals "succes". Fix, în ordine de preferință:
+    /// 1. `QuietUninstallString` (câmp Registry OPȚIONAL, dar populat de
+    ///    multe installere tocmai pentru acest scop — silențios garantat).
+    /// 2. Dacă `UninstallString` e un `msiexec.exe /X{GUID}` (MSI — ușor de
+    ///    recunoscut, mereu suportă silent), adaugă automat `/quiet /norestart`.
+    /// 3. Altfel, `UninstallString` brut, neschimbat — cel mai bun efort,
+    ///    poate tot cere clickuri (limitare reală a instalatorului, nu de
+    ///    cod), dar apelantul verifică acum REAL dacă a dispărut din
+    ///    Registry (`IsStillRegistered`), nu doar codul de ieșire.
     public static bool RunOfficialUninstaller(InstalledAppWin app)
     {
-        if (string.IsNullOrWhiteSpace(app.UninstallString)) return false;
-        return PrivilegedRunner.Run($"Start-Process -FilePath cmd.exe -ArgumentList '/c {app.UninstallString.Replace("'", "''")}' -Wait");
+        string? command = app.QuietUninstallString;
+        if (string.IsNullOrWhiteSpace(command) && !string.IsNullOrWhiteSpace(app.UninstallString))
+        {
+            var raw = app.UninstallString!;
+            if (raw.Contains("msiexec", StringComparison.OrdinalIgnoreCase))
+            {
+                // "/I{GUID}" sau "/X{GUID}" - fortam /X (uninstall) + silent,
+                // indiferent ce a scris installerul (unele scriu /I gresit
+                // pentru Modify/Repair, dar UninstallString e mereu pt. dezinstalare).
+                var guidStart = raw.IndexOf('{');
+                var guidEnd = raw.IndexOf('}');
+                var guid = (guidStart >= 0 && guidEnd > guidStart) ? raw[guidStart..(guidEnd + 1)] : null;
+                command = guid is not null ? $"msiexec.exe /X{guid} /quiet /norestart" : raw;
+            }
+            else
+            {
+                command = raw;
+            }
+        }
+        if (string.IsNullOrWhiteSpace(command)) return false;
+        return PrivilegedRunner.Run($"Start-Process -FilePath cmd.exe -ArgumentList '/c {command.Replace("'", "''")}' -Wait");
     }
 
     /// Cerinta (2026-09-01): "sa elimine tot tot tot" — extins sa recunoasca
@@ -200,8 +264,8 @@ public static class UninstallerService
         if (privileged.Count > 0)
         {
             log($"Solicit privilegii de administrator pentru {privileged.Count} elemente (Registry/sarcini programate/comenzi rapide de sistem)…");
-            var ok = PrivilegedRunner.Run(privileged);
-            log(ok ? "Elemente privilegiate curățate." : "EROARE la curățarea elementelor privilegiate.");
+            var ok = PrivilegedRunner.Run(privileged, line => log("  " + line));
+            log(ok ? "Elemente privilegiate curățate." : "EROARE la curățarea elementelor privilegiate (promptul UAC a fost respins).");
         }
     }
 }

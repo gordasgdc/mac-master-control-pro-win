@@ -1,5 +1,20 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.17.1 (2026-09-03) — Fix: Dezinstalator, mesaje reale de eroare, mărime text
+
+- **Dezinstalatorul lăsa aplicații "instalate" în continuare** — scanarea
+  acoperă acum și aplicațiile instalate per-utilizator (nu doar la nivel
+  de sistem), preferă metoda silențioasă de dezinstalare când e
+  disponibilă, și verifică REAL, după fiecare ștergere, dacă aplicația
+  chiar a dispărut — dacă nu, spune clar de ce (fereastră care așteaptă
+  un click), în loc să pretindă succes.
+- **„Mod Randare” și „Pornire Sistem” arătau doar „a eșuat”, fără detalii**
+  — acum arată exact ce comandă a rulat și rezultatul ei real în panoul
+  „Terminal Live”.
+- **Mărimea textului (Mare/Foarte mare) tăia părți din unele pagini, fără
+  bară de derulare vizibilă** — fereastra se redimensionează acum odată cu
+  mărimea textului, ca tot conținutul să rămână vizibil.
+
 ## v1.17.0 (2026-09-01) — Duplicate, căutare în meniu
 
 - **Modul nou „Duplicate”** — alegi ce foldere se caută, aplicația
