@@ -11,6 +11,13 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    # [CLAUDE.md Regula 34, 2026-09-06] `secrets` NU e un context permis
+    # direct intr-un `if:` de pas (confirmat cu actionlint, tipar identic
+    # cu CGConvertor) - valoarea trece printr-un `env:` la nivel de JOB
+    # (aici `secrets` E permis), iar pasii citesc `env.HAS_WIN_SELFSIGN`
+    # (context permis in `if:`).
+    env:
+      HAS_WIN_SELFSIGN: ${{ secrets.WIN_SELFSIGN_PFX_BASE64 != '' }}
     steps:
       - name: Descarca codul din repo
         uses: actions/checkout@v4
@@ -29,9 +36,32 @@ jobs:
       - name: Publica exe-ul (self-contained, win-x64)
         run: dotnet publish src/MacMasterControlPro.Client/MacMasterControlPro.Client.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false -o publish
 
+      # [CLAUDE.md Regula 34, 2026-09-06] Semnare Self-Signed, DOAR pentru
+      # testare interna/cerc restrans (NU elimina SmartScreen pentru
+      # publicul larg - vezi codesigning/README-windows.md). Ruleaza DOAR
+      # daca secretele exista (Cristi le incarca o singura data, direct de
+      # pe Windows real - certificatul nu trece niciodata prin conversatia
+      # cu Claude) - altfel build-ul continua NESEMNAT, exact ca inainte,
+      # fara nicio eroare.
+      - name: Semneaza MacMasterControlPro.exe (Self-Signed, test intern)
+        if: ${{ env.HAS_WIN_SELFSIGN == 'true' }}
+        shell: pwsh
+        env:
+          WIN_SELFSIGN_PFX_BASE64: ${{ secrets.WIN_SELFSIGN_PFX_BASE64 }}
+          WIN_SELFSIGN_PFX_PASSWORD: ${{ secrets.WIN_SELFSIGN_PFX_PASSWORD }}
+        run: .\codesigning\sign-windows.ps1 -TargetPath "publish\MacMasterControlPro.exe"
+
       - name: Compileaza instalatorul (Inno Setup - preinstalat pe runner-ul windows-latest)
         run: |
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+
+      - name: Semneaza installer-ul final (Self-Signed, test intern)
+        if: ${{ env.HAS_WIN_SELFSIGN == 'true' }}
+        shell: pwsh
+        env:
+          WIN_SELFSIGN_PFX_BASE64: ${{ secrets.WIN_SELFSIGN_PFX_BASE64 }}
+          WIN_SELFSIGN_PFX_PASSWORD: ${{ secrets.WIN_SELFSIGN_PFX_PASSWORD }}
+        run: .\codesigning\sign-windows.ps1 -TargetPath "Output\MacMasterControlProSetup.exe"
 
       - name: Incarca instalatorul ca artefact descarcabil
         uses: actions/upload-artifact@v4
