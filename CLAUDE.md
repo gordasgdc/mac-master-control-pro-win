@@ -1118,3 +1118,16 @@ manuală, o dată, de Cristi.
 ```bash
 cd ~/Developer/MacMasterControlProWin && dotnet build
 ```
+
+## Etapa 2026-09-11 — v1.18.1 publicat cu semnare Windows activa
+
+Secretele CI (`WIN_SELFSIGN_PFX_BASE64`/`WIN_SELFSIGN_PFX_PASSWORD`,
+certificat COMUN ecosistemului) erau deja incarcate de Cristi. Acest release
+e primul in care semnarea Regulii 34 chiar a rulat pe un build real.
+
+Verificat direct, nu presupus: pasul de semnare marcat OK in lista de pasi a
+job-ului, plus directorul de securitate din header-ul PE al installer-ului
+descarcat = 7496 bytes de semnatura Authenticode. Link stabil
+`releases/latest/download/...` verificat HTTP 200.
+
+Release creat manual din artefactul CI (repo fara automatizare de release).
