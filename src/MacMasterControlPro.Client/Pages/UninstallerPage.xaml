@@ -28,7 +28,7 @@
         </StackPanel>
 
         <StackPanel Grid.Column="2" x:Name="DetailsPanel">
-            <TextBlock Text="Alege o aplicație din listă." Foreground="Gray" />
+            <TextBlock Text="Alege o aplicație din listă." Foreground="{DynamicResource TextSecondaryBrush}" />
         </StackPanel>
     </Grid>
 </UserControl>

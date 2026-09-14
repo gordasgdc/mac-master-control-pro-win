@@ -6,10 +6,10 @@
          (stergere fisiere, winget, rclone) apeleaza Append() per pas, ca
          userul sa vada CONCRET ca se intampla ceva, nu doar "se instaleaza..."
          urmat de tacere. -->
-    <Border Background="#0D0F12" BorderBrush="#2B2F36" BorderThickness="1" CornerRadius="4"
+    <Border Background="{DynamicResource TerminalSurfaceBrush}" BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="1" CornerRadius="4"
             Visibility="Collapsed" x:Name="Root">
         <ScrollViewer x:Name="Scroller" MaxHeight="160" VerticalScrollBarVisibility="Auto" Padding="10,8">
-            <TextBlock x:Name="LogText" FontFamily="Consolas" FontSize="11" Foreground="#8FE388" TextWrapping="Wrap" />
+            <TextBlock x:Name="LogText" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource TerminalTextBrush}" TextWrapping="Wrap" />
         </ScrollViewer>
     </Border>
 </UserControl>

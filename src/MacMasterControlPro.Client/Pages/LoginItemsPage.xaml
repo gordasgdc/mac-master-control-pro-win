@@ -12,12 +12,12 @@
             <TextBlock Grid.Column="0" Text="🔌 Aplicații de fundal la pornire" FontSize="22" FontWeight="Bold" />
             <ui:Button Grid.Column="1" Content="Rescanează" Click="OnRescanClicked" />
         </Grid>
-        <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11" Margin="0,0,0,10"
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10"
                    Text="Servicii de fundal (Registry Run + Startup), fără componente Microsoft — dezactivarea e reversibilă oricând." />
         <ui:CardExpander Header="Servicii găsite" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel x:Name="ItemsPanel" />
         </ui:CardExpander>
-        <TextBlock x:Name="StatusText" Margin="0,0,0,8" Foreground="Gray" FontSize="11" />
+        <TextBlock x:Name="StatusText" Margin="0,0,0,8" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
         <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
 </UserControl>

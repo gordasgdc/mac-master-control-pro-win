@@ -34,7 +34,7 @@
                  CONSTANTA aici, nu legata de tema. Foreground-urile setate explicit
                  in cod (DependenciesItem, LicenseBadge) raman neschimbate - o
                  valoare locala are mereu prioritate peste un Style. -->
-            <Grid Grid.Column="0" Background="#14161A">
+            <Grid Grid.Column="0" Background="{DynamicResource SidebarBackgroundBrush}">
                 <Grid.Resources>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="Foreground" Value="#EDEFF2" />
@@ -54,7 +54,7 @@
                      ... reglare, duplicate, dezinstalare ... prin toata
                      aplicatia") - filtreaza randurile din ModuleList mai jos,
                      nu deschide o pagina separata. -->
-                <Border Grid.Row="0" Background="#1E2128" CornerRadius="6" Margin="8,8,8,4" Padding="8,4">
+                <Border Grid.Row="0" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="6" Margin="8,8,8,4" Padding="8,4">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -62,7 +62,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center" />
                         <ui:TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0"
-                                    Foreground="#EDEFF2" CaretBrush="#EDEFF2"
+                                    Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}"
                                     PlaceholderText="Caută (duplicate, dezinstalare, reglare)…"
                                     TextChanged="OnSearchTextChanged" />
                     </Grid>
@@ -97,7 +97,7 @@
                 </ListBox>
 
                 <!-- Sidebar Footer (Regula 12): profil, Machine ID + copy, versiune, update -->
-                <Border Grid.Row="2" BorderBrush="#2B2F36" BorderThickness="0,1,0,0" Padding="12,10">
+                <Border Grid.Row="2" BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="0,1,0,0" Padding="12,10">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -105,23 +105,23 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock x:Name="ProfileNameText" FontSize="12" FontWeight="Bold" Foreground="#EDEFF2" />
-                                <TextBlock x:Name="ProfileEmailText" FontSize="10.5" Foreground="Gray" />
+                                <TextBlock x:Name="ProfileNameText" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock x:Name="ProfileEmailText" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" />
                             </StackPanel>
                             <ui:Button x:Name="LicenseBadge" Grid.Column="1" FontSize="10.5" Padding="6,2"
                                        Appearance="Transparent" VerticalAlignment="Top" Click="OnLicenseBadgeClicked" />
                         </Grid>
                         <ui:Button x:Name="MachineIdButton" Content="Machine ID: …" FontSize="10.5" Margin="0,6,0,0"
-                                   Appearance="Transparent" Padding="0" HorizontalAlignment="Left" Foreground="#EDEFF2"
+                                   Appearance="Transparent" Padding="0" HorizontalAlignment="Left" Foreground="{DynamicResource TextPrimaryBrush}"
                                    Click="OnCopyMachineId" />
                         <Grid Margin="0,8,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="VersionText" FontSize="10.5" Foreground="Gray" VerticalAlignment="Center" />
+                            <TextBlock x:Name="VersionText" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
                             <ui:Button x:Name="CheckUpdatesButton" Grid.Column="1" Content="Caută actualizări" FontSize="10.5"
-                                       Appearance="Transparent" Foreground="#4EA1F5" Click="OnCheckUpdatesClicked" />
+                                       Appearance="Transparent" Foreground="{DynamicResource LinkAccentBrush}" Click="OnCheckUpdatesClicked" />
                         </Grid>
                     </StackPanel>
                 </Border>

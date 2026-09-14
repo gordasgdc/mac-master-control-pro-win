@@ -17,17 +17,17 @@
                     <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
                 </Grid>
                 <StackPanel x:Name="AdaptersPanel" />
-                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,0" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0" />
             </StackPanel>
         </ui:CardExpander>
 
         <ui:CardExpander Header="Tuning TCP" IsExpanded="True">
             <StackPanel>
-                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google — pe plăcile bifate." Foreground="Gray" Margin="0,0,0,10" TextWrapping="Wrap" />
+                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google — pe plăcile bifate." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
                 <ui:Button x:Name="ApplyButton" Content="Aplică Tuning pe selecție" Appearance="Primary" Click="OnApplyTuningClicked" />
             </StackPanel>
         </ui:CardExpander>
 
-        <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="Gray" FontSize="11" />
+        <TextBlock x:Name="StatusText" Margin="0,12,0,0" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
     </StackPanel>
 </UserControl>

@@ -12,7 +12,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="FolderText" Text="Niciun folder local ales" FontSize="11" Foreground="Gray" VerticalAlignment="Center" TextWrapping="Wrap" />
+            <TextBlock x:Name="FolderText" Text="Niciun folder local ales" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
             <ui:Button Grid.Column="1" Content="Alege folder local…" Click="OnPickFolderClicked" />
         </Grid>
 
@@ -20,7 +20,7 @@
         <RadioButton x:Name="DownloadRadio" Content="Cloud → Local (descarcă)" Margin="0,0,0,10" />
 
         <CheckBox x:Name="MirrorCheck" Content="Oglindă exactă (șterge la destinație ce lipsește la sursă)" Checked="OnMirrorChanged" Unchecked="OnMirrorChanged" />
-        <TextBlock x:Name="MirrorWarning" Text="⚠ Atenție: poate șterge fișiere ireversibil la destinație." FontSize="11" Foreground="Orange" Margin="0,4,0,10" Visibility="Collapsed" />
+        <TextBlock x:Name="MirrorWarning" Text="⚠ Atenție: poate șterge fișiere ireversibil la destinație." FontSize="11" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,4,0,10" Visibility="Collapsed" />
 
         <controls:TerminalLogView x:Name="Log" Margin="0,0,0,10" />
 

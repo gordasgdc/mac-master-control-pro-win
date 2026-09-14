@@ -7,7 +7,7 @@
         Background="{DynamicResource ApplicationBackgroundBrush}">
     <StackPanel Margin="24" HorizontalAlignment="Stretch">
         <TextBlock x:Name="TitleText" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" />
-        <TextBlock x:Name="BodyText" TextWrapping="Wrap" TextAlignment="Center" Foreground="Gray" Margin="0,10,0,14" />
+        <TextBlock x:Name="BodyText" TextWrapping="Wrap" TextAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,14" />
         <ui:TextBox x:Name="KeyBox" Margin="0,0,0,6" />
         <TextBlock x:Name="ErrorText" Foreground="OrangeRed" FontSize="11" Visibility="Collapsed" Margin="0,0,0,6" />
         <ui:Button x:Name="MachineIdButton" Appearance="Transparent" HorizontalAlignment="Left"

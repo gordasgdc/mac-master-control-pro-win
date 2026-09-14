@@ -4,7 +4,7 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
         <TextBlock Text="🪟 Layout Ferestre" FontSize="22" FontWeight="Bold" Margin="0,0,0,8" />
-        <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11" Margin="0,0,0,16"
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,16"
                    Text="Salvează pozițiile ferestrelor unei aplicații (ex. DaVinci Resolve) ca profil — util când schimbi frecvent între configurații de monitoare." />
 
         <ui:CardExpander Header="Salvează layout-ul curent" IsExpanded="True" Margin="0,0,0,12">
@@ -25,6 +25,6 @@
             <StackPanel x:Name="ProfilesPanel" />
         </ui:CardExpander>
 
-        <TextBlock x:Name="StatusText" Foreground="Gray" FontSize="11" />
+        <TextBlock x:Name="StatusText" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
     </StackPanel>
 </UserControl>

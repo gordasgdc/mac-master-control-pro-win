@@ -8,7 +8,7 @@
 
         <ui:CardExpander Header="Status pachete" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,8"
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"
                            Text="Fiecare componentă are propriul buton de instalare — roșu (neinstalat) devine verde (instalat) după ce comanda reușește." />
                 <ItemsControl x:Name="ItemsList" Margin="0,0,0,10" />
                 <ui:Button Content="Rescanează" Click="OnRescanClicked" />

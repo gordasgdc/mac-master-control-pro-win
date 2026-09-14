@@ -17,7 +17,7 @@
 
         <ui:CardExpander Header="Locație montare" IsExpanded="False" Margin="0,0,0,14">
             <StackPanel>
-                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,8"
+                <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"
                            Text="Implicit, fiecare cont montat primește o literă de disc nouă. Poți alege în schimb un folder — util pe un disc extern (Thunderbolt/USB-C), ca să nu ocupi litere de disc pe intern." />
                 <TextBlock x:Name="MountFolderText" FontSize="11" Margin="0,0,0,8" />
                 <StackPanel Orientation="Horizontal">
@@ -35,13 +35,13 @@
             <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Click="OnSelectAllClicked" />
         </Grid>
         <ItemsControl x:Name="RemotesList" />
-        <TextBlock x:Name="EmptyText" Text="Niciun cont adăugat încă." Foreground="Gray" Visibility="Collapsed" />
-        <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,10" />
+        <TextBlock x:Name="EmptyText" Text="Niciun cont adăugat încă." Foreground="{DynamicResource TextSecondaryBrush}" Visibility="Collapsed" />
+        <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,10" />
         <StackPanel Orientation="Horizontal">
             <ui:Button x:Name="MountSelectedButton" Content="Montează selecția" Appearance="Primary" Margin="0,0,8,0" Click="OnMountSelectedClicked" />
             <ui:Button x:Name="UnmountSelectedButton" Content="Demontează selecția" Click="OnUnmountSelectedClicked" />
         </StackPanel>
-        <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="Gray" FontSize="11" TextWrapping="Wrap" />
+        <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextWrapping="Wrap" />
         <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
 </UserControl>

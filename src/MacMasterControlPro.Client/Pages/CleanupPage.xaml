@@ -24,14 +24,14 @@
                     <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
                 </Grid>
                 <StackPanel x:Name="ItemsPanel" />
-                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="Gray" Margin="0,8,0,10" />
+                <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,10" />
                 <ui:Button x:Name="DeleteButton" Content="Șterge cache-urile selectate" Appearance="Primary" Click="OnDeleteClicked" />
             </StackPanel>
         </ui:CardExpander>
 
         <ui:CardExpander Header="Fișiere mari" IsExpanded="False" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock Text="Foldere de scanat — alege ce vrei, adaugă orice folder propriu:" FontSize="11" Foreground="Gray" Margin="0,0,0,4" />
+                <TextBlock Text="Foldere de scanat — alege ce vrei, adaugă orice folder propriu:" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4" />
                 <StackPanel x:Name="ScanFoldersPanel" Margin="0,0,0,4" />
                 <ui:Button Content="+ Adaugă folder…" Click="OnAddCustomFolderClicked" HorizontalAlignment="Left" Margin="0,0,0,8" />
                 <Grid Margin="0,0,0,8">
@@ -54,7 +54,7 @@
             <ui:Button Content="Golește Coșul de reciclare" Click="OnEmptyRecycleBinClicked" />
         </ui:CardExpander>
 
-        <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="Gray" FontSize="11" />
+        <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
         <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
     </ScrollViewer>

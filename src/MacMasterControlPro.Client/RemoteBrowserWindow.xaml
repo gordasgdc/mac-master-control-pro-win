@@ -28,7 +28,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <ui:Button Grid.Column="0" x:Name="BackButton" Content="⬅︎ Înapoi" Margin="0,0,8,0" Click="OnBackClicked" Visibility="Collapsed" />
-            <TextBlock Grid.Column="1" x:Name="BreadcrumbText" FontFamily="Consolas" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" x:Name="BreadcrumbText" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
         </Grid>
 
         <ListBox Grid.Row="2" x:Name="EntriesList" MouseDoubleClick="OnEntryDoubleClick" SelectionChanged="OnSelectionChanged">
@@ -37,7 +37,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding IsDir, Converter={StaticResource EntryIcon}}" Margin="0,0,8,0" />
                         <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="{Binding Size, Converter={StaticResource EntrySize}}" Foreground="Gray" FontSize="11" Margin="8,0,0,0"
+                        <TextBlock Text="{Binding Size, Converter={StaticResource EntrySize}}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="8,0,0,0"
                                    Visibility="{Binding IsDir, Converter={StaticResource InverseBoolToVisibility}}" />
                     </StackPanel>
                 </DataTemplate>

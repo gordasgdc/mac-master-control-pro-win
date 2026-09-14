@@ -21,7 +21,7 @@
                 <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="LightGreen" FontSize="11" />
             </StackPanel>
         </ui:CardExpander>
-        <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11"
+        <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
                    Text="BitLocker (cere cheie de recuperare confirmată manual) și dezactivarea protecțiilor de sistem rămân decizii luate direct din Windows Settings, niciodată dintr-un buton." />
     </StackPanel>
 </UserControl>

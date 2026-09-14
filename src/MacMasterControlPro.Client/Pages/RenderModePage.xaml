@@ -8,7 +8,7 @@
 
         <ui:CardExpander Header="Optimizare temporară pentru export/randare" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11" Margin="0,0,0,10"
+                <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10"
                            Text="Pentru export-uri/randări lungi: oprește indexarea Windows Search, pune pe pauză File History, și ridică prioritatea procesului DaVinci Resolve, dacă rulează." />
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -21,7 +21,7 @@
             </StackPanel>
         </ui:CardExpander>
 
-        <TextBlock x:Name="StatusText" Margin="0,0,0,8" Foreground="Gray" FontSize="11" />
+        <TextBlock x:Name="StatusText" Margin="0,0,0,8" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
         <controls:TerminalLogView x:Name="Log" />
     </StackPanel>
 </UserControl>

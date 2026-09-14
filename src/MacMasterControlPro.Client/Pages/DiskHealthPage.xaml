@@ -12,7 +12,7 @@
                 <TextBlock Grid.Column="0" Text="💽 Sănătate Discuri" FontSize="22" FontWeight="Bold" />
                 <ui:Button Grid.Column="1" Content="Rescanează" Click="OnRescanClicked" />
             </Grid>
-            <TextBlock TextWrapping="Wrap" Foreground="Gray" FontSize="11" Margin="0,0,0,10"
+            <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10"
                        Text="Spațiu liber, status SMART și test opțional de viteză de scriere — un disc de scratch/cache aproape plin sau pe moarte e cauza cea mai frecventă a randărilor care se blochează la mijloc." />
             <StackPanel x:Name="DisksPanel" />
         </StackPanel>

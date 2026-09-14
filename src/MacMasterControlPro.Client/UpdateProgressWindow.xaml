@@ -10,7 +10,7 @@
     <StackPanel Margin="20,18">
         <TextBlock x:Name="TitleText" FontSize="13" FontWeight="SemiBold" />
         <TextBlock x:Name="StatusText" FontSize="11" Margin="0,6,0,12"
-                   Foreground="Gray" TextWrapping="Wrap" />
+                   Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
         <ProgressBar IsIndeterminate="True" Height="4" />
     </StackPanel>
 </Window>

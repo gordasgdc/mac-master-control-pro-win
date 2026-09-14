@@ -6,7 +6,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
         <TextBlock Text="🧬 Duplicate" FontSize="22" FontWeight="Bold" Margin="0,0,0,4" />
-        <TextBlock Text="Comparație REALĂ pe conținut (hash SHA256), nu doar nume/dată — două fișiere apar ca duplicate doar dacă sunt identice byte-cu-byte." FontSize="11" Foreground="Gray" Margin="0,0,0,16" TextWrapping="Wrap" />
+        <TextBlock Text="Comparație REALĂ pe conținut (hash SHA256), nu doar nume/dată — două fișiere apar ca duplicate doar dacă sunt identice byte-cu-byte." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,16" TextWrapping="Wrap" />
 
         <ui:CardExpander Header="Foldere de căutat" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
@@ -17,7 +17,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" x:Name="ScanStatusText" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="0" x:Name="ScanStatusText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
                     <ui:Button Grid.Column="1" x:Name="ScanButton" Content="Caută duplicate" Appearance="Primary" Click="OnScanClicked"
                                ToolTip="Scanează folderele alese și grupează fișierele identice ca și conținut." />
                 </Grid>
@@ -33,7 +33,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" x:Name="MarkedText" FontSize="11" Foreground="Gray" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="0" x:Name="MarkedText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
             <ui:Button Grid.Column="1" x:Name="DeleteMarkedButton" Appearance="Danger" Click="OnDeleteMarkedClicked" IsEnabled="False" />
         </Grid>
 
