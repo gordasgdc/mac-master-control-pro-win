@@ -1,5 +1,14 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.18.2 (2026-09-14) — Teme si contrast
+
+### Fixed
+- Interfata folosea o paleta inchisa fixa: pe tema deschisa ramanea panou
+  negru si text aproape alb pe fereastra alba. Acum urmeaza tema aleasa.
+- Cursorul de scriere din campurile de text ramanea deschis la culoare pe
+  fundal alb.
+- Campurile si butoanele dezactivate raman lizibile.
+
 ## v1.18.0 (2026-09-04) — Modul nou: Analiză Disc
 
 Modul complet nou — vezi ce ocupă spațiul pe disc, folder cu folder,
