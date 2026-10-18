@@ -1,5 +1,10 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.19.2 (2026-10-19) — Izolare: variabilele de demonstrație nu au efect în instalarea oficială
+
+### Fixed
+- Variabilele de mediu folosite doar la capturi demonstrative (filtrarea volumelor afișate) funcționează acum NUMAI într-un profil izolat de test; în instalarea oficială nu au niciun efect.
+
 ## v1.19.1 (2026-10-19) — Oferte selectabile, un singur prompt UAC, spațiu alocat corect
 
 ### Added

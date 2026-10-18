@@ -22,8 +22,8 @@ public static class DiskAnalyzerServiceRoots
             var name = string.IsNullOrEmpty(drive.VolumeLabel) ? drive.Name : $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})";
             result.Add(new DiskEntry(name, drive.RootDirectory.FullName, drive.TotalSize));
         }
-        // Doar pentru materiale demonstrative (capturi): MCSP_DEMO_VOLUMES="Nume1,Nume2" arata numai acele volume.
-        if (Environment.GetEnvironmentVariable("MCSP_DEMO_VOLUMES") is { Length: > 0 } only)
+        // Doar pentru materiale demonstrative (capturi), NUMAI in profil izolat — in instalarea oficiala variabila nu are niciun efect: MCSP_DEMO_VOLUMES="Nume1,Nume2" arata numai acele volume.
+        if (AppProfile.IsIsolated && Environment.GetEnvironmentVariable("MCSP_DEMO_VOLUMES") is { Length: > 0 } only)
         {
             var names = only.Split(',', StringSplitOptions.TrimEntries).ToHashSet(StringComparer.OrdinalIgnoreCase);
             result = result.Where(r => names.Any(n => r.Name.StartsWith(n, StringComparison.OrdinalIgnoreCase))).ToList();
