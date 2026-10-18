@@ -22,7 +22,13 @@ public static class DiagnosticLog
     public static string Directory_ => DirectoryOverride ?? Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MacMasterControlPro", "Logs");
     public static string FilePath => Path.Combine(Directory_, "mcsp.log");
-    public static string AppVersion => typeof(DiagnosticLog).Assembly.GetName().Version?.ToString(3) ?? "dev";
+    public static string AppVersion { get; } = ResolveVersion();
+    private static string ResolveVersion()
+    {
+        var asm = System.Reflection.Assembly.GetEntryAssembly() ?? typeof(DiagnosticLog).Assembly;
+        var info = (System.Reflection.CustomAttributeExtensions.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>(asm))?.InformationalVersion;
+        return string.IsNullOrEmpty(info) ? asm.GetName().Version?.ToString(3) ?? "dev" : info.Split('+')[0];
+    }
 
     public static void Write(string tag, string message) => Log("info", tag, "msg", message);
 

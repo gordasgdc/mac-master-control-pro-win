@@ -218,5 +218,30 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
     Check("machine id: 10 caractere Base32", MachineID.Display.Length == 10 && MachineID.Display.All(c => char.IsAsciiLetterUpper(c) || (c >= '2' && c <= '7')), MachineID.Display);
 }
 
+// ---- Clasificare verificată, total fără dublă numărare, Coș recuperabil ----
+{
+    Check("clasificare: CacheClip regenerabil, folder obisnuit fara regula",
+        SpaceClassifier.Flags(@"D:\Proj\CacheClip", true).Contains(SpaceFlag.Regenerable) && SpaceClassifier.Flags(@"D:\Proj\Originale", true).Count == 0);
+    Check("clasificare: protejate (iOS backup, Windows, Program Files, Documents intreg, OneDrive)",
+        SpaceClassifier.Flags(@"C:\Users\a\AppData\Roaming\Apple Computer\MobileSync\Backup", true).Contains(SpaceFlag.Protected)
+        && SpaceClassifier.Flags(@"C:\Windows\System32", true).Contains(SpaceFlag.Protected)
+        && SpaceClassifier.Flags(@"C:\Program Files\X", true).Contains(SpaceFlag.Protected)
+        && SpaceClassifier.Flags(@"C:\Users\a\Documents", true).Contains(SpaceFlag.Protected)
+        && !SpaceClassifier.Flags(@"C:\Users\a\Documents\Proiect", true).Contains(SpaceFlag.Protected)
+        && SpaceClassifier.Flags(@"C:\Users\a\OneDrive\x", true).Contains(SpaceFlag.Protected));
+    DiskNode N(string path, long size, bool dir = true, params DiskNode[] kids) { var n = new DiskNode(System.IO.Path.GetFileName(path), path, dir) { SizeBytes = size }; foreach (var k in kids) n.Children[k.Name] = k; return n; }
+    var cc = N(@"D:\V\P\CacheClip", 48); var om = N(@"D:\V\P\Optimized Media", 22); var tc = N(@"D:\V\P\teste_culoare", 35); var inner = N(@"D:\V\P\CacheClip\sub", 10);
+    var sum = SpaceMath.Summarize(new[] { cc, inner, om, tc });
+    Check("total: parintele inlocuieste copilul, neverificatul separat", sum.RecoverableBytes == 70 && sum.UnverifiedBytes == 35 && sum.MoveBytes == 105, $"{sum.RecoverableBytes}/{sum.UnverifiedBytes}");
+    var dupIn = N(@"D:\V\P\Optimized Media\copy.mov", 9, false); var om2 = N(@"D:\V\P\Optimized Media", 22, true, dupIn); var dupOut = N(@"D:\V\P\r1_copy.mov", 18, false);
+    var root = N(@"D:\V\P", 88, true, om2, N(@"D:\V\P\CacheClip", 48), dupOut);
+    var t = SpaceMath.VolumeTotals(root, new HashSet<string> { dupIn.Path, dupOut.Path });
+    Check("total volum: fara dubla numarare (70 + 18, suprapunere 9)", t.Regenerable == 70 && t.DuplicateSurplus == 18 && t.Overlap == 9 && t.Recoverable == 88, $"{t}");
+    var f = System.IO.Path.Combine(Tmp("bin"), "fixture.txt"); File.WriteAllText(f, "x");
+    var r = RecycleBinService.MoveToRecycleBin(f);
+    Check("Cos: fisier mutat recuperabil (nu sters definitiv)", r.Moved && !File.Exists(f), r.Error ?? "");
+    Check("Cos: cale inexistenta => eroare, fara efect", !RecycleBinService.MoveToRecycleBin(@"C:\nu\exista\" + Guid.NewGuid()).Moved);
+}
+
 Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
 return fail == 0 ? 0 : 1;

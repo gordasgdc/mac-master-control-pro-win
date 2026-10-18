@@ -28,6 +28,7 @@ public partial class MainWindow
         _dependencyChecker.CheckAll();
         RefreshDependencyBadge();
 
+        ArrangeSidebarGroups();
         RenderSidebarLabels();
         LanguageStore.Changed += RenderSidebarLabels;
         LanguageStore.Changed += () => { if (PageHost.Content is DashboardPage) PageHost.Content = new DashboardPage(); };
@@ -42,25 +43,57 @@ public partial class MainWindow
         _ = MaybeShowUpdatePopupAsync(respectDismissal: true);
     }
 
+    private static readonly System.Windows.Media.FontFamily IconFont = new("Segoe Fluent Icons, Segoe MDL2 Assets");
+
+    /// Eticheta din bara laterală: pictogramă desenată (nu emoji) + denumire clară.
+    private static void SetLabel(ListBoxItem item, string glyph, string text)
+    {
+        var sp = new StackPanel { Orientation = Orientation.Horizontal };
+        sp.Children.Add(new TextBlock { Text = glyph, FontFamily = IconFont, FontSize = 16, Width = 24, VerticalAlignment = VerticalAlignment.Center });
+        sp.Children.Add(new TextBlock { Text = text, VerticalAlignment = VerticalAlignment.Center });
+        item.Content = sp;
+        System.Windows.Automation.AutomationProperties.SetName(item, text);
+    }
+    private static string LabelOf(ListBoxItem item) => item.Content is StackPanel sp && sp.Children.Count > 1 && sp.Children[1] is TextBlock t ? t.Text : item.Content?.ToString() ?? "";
+
+    /// Toate modulele rămân, grupate după ce vrea utilizatorul să facă.
+    private void ArrangeSidebarGroups()
+    {
+        var groups = new (string Title, ListBoxItem[] Items)[]
+        {
+            ("Acasă", new[] { ItemDashboard }),
+            ("Spațiu", new[] { ItemDiskAnalyzer, ItemCleanup, ItemDuplicates, ItemUninstaller }),
+            ("Sistem și activitate", new[] { ItemProcessMonitor, ItemLoginItems, ItemDiskHealth, ItemRenderMode, ItemNetwork, ItemSecurity, ItemTweaks, ItemWindowLayouts }),
+            ("Media și Resolve", new[] { ItemResolveTools, ItemCloud }),
+            ("Aplicație", new[] { DependenciesItem, ItemSettings }),
+        };
+        ModuleList.Items.Clear();
+        foreach (var (title, items) in groups)
+        {
+            ModuleList.Items.Add(new ListBoxItem { Content = title, IsEnabled = false, Focusable = false, IsHitTestVisible = false, FontSize = 11, FontWeight = FontWeights.SemiBold, Opacity = 0.75, Margin = new Thickness(4, 10, 0, 2), Tag = "__header" });
+            foreach (var i in items) ModuleList.Items.Add(i);
+        }
+    }
+
     private void RenderSidebarLabels()
     {
-        ItemDashboard.Content = "📊 " + L.T("sidebar.dashboard");
-        ItemRenderMode.Content = "⚡️ " + L.T("sidebar.renderMode");
-        ItemLoginItems.Content = "🔌 " + L.T("sidebar.loginItems");
-        ItemProcessMonitor.Content = "⚙️ " + L.T("sidebar.processMonitor");
-        ItemUninstaller.Content = "🗑️ " + L.T("sidebar.uninstaller");
-        ItemDiskHealth.Content = "💽 " + L.T("sidebar.diskHealth");
-        ItemDiskAnalyzer.Content = "📊 " + L.T("sidebar.diskAnalyzer");
-        ItemResolveTools.Content = "🎬 " + L.T("sidebar.resolveTools");
-        ItemWindowLayouts.Content = "🪟 " + L.T("sidebar.windowLayouts");
-        ItemNetwork.Content = "🌐 " + L.T("sidebar.network");
-        ItemCloud.Content = "☁️ " + L.T("sidebar.cloud");
-        ItemCleanup.Content = "🧹 " + L.T("sidebar.cleanup");
-        ItemDuplicates.Content = "🧬 " + L.T("sidebar.duplicates");
-        ItemSecurity.Content = "🛡️ " + L.T("sidebar.security");
-        ItemTweaks.Content = "🛠️ " + L.T("sidebar.tweaks");
-        DependenciesItem.Content = "🧩 " + L.T("sidebar.dependencies");
-        ItemSettings.Content = "⚙️ " + L.T("sidebar.settings");
+        SetLabel(ItemDashboard, "\uE80F", L.T("sidebar.dashboard"));
+        SetLabel(ItemRenderMode, "\uE945", L.T("sidebar.renderMode"));
+        SetLabel(ItemLoginItems, "\uE7E8", L.T("sidebar.loginItems"));
+        SetLabel(ItemProcessMonitor, "\uE950", L.T("sidebar.processMonitor"));
+        SetLabel(ItemUninstaller, "\uE71D", L.T("sidebar.uninstaller"));
+        SetLabel(ItemDiskHealth, "\uEDA2", L.T("sidebar.diskHealth"));
+        SetLabel(ItemDiskAnalyzer, "\uEB05", L.T("sidebar.diskAnalyzer"));
+        SetLabel(ItemResolveTools, "\uE714", L.T("sidebar.resolveTools"));
+        SetLabel(ItemWindowLayouts, "\uE8A1", L.T("sidebar.windowLayouts"));
+        SetLabel(ItemNetwork, "\uE774", L.T("sidebar.network"));
+        SetLabel(ItemCloud, "\uE753", L.T("sidebar.cloud"));
+        SetLabel(ItemCleanup, "\uE74D", L.T("sidebar.cleanup"));
+        SetLabel(ItemDuplicates, "\uE8C8", L.T("sidebar.duplicates"));
+        SetLabel(ItemSecurity, "\uEA18", L.T("sidebar.security"));
+        SetLabel(ItemTweaks, "\uE9E9", L.T("sidebar.tweaks"));
+        SetLabel(DependenciesItem, "\uE7B8", L.T("sidebar.dependencies"));
+        SetLabel(ItemSettings, "\uE713", L.T("sidebar.settings"));
         CheckUpdatesButton.Content = L.T("sidebar.checkUpdates");
 
         // Cerinta directa (2026-09-01): "cand te duci cu mouse-ul peste un
@@ -112,7 +145,8 @@ public partial class MainWindow
             if (obj is not ListBoxItem item) continue;
             if (string.IsNullOrEmpty(query)) { item.Visibility = Visibility.Visible; continue; }
             var tag = item.Tag as string ?? "";
-            var haystack = RemoveDiacritics($"{item.Content} {item.ToolTip} {(SearchKeywords.TryGetValue(tag, out var kw) ? kw : "")}").ToLowerInvariant();
+            if (tag == "__header") { item.Visibility = Visibility.Collapsed; continue; }
+            var haystack = RemoveDiacritics($"{LabelOf(item)} {item.ToolTip} {(SearchKeywords.TryGetValue(tag, out var kw) ? kw : "")}").ToLowerInvariant();
             item.Visibility = haystack.Contains(query) ? Visibility.Visible : Visibility.Collapsed;
         }
     }

@@ -3,68 +3,109 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="0,0,0,16">
-        <TextBlock Text="📊 Analiză Disc" FontSize="22" FontWeight="Bold" Margin="0,0,0,4" />
-        <TextBlock Text="Indexare completă o singură dată — după aceea, navigarea în orice subfolder e instantă, chiar dacă navighezi în alt meniu între timp." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,16" TextWrapping="Wrap" />
+    <!-- Studio Glass: grafic radial mare + listă scurtă + selecție vizibilă + o acțiune principală. Tabelele stau în „Tabel avansat”. -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- Alegere radacina (afisata doar cat timp nu exista niciun arbore incarcat) -->
-        <StackPanel x:Name="RootPickerPanel">
-            <TextBlock Text="Alege ce vrei să analizezi:" FontWeight="SemiBold" Margin="0,0,0,8" />
-            <StackPanel x:Name="RootsList" />
-        </StackPanel>
-
-        <!-- Progres indexare completa -->
-        <StackPanel x:Name="IndexingPanel" Visibility="Collapsed">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="0,0,10,0" />
-                <TextBlock x:Name="IndexingStatusText" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                <ui:Button x:Name="StopScanButton" Content="Oprește" Click="OnStopScanClicked" Margin="12,0,0,0" />
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Ce ocupă spațiul" FontSize="28" FontWeight="Bold" />
+                <TextBlock Text="Alege un volum, intră în foldere, bifează ce vrei să revizuiești." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,2,0,0" />
             </StackPanel>
-            <TextBlock Text="O singură trecere completă — după ce se termină, orice subfolder se deschide instant, fără rescanare." FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+            <StackPanel x:Name="ViewToggle" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" Visibility="Collapsed">
+                <ui:ToggleSwitch x:Name="AdvancedToggle" Content="Tabel avansat" Checked="OnViewToggled" Unchecked="OnViewToggled" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Grid.Row="1">
+            <ItemsControl x:Name="VolumesList" Margin="0,12,0,0">
+                <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <TextBlock x:Name="PickerHint" Text="Alege un volum ca să-l analizezi. Rezultatul rămâne salvat; la următoarea deschidere nu se reia scanarea." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
+            <StackPanel x:Name="IndexingPanel" Visibility="Collapsed" Margin="0,16,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <ui:ProgressRing IsIndeterminate="True" Width="18" Height="18" Margin="0,0,10,0" />
+                    <TextBlock x:Name="IndexingStatusText" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ui:Button x:Name="StopScanButton" Content="Oprește" Click="OnStopScanClicked" Margin="12,0,0,0" />
+                </StackPanel>
+                <TextBlock Text="O singură trecere completă. După ce se termină, orice subfolder se deschide instant." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,6,0,0" />
+            </StackPanel>
+            <Grid x:Name="CrumbBar" Margin="0,8,0,0" Visibility="Collapsed">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="FreshnessText" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ui:ProgressRing x:Name="RescanSpinner" IsIndeterminate="True" Width="14" Height="14" Margin="0,0,8,0" Visibility="Collapsed" />
+                    <ui:Button x:Name="StopRescanButton" Content="Oprește" Click="OnStopScanClicked" Margin="0,0,8,0" Visibility="Collapsed" />
+                    <ui:Button x:Name="RescanButton" Content="Verifică modificările" Appearance="Transparent" Click="OnRescanClicked" />
+                    <ui:Button x:Name="ResetCacheButton" Content="Resetează cache" Appearance="Transparent" Click="OnResetCacheClicked" />
+                </StackPanel>
+            </Grid>
+            <TextBlock x:Name="NoticeText" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,4,0,0" Visibility="Collapsed" TextWrapping="Wrap" />
         </StackPanel>
 
-        <!-- Rezultat: banner cache + breadcrumb + bara proportionala + lista -->
-        <StackPanel x:Name="ResultPanel" Visibility="Collapsed">
-
-            <Border x:Name="CacheBanner" Background="{DynamicResource CardBackgroundBrush}" CornerRadius="8" Padding="10" Margin="0,0,0,12">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" x:Name="CacheBannerText" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" x:Name="CacheBannerActions">
-                        <ui:ProgressRing x:Name="RescanSpinner" IsIndeterminate="True" Width="14" Height="14" Margin="0,0,8,0" Visibility="Collapsed" />
-                        <TextBlock x:Name="RescanningText" Text="Rescanez…" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" Visibility="Collapsed" />
-                        <ui:Button x:Name="StopRescanButton" Content="Oprește" Click="OnStopScanClicked" Margin="0,0,8,0" Visibility="Collapsed" />
-                        <ui:Button x:Name="RescanButton" Content="Verifică modificările" Click="OnRescanClicked" Margin="0,0,8,0" />
-                        <ui:Button x:Name="ResetCacheButton" Content="Resetare Cache &amp; Scanare Completă" Appearance="Transparent" Click="OnResetCacheClicked" />
+        <Grid Grid.Row="2" x:Name="ResultPanel" Visibility="Collapsed" Margin="0,6,0,0">
+            <Grid x:Name="MapView">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" MinWidth="320" /><ColumnDefinition Width="24" /><ColumnDefinition Width="420" /></Grid.ColumnDefinitions>
+                <controls:SunburstControl x:Name="Chart" Margin="0,0,0,90" MinHeight="320" />
+                <Grid Grid.Column="2" Margin="0,0,0,90">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel x:Name="FocusPanel" Orientation="Horizontal" Margin="0,0,0,10" />
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"><StackPanel x:Name="EntryList" /></ScrollViewer>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,8,0,0">
+                        <TextBlock x:Name="RecoverableText" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                        <ui:Button x:Name="CalcButton" Content="Cum se calculează" Appearance="Transparent" Click="OnCalcClicked" FontSize="12" />
                     </StackPanel>
                 </Grid>
-            </Border>
-
-            <Grid Margin="0,0,0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <ui:Button Grid.Column="0" Content="💽" Appearance="Transparent" Click="OnRootIconClicked" ToolTip="Înapoi la alegerea discului/folderului" Margin="0,0,4,0" />
-                <StackPanel Grid.Column="1" x:Name="BreadcrumbPanel" Orientation="Horizontal" VerticalAlignment="Center" />
             </Grid>
+            <DataGrid x:Name="AdvancedGrid" Visibility="Collapsed" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                      Margin="0,0,0,90" Background="Transparent" BorderThickness="0" CanUserAddRows="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nume" Binding="{Binding Name}" Width="*" />
+                    <DataGridTextColumn Header="Stare" Binding="{Binding State}" Width="170" />
+                    <DataGridTextColumn Header="Logic" Binding="{Binding Logical}" Width="100" />
+                    <DataGridTextColumn Header="Alocat" Binding="{Binding Allocated}" Width="100" />
+                    <DataGridTextColumn Header="%" Binding="{Binding Percent}" Width="70" />
+                </DataGrid.Columns>
+            </DataGrid>
 
-            <Border x:Name="ProportionalBarHost" Height="28" CornerRadius="6" ClipToBounds="True" Margin="0,0,0,12">
-                <Grid x:Name="ProportionalBar" />
+            <Border x:Name="Tray" VerticalAlignment="Bottom" Margin="0,0,0,8" Padding="16,12" CornerRadius="16" Visibility="Collapsed"
+                    Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="1">
+                <Border.Effect><DropShadowEffect BlurRadius="22" ShadowDepth="5" Opacity="0.25" Direction="270" /></Border.Effect>
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock x:Name="TrayTitle" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TraySub" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </StackPanel>
+                    <ui:Button Grid.Column="1" Content="Deselectează" Appearance="Transparent" Click="OnClearSelection" Margin="0,0,10,0" />
+                    <ui:Button Grid.Column="2" Content="Revizuiește selecția" Appearance="Primary" Click="OnReviewClicked" />
+                </Grid>
             </Border>
+        </Grid>
 
-            <TextBlock x:Name="EmptyFolderText" Text="Folder gol." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Visibility="Collapsed" Margin="0,0,0,8" />
-
-            <StackPanel x:Name="EntryList" />
-        </StackPanel>
-
-        <TextBlock x:Name="DeleteErrorText" FontSize="11" Foreground="{DynamicResource StatusErrorBrush}" Margin="0,10,0,0" Visibility="Collapsed" TextWrapping="Wrap" />
-
-        <controls:TerminalLogView x:Name="Log" Margin="0,10,0,0" />
-    </StackPanel>
-    </ScrollViewer>
+        <Border x:Name="Sheet" Grid.RowSpan="3" Visibility="Collapsed" Background="#99101418">
+            <Border HorizontalAlignment="Right" Width="540" Background="{DynamicResource ApplicationBackgroundBrush}" Padding="24,22">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock x:Name="SheetTitle" FontSize="22" FontWeight="Bold" TextWrapping="Wrap" />
+                        <TextBlock x:Name="SheetSub" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,12" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"><StackPanel x:Name="SheetBody" /></ScrollViewer>
+                    <Grid Grid.Row="2" Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="SheetTotal" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ui:Button x:Name="SheetBack" Grid.Column="1" Content="Înapoi" Click="OnSheetBack" Margin="0,0,8,0" />
+                        <ui:Button x:Name="SheetRun" Grid.Column="2" Appearance="Primary" Click="OnSheetRun" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </Border>
+    </Grid>
 </UserControl>
