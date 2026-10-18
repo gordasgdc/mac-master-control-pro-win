@@ -10,12 +10,12 @@
         <TextBlock x:Name="BodyText" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,12" />
         <StackPanel x:Name="OffersPanel" Margin="0,0,0,12" />
         <StackPanel x:Name="LicensePanel">
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <ui:Button x:Name="RequestButton" Appearance="Primary" Click="OnRequestClicked" Margin="0,0,8,0" />
-                <ui:Button x:Name="PageButton" Click="OnPageClicked" Margin="0,0,8,0" />
-                <ui:Button x:Name="CopyIdButton" Click="OnCopyMachineId" Margin="0,0,8,0" />
-                <ui:Button x:Name="CopyRequestButton" Click="OnCopyRequest" />
-            </StackPanel>
+            <WrapPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <ui:Button x:Name="RequestButton" Appearance="Primary" Click="OnRequestClicked" Margin="0,0,8,8" />
+                <ui:Button x:Name="PageButton" Click="OnPageClicked" Margin="0,0,8,8" />
+                <ui:Button x:Name="CopyIdButton" Click="OnCopyMachineId" Margin="0,0,8,8" />
+                <ui:Button x:Name="CopyRequestButton" Click="OnCopyRequest" Margin="0,0,0,8" />
+            </WrapPanel>
             <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <ui:TextBox x:Name="KeyBox" />

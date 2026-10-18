@@ -27,6 +27,7 @@ public partial class AccessGateWindow : Window
     private void Render()
     {
         var p = LicenseManager.Shared.Provider;
+        Title = L.X("Acces", "Access", "Acceso");
         switch (p.Mode)
         {
             case AccessMode.DemoLocked l:
@@ -61,10 +62,16 @@ public partial class AccessGateWindow : Window
                 var offer = o;
                 var isSel = _selected is { } s0 && s0.Id == offer.Id && s0.Version == offer.Version;
                 var row = new Grid();
-                row.ColumnDefinitions.Add(new ColumnDefinition()); row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                row.Children.Add(new TextBlock { Text = offer.Title, VerticalAlignment = VerticalAlignment.Center });
-                var amt = new TextBlock { Text = offer.AmountText, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(amt, 1); row.Children.Add(amt);
-                var radio = new RadioButton { GroupName = "offers", IsChecked = isSel, Content = row, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(8, 8, 10, 8), Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.Hand };
+                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) }); row.ColumnDefinitions.Add(new ColumnDefinition()); row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                var indicator = new Grid { Width = 20, Height = 20, HorizontalAlignment = HorizontalAlignment.Left, VerticalAlignment = VerticalAlignment.Center };
+                var ring = new System.Windows.Shapes.Ellipse { StrokeThickness = 1.5 }; ring.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, isSel ? "AccentFillColorDefaultBrush" : "TextSecondaryBrush");
+                indicator.Children.Add(ring);
+                if (isSel) { var dot = new System.Windows.Shapes.Ellipse { Width = 10, Height = 10 }; dot.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, "AccentFillColorDefaultBrush"); indicator.Children.Add(dot); }
+                row.Children.Add(indicator);
+                var title = new TextBlock { Text = offer.Title, VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(title, 1); row.Children.Add(title);
+                var amt = new TextBlock { Text = offer.AmountText, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(amt, 2); row.Children.Add(amt);
+                var radio = new RadioButton { GroupName = "offers", IsChecked = isSel, Content = row, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(8, 8, 10, 8), Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.Hand,
+                    Template = (ControlTemplate)System.Windows.Markup.XamlReader.Parse("<ControlTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' TargetType='RadioButton'><Border Background='{TemplateBinding Background}' Padding='{TemplateBinding Padding}'><ContentPresenter/></Border></ControlTemplate>") };
                 System.Windows.Automation.AutomationProperties.SetName(radio, $"{offer.Title}, {offer.AmountText}");
                 radio.Checked += (_, _) => { if (_selected is not { } cur || cur.Id != offer.Id || cur.Version != offer.Version) { _selected = (offer.Id, offer.Version); _notice = null; Render(); } };
                 var border = new Border { Margin = new Thickness(0, 0, 0, 6), CornerRadius = new CornerRadius(10), BorderThickness = new Thickness(isSel ? 1.5 : 1), Child = radio };
