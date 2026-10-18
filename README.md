@@ -26,7 +26,7 @@ See what takes up space on your drives, review it, and move it to the Recycle Bi
 ## Access, licence and limits
 
 - The app runs in **Demo** without an account: 10 minutes of active use, then the next session 48 hours after it ends. Ending the trial never deletes your settings, accounts or data.
-- The official edition takes a signed licence in return for a donation (offers are a signed list read inside the app: 5 € / 1 month, 10 € / 3 months, 15 € / 1 year). **One licence = one computer** (Windows *or* Mac); moving it means deactivating the old activation (or an administrator reset) and activating the new one.
+- The official edition takes a signed licence in return for a donation (offers are a signed list read inside the app: 5 € / 1 month, 10 € / 3 months, 15 € / 1 year). **One licence = one computer** (Windows *or* Mac); moving it means the old right is withdrawn and a new licence is issued for the new computer (use “Request a licence” in the app).
 - The community edition built from this repository has no activation and stays in Demo.
 - Known limits: hard links are counted per link; small files are listed individually (macOS groups them); cloud-only files are not downloaded to be measured; on Windows ARM the x64 build runs through emulation.
 
