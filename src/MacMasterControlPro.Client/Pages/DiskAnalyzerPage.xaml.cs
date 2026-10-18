@@ -73,7 +73,7 @@ public partial class DiskAnalyzerPage : UserControl
         var ps = new StackPanel { Width = 112, Margin = new Thickness(4) };
         ps.Children.Add(new TextBlock { Text = "\uE8F4", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), FontSize = 34, HorizontalAlignment = HorizontalAlignment.Center, Foreground = (Brush)FindResource("LinkAccentBrush"), Margin = new Thickness(0, 6, 0, 6) });
         ps.Children.Add(new TextBlock { Text = L.X("Alege un folder", "Choose a folder", "Elige una carpeta"), TextAlignment = TextAlignment.Center, FontWeight = FontWeights.Medium });
-        ps.Children.Add(new TextBlock { Text = L.X("orice folder sau volum", "any folder or volume", "cualquier carpeta o volumen"), FontSize = 11, TextAlignment = TextAlignment.Center, Foreground = (Brush)FindResource("TextSecondaryBrush") });
+        ps.Children.Add(new TextBlock { Text = L.X("folder sau volum", "folder or volume", "carpeta o volumen"), FontSize = 11, TextAlignment = TextAlignment.Center, Foreground = (Brush)FindResource("TextSecondaryBrush") });
         pick.Content = ps; pick.Click += (_, _) => ChooseFolder();
         VolumesList.Items.Add(pick);
         foreach (var root in DiskAnalyzerServiceRoots.AvailableRoots())
@@ -227,7 +227,7 @@ public partial class DiskAnalyzerPage : UserControl
     private void RenderFreshness()
     {
         FreshnessText.Text = (_lastScannedAtUtc is null ? "" : _verifiedAtUtc is { } v ? string.Format(Culture, L.X("Verificat {0:d MMMM, HH:mm}", "Verified {0:d MMMM, HH:mm}", "Verificado {0:d MMMM, HH:mm}"), v.ToLocalTime()) : string.Format(Culture, L.X("Din analiza de {0:d MMMM, HH:mm}, neverificată", "From the analysis of {0:d MMMM, HH:mm}, not verified", "Del análisis del {0:d MMMM, HH:mm}, sin verificar"), _lastScannedAtUtc.Value.ToLocalTime()))
-            + (_accessErrors > 0 ? $" · {_accessErrors} "+L.X("inaccesibile", "inaccessible", "inaccesibles") : "");
+            + (_accessErrors > 0 ? $" · {_accessErrors} "+(_accessErrors == 1 ? L.X("inaccesibil", "inaccessible", "inaccesible") : L.X("inaccesibile", "inaccessible", "inaccesibles")) : "");
         RescanSpinner.Visibility = StopRescanButton.Visibility = _isRescanning ? Visibility.Visible : Visibility.Collapsed;
         RescanButton.Visibility = ResetCacheButton.Visibility = _isRescanning ? Visibility.Collapsed : Visibility.Visible;
     }
@@ -278,11 +278,12 @@ public partial class DiskAnalyzerPage : UserControl
 
     private UIElement BuildChip(SpaceFlag f)
     {
+        var dark = Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme() == Wpf.Ui.Appearance.ApplicationTheme.Dark;
         var (fg, bg) = f switch
         {
-            SpaceFlag.Regenerable => (Color.FromRgb(0x11, 0x7A, 0x52), Color.FromArgb(0x30, 0x2A, 0x9D, 0x6F)),
-            SpaceFlag.Duplicate => (Color.FromRgb(0x5B, 0x3F, 0xC4), Color.FromArgb(0x30, 0x7A, 0x52, 0xD8)),
-            _ => (Color.FromRgb(0x6B, 0x77, 0x85), Color.FromArgb(0x30, 0x80, 0x80, 0x80)),
+            SpaceFlag.Regenerable => dark ? (Color.FromRgb(0x6E, 0xE0, 0xAE), Color.FromArgb(0x40, 0x2A, 0x9D, 0x6F)) : (Color.FromRgb(0x11, 0x7A, 0x52), Color.FromArgb(0x30, 0x2A, 0x9D, 0x6F)),
+            SpaceFlag.Duplicate => dark ? (Color.FromRgb(0xC4, 0xB5, 0xFF), Color.FromArgb(0x40, 0x7A, 0x52, 0xD8)) : (Color.FromRgb(0x5B, 0x3F, 0xC4), Color.FromArgb(0x30, 0x7A, 0x52, 0xD8)),
+            _ => dark ? (Color.FromRgb(0xB4, 0xBE, 0xCA), Color.FromArgb(0x40, 0x80, 0x80, 0x80)) : (Color.FromRgb(0x6B, 0x77, 0x85), Color.FromArgb(0x30, 0x80, 0x80, 0x80)),
         };
         var sp = new StackPanel { Orientation = Orientation.Horizontal };
         sp.Children.Add(new TextBlock { Text = FlagGlyph(f), FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), FontSize = 11, Foreground = new SolidColorBrush(fg), Margin = new Thickness(0, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center });
@@ -316,12 +317,14 @@ public partial class DiskAnalyzerPage : UserControl
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         foreach (var f in flags.OrderBy(x => x)) chips.Children.Add(BuildChip(f));
         Grid.SetColumn(chips, 3); grid.Children.Add(chips);
-        var info = new Button { Content = "", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), Background = Brushes.Transparent, BorderThickness = new Thickness(0), Width = 28, ToolTip = L.X("Detalii", "Details", "Detalles"), Foreground = (Brush)FindResource("TextSecondaryBrush") };
+        var info = new Button { Content = "", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0), HorizontalContentAlignment = HorizontalAlignment.Center, Width = 28, ToolTip = L.X("Detalii", "Details", "Detalles"), Foreground = (Brush)FindResource("TextSecondaryBrush") };
+        System.Windows.Automation.AutomationProperties.SetName(info, L.X("Detalii ", "Details ", "Detalles ") + n.Name);
         info.Click += (_, _) => { _openDetail = _openDetail == n.Path ? null : n.Path; _focus = n; RenderResult(); };
         Grid.SetColumn(info, 4); grid.Children.Add(info);
         if (n.IsDirectory)
         {
-            var go = new Button { Content = "", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), Background = Brushes.Transparent, BorderThickness = new Thickness(0), Width = 28, ToolTip = $"{L.X("Deschide", "Open", "Abrir")} {n.Name}", Foreground = (Brush)FindResource("TextSecondaryBrush") };
+            var go = new Button { Content = "", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(0), HorizontalContentAlignment = HorizontalAlignment.Center, Width = 28, ToolTip = $"{L.X("Deschide", "Open", "Abrir")} {n.Name}", Foreground = (Brush)FindResource("TextSecondaryBrush") };
+            System.Windows.Automation.AutomationProperties.SetName(go, L.X("Deschide ", "Open ", "Abrir ") + n.Name);
             go.Click += (_, _) => Drill(n); Grid.SetColumn(go, 5); grid.Children.Add(go);
         }
         var border = new Border { Child = grid, CornerRadius = new CornerRadius(10), Background = selected ? new SolidColorBrush(Color.FromArgb(0x26, 0x2F, 0x6B, 0xF0)) : Brushes.Transparent };

@@ -33,7 +33,8 @@ public partial class DashboardPage : UserControl
 
     private void RenderVolumes()
     {
-        foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && d.DriveType is DriveType.Fixed or DriveType.Removable or DriveType.Network))
+        var allowed = DiskAnalyzerServiceRoots.AvailableRoots().Select(r => r.Path.TrimEnd('\\')).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var drive in DriveInfo.GetDrives().Where(d => d.IsReady && d.DriveType is DriveType.Fixed or DriveType.Removable or DriveType.Network).Where(d => allowed.Contains(d.RootDirectory.FullName.TrimEnd('\\'))))
         {
             long total = 0, free = 0;
             try { total = drive.TotalSize; free = drive.AvailableFreeSpace; } catch { }
@@ -47,7 +48,7 @@ public partial class DashboardPage : UserControl
             sp.Children.Add(new TextBlock { Text = string.IsNullOrEmpty(drive.VolumeLabel) ? drive.Name : $"{drive.VolumeLabel} ({drive.Name.TrimEnd('\\')})", FontWeight = FontWeights.SemiBold, TextAlignment = TextAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis, Margin = new Thickness(0, 6, 0, 0) });
             sp.Children.Add(bar);
             sp.Children.Add(new TextBlock { Text = $"{DiskNode.FormatBytes(used)} "+L.X("folosit", "used", "usado")+$" · {DiskNode.FormatBytes(free)} "+L.X("liber", "free", "libre"), FontSize = 11.5, TextAlignment = TextAlignment.Center, Foreground = (Brush)FindResource("TextSecondaryBrush") });
-            var card = new Border { Child = sp, Padding = new Thickness(16), Margin = new Thickness(0, 0, 14, 14), CornerRadius = new CornerRadius(16), Background = (Brush)FindResource("CardBackgroundBrush"), BorderBrush = (Brush)FindResource("CardStrokeBrush"), BorderThickness = new Thickness(1), Cursor = System.Windows.Input.Cursors.Hand, ToolTip = "Analizează acest volum" };
+            var card = new Border { Child = sp, Padding = new Thickness(16), Margin = new Thickness(0, 0, 14, 14), CornerRadius = new CornerRadius(16), Background = (Brush)FindResource("CardBackgroundBrush"), BorderBrush = (Brush)FindResource("CardStrokeBrush"), BorderThickness = new Thickness(1), Cursor = System.Windows.Input.Cursors.Hand, ToolTip = L.X("Analizează acest volum", "Analyze this volume", "Analizar este volumen") };
             System.Windows.Automation.AutomationProperties.SetName(card, $"{drive.Name}: {DiskNode.FormatBytes(used)} / {DiskNode.FormatBytes(total)}");
             card.MouseLeftButtonUp += (_, _) => Navigate("DiskAnalyzer");
             VolumeCards.Items.Add(card);

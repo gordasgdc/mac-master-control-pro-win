@@ -89,11 +89,11 @@ public static class DiskHealthService
         }
         catch (Exception ex)
         {
-            return (null, $"Scrierea a eșuat: {ex.Message}");
+            return (null, CoreL.X($"Scrierea a eșuat: {ex.Message}", $"Write failed: {ex.Message}", $"Falló la escritura: {ex.Message}"));
         }
         sw.Stop();
         try { File.Delete(testFile); } catch { /* best-effort */ }
-        if (sw.Elapsed.TotalSeconds <= 0) return (null, "Măsurătoarea a fost prea rapidă ca să fie exactă — încearcă din nou.");
+        if (sw.Elapsed.TotalSeconds <= 0) return (null, CoreL.X("Măsurătoarea a fost prea rapidă ca să fie exactă — încearcă din nou.", "The measurement was too fast to be accurate — try again.", "La medición fue demasiado rápida para ser exacta; inténtalo de nuevo."));
         return ((sizeBytes / 1_048_576.0) / sw.Elapsed.TotalSeconds, null);
     }
 }

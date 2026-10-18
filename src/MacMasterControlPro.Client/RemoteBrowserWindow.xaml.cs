@@ -62,7 +62,7 @@ public partial class RemoteBrowserWindow
 
     private void OnUploadClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFileDialog { Title = "Alege fișiere de încărcat", Multiselect = true };
+        var dialog = new OpenFileDialog { Title = L.X("Alege fișiere de încărcat", "Choose files to upload", "Elige los archivos que subir"), Multiselect = true };
         if (dialog.ShowDialog() != true) return;
         Log.Clear();
         _service.Upload(_remoteName, _path, dialog.FileNames, line => Dispatcher.Invoke(() => Log.Append(line)), _ => Dispatcher.Invoke(async () => await ReloadAsync()));
@@ -71,7 +71,7 @@ public partial class RemoteBrowserWindow
     private void OnDownloadClicked(object sender, RoutedEventArgs e)
     {
         if (EntriesList.SelectedItem is not RemoteEntry entry) return;
-        var dialog = new OpenFolderDialog { Title = "Alege unde se descarcă" };
+        var dialog = new OpenFolderDialog { Title = L.X("Alege unde se descarcă", "Choose where to download", "Elige dónde descargar") };
         if (dialog.ShowDialog() != true) return;
         Log.Clear();
         _service.Download(_remoteName, entry.Path, dialog.FolderName, line => Dispatcher.Invoke(() => Log.Append(line)), _ => { });
@@ -82,10 +82,10 @@ public partial class RemoteBrowserWindow
         if (EntriesList.SelectedItem is not RemoteEntry entry) return;
         var confirm = new Wpf.Ui.Controls.MessageBox
         {
-            Title = $"Ștergi „{entry.Name}”?",
-            Content = $"Această acțiune e ireversibilă — fișierul/folderul se șterge direct de pe {_remoteName}.",
-            PrimaryButtonText = "Șterge definitiv",
-            CloseButtonText = "Anulează",
+            Title = L.X($"Ștergi „{entry.Name}”?", $"Delete “{entry.Name}”?", $"¿Eliminar «{entry.Name}»?"),
+            Content = L.X($"Această acțiune e ireversibilă — fișierul/folderul se șterge direct de pe {_remoteName}.", $"This action is irreversible — the file/folder is deleted directly from {_remoteName}.", $"Esta acción es irreversible: el archivo o la carpeta se elimina directamente de {_remoteName}."),
+            PrimaryButtonText = L.X("Șterge definitiv", "Delete permanently", "Eliminar definitivamente"),
+            CloseButtonText = L.X("Anulează", "Cancel", "Cancelar"),
         };
         confirm.ShowDialogAsync().ContinueWith(t =>
         {

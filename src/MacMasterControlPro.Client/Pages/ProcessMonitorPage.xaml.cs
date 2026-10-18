@@ -27,7 +27,7 @@ public partial class ProcessMonitorPage : UserControl
     private void OnToggleSortClicked(object sender, RoutedEventArgs e)
     {
         _largestFirst = !_largestFirst;
-        SortOrderButton.Content = _largestFirst ? "Cel mai mare întâi" : "Cel mai mic întâi";
+        SortOrderButton.Content = _largestFirst ? L.X("Cel mai mare întâi", "Largest first", "El mayor primero") : L.X("Cel mai mic întâi", "Smallest first", "El menor primero");
         Refresh();
     }
 
@@ -60,8 +60,8 @@ public partial class ProcessMonitorPage : UserControl
 
             var closeButton = new Wpf.Ui.Controls.Button
             {
-                Content = "Închide", Padding = new Thickness(8, 2, 8, 2),
-                ToolTip = "Cere procesului să se închidă normal.",
+                Content = L.X("Închide", "Close", "Cerrar"), Padding = new Thickness(8, 2, 8, 2),
+                ToolTip = L.X("Cere procesului să se închidă normal.", "Asks the process to quit normally.", "Pide al proceso que se cierre con normalidad."),
             };
             closeButton.Click += (_, _) => { ProcessMonitorService.Terminate(process.Pid, force: false); Refresh(); };
             Grid.SetColumn(closeButton, 2);

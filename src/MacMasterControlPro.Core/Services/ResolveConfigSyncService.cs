@@ -21,7 +21,7 @@ public static class ResolveConfigSyncService
     {
         new ResolveConfigFolder { Label = "LUT-uri (LUT)", Path = System.IO.Path.Combine(Base, "LUT") },
         new ResolveConfigFolder { Label = "Fusion — Macro-uri", Path = System.IO.Path.Combine(Base, "Fusion", "Macros") },
-        new ResolveConfigFolder { Label = "Fusion — Șabloane", Path = System.IO.Path.Combine(Base, "Fusion", "Templates") },
+        new ResolveConfigFolder { Label = CoreL.X("Fusion — Șabloane", "Fusion — Templates", "Fusion — Plantillas"), Path = System.IO.Path.Combine(Base, "Fusion", "Templates") },
         new ResolveConfigFolder { Label = "Fusion — Script-uri", Path = System.IO.Path.Combine(Base, "Fusion", "Scripts") },
     };
 }

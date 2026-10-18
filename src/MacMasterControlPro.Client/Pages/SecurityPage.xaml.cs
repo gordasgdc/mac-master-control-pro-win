@@ -77,7 +77,7 @@ public partial class SecurityPage : UserControl
         }
         if (check.SettingsUri != null)
         {
-            var openButton = new Wpf.Ui.Controls.Button { Content = "Deschide Settings", Appearance = Wpf.Ui.Controls.ControlAppearance.Primary, Margin = new Thickness(0, 12, 0, 0) };
+            var openButton = new Wpf.Ui.Controls.Button { Content = L.X("Deschide Settings", "Open Settings", "Abrir Configuración"), Appearance = Wpf.Ui.Controls.ControlAppearance.Primary, Margin = new Thickness(0, 12, 0, 0) };
             openButton.Click += (_, _) =>
             {
                 try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(check.SettingsUri!) { UseShellExecute = true }); }
@@ -85,7 +85,7 @@ public partial class SecurityPage : UserControl
             };
             stack.Children.Add(openButton);
         }
-        var closeButton = new Wpf.Ui.Controls.Button { Content = "Închide", Margin = new Thickness(0, 8, 0, 0) };
+        var closeButton = new Wpf.Ui.Controls.Button { Content = L.X("Închide", "Close", "Cerrar"), Margin = new Thickness(0, 8, 0, 0) };
         var window = new Window
         {
             Title = check.Title,
@@ -104,7 +104,7 @@ public partial class SecurityPage : UserControl
     {
         if (!RequireLicense()) return;
         var ok = SecurityService.EnableFirewallAllProfiles();
-        StatusText.Text = ok ? "✔ Firewall activat pe toate profilurile." : "EROARE — verifică promptul UAC.";
+        StatusText.Text = ok ? "✔ Firewall activat pe toate profilurile." : L.X("EROARE — verifică promptul UAC.", "ERROR — check the UAC prompt.", "ERROR: revisa el aviso de UAC.");
         Rescan();
     }
 
@@ -112,7 +112,7 @@ public partial class SecurityPage : UserControl
     {
         if (!RequireLicense()) return;
         var ok = SecurityService.RequirePasswordImmediatelyOnWake();
-        StatusText.Text = ok ? "✔ Parola va fi cerută imediat la trezire." : "EROARE — verifică promptul UAC.";
+        StatusText.Text = ok ? L.X("✔ Parola va fi cerută imediat la trezire.", "✔ The password will be required immediately on wake.", "✔ Se pedirá la contraseña inmediatamente al reactivar.") : L.X("EROARE — verifică promptul UAC.", "ERROR — check the UAC prompt.", "ERROR: revisa el aviso de UAC.");
     }
 
     private bool RequireLicense()

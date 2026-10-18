@@ -39,6 +39,7 @@ public partial class MainWindow
         // la acest punct PageHost e deja asignat, deci OnModuleSelected
         // (declansat de asta) e sigur.
         ModuleList.SelectedItem = ItemDashboard;
+        if (DemoHooks.Page is { } demoPage) NavigateTo(demoPage);
 
         _ = MaybeShowUpdatePopupAsync(respectDismissal: true);
     }
@@ -102,6 +103,7 @@ public partial class MainWindow
         SetLabel(DependenciesItem, "\uE7B8", L.T("sidebar.dependencies"));
         SetLabel(ItemSettings, "\uE713", L.T("sidebar.settings"));
         CheckUpdatesButton.Content = L.T("sidebar.checkUpdates");
+        SearchBox.PlaceholderText = L.X("Caută (duplicate, dezinstalare, reglare)…", "Search (duplicates, uninstall, tweaks)…", "Buscar (duplicados, desinstalar, ajustes)…");
 
         // Cerinta directa (2026-09-01): "cand te duci cu mouse-ul peste un
         // buton, sa-ti apara o descriere de ce face".
@@ -200,7 +202,7 @@ public partial class MainWindow
     public void RefreshProfile()
     {
         var name = UserProfileStore.Name;
-        ProfileNameText.Text = string.IsNullOrWhiteSpace(name) ? "Anonim" : name;
+        ProfileNameText.Text = string.IsNullOrWhiteSpace(name) ? L.X("Anonim", "Anonymous", "Anónimo") : name;
         ProfileEmailText.Text = UserProfileStore.Email;
     }
 

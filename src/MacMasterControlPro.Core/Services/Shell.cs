@@ -57,7 +57,7 @@ public static class Shell
         }
         catch (Exception ex)
         {
-            return $"Eroare executie: {ex.Message}";
+            return CoreL.X($"Eroare executie: {ex.Message}", $"Execution error: {ex.Message}", $"Error de ejecución: {ex.Message}");
         }
     }
 

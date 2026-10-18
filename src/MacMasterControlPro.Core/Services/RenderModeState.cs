@@ -69,12 +69,12 @@ public static class RenderModeState
     public static List<string> ChangeSummary(RenderModeSnapshot s)
     {
         var l = new List<string>();
-        l.Add(!s.Services.TryGetValue("WSearch", out var ws) ? "Windows Search: stare necunoscută, nu se modifică."
-            : ws.StartType == 4 && !ws.Running ? "Windows Search: deja oprit, rămâne neschimbat."
-            : "Windows Search: se oprește și se dezactivează temporar; la dezactivare revine la modul de pornire de dinainte.");
-        l.Add(!s.Services.TryGetValue("fhsvc", out var fh) ? "File History: stare necunoscută, nu se modifică."
-            : fh.Running ? "File History: se oprește temporar; se repornește la dezactivare." : "File History: deja oprit, rămâne neschimbat.");
-        l.Add(s.Priorities.Count == 0 ? "Prioritate: DaVinci Resolve nu rulează acum." : $"Prioritate: {s.Priorities.Count} proces(e) trec la High; valorile vechi se restaurează.");
+        l.Add(!s.Services.TryGetValue("WSearch", out var ws) ? CoreL.X("Windows Search: stare necunoscută, nu se modifică.", "Windows Search: unknown state, not modified.", "Windows Search: estado desconocido, no se modifica.")
+            : ws.StartType == 4 && !ws.Running ? CoreL.X("Windows Search: deja oprit, rămâne neschimbat.", "Windows Search: already off, left unchanged.", "Windows Search: ya estaba desactivado, no se modifica.")
+            : CoreL.X("Windows Search: se oprește și se dezactivează temporar; la dezactivare revine la modul de pornire de dinainte.", "Windows Search: stopped and disabled temporarily; when you turn Render Mode off it returns to its previous start mode.", "Windows Search: se detiene y desactiva temporalmente; al desactivar el modo vuelve a su modo de inicio anterior."));
+        l.Add(!s.Services.TryGetValue("fhsvc", out var fh) ? CoreL.X("File History: stare necunoscută, nu se modifică.", "File History: unknown state, not modified.", "Historial de archivos: estado desconocido, no se modifica.")
+            : fh.Running ? CoreL.X("File History: se oprește temporar; se repornește la dezactivare.", "File History: paused temporarily; it resumes when you turn Render Mode off.", "Historial de archivos: se pausa temporalmente; se reanuda al desactivar el modo.") : CoreL.X("File History: deja oprit, rămâne neschimbat.", "File History: already off, left unchanged.", "Historial de archivos: ya estaba desactivado, no se modifica."));
+        l.Add(s.Priorities.Count == 0 ? CoreL.X("Prioritate: DaVinci Resolve nu rulează acum.", "Priority: DaVinci Resolve is not running now.", "Prioridad: DaVinci Resolve no se está ejecutando ahora.") : CoreL.X($"Prioritate: {s.Priorities.Count} proces(e) trec la High; valorile vechi se restaurează.", $"Priority: {s.Priorities.Count} process(es) go to High; the old values are restored.", $"Prioridad: {s.Priorities.Count} proceso(s) pasan a High; los valores anteriores se restauran."));
         return l;
     }
 

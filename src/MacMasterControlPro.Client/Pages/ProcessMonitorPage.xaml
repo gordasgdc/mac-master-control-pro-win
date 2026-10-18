@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.ProcessMonitorPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
@@ -9,11 +10,11 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="⚙️ Procese active" FontSize="22" FontWeight="Bold" />
-            <ui:Button Grid.Column="1" x:Name="SortOrderButton" Content="Cel mai mare întâi" Margin="0,0,8,0" Click="OnToggleSortClicked" />
-            <ui:Button Grid.Column="2" Content="Actualizează" Click="OnRefreshClicked" />
+            <TextBlock Grid.Column="0" Text="{loc:Loc Ro='⚙️ Procese active', En='⚙️ Active processes', Es='⚙️ Procesos activos'}" FontSize="22" FontWeight="Bold" />
+            <ui:Button Grid.Column="1" x:Name="SortOrderButton" Content="{loc:Loc Ro='Cel mai mare întâi', En='Largest first', Es='El mayor primero'}" Margin="0,0,8,0" Click="OnToggleSortClicked" />
+            <ui:Button Grid.Column="2" Content="{loc:Loc Ro='Actualizează', En='Refresh', Es='Actualizar'}" Click="OnRefreshClicked" />
         </Grid>
-        <TextBlock Text="Top 20 după consum RAM, actualizat automat la 3 secunde — crescător sau descrescător." Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10" />
+        <TextBlock Text="{loc:Loc Ro='Top 20 după consum RAM, actualizat automat la 3 secunde — crescător sau descrescător.', En='Top 20 by RAM use, refreshed automatically every 3 seconds — ascending or descending.', Es='Top 20 por uso de RAM, actualizado cada 3 segundos; ascendente o descendente.'}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10" />
         <ScrollViewer MaxHeight="480">
             <StackPanel x:Name="ItemsPanel" />
         </ScrollViewer>

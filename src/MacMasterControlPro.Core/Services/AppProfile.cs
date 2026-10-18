@@ -44,10 +44,10 @@ public static class AppProfile
 
     public static List<string> ResetPreview() => new()
     {
-        "Setările aplicației (temă, limbă, mărimea textului, folderele alese, profil)",
-        "Cache-uri și fișiere locale din directoarele de date ale aplicației",
-        "Parola de aplicație SMTP (dacă a fost salvată)",
-        "NU se șterg: licența/starea de acces, conturile rclone, jurnalele, instantaneul Modului Randare",
+        CoreL.X("Setările aplicației (temă, limbă, mărimea textului, folderele alese, profil)", "App settings (theme, language, text size, chosen folders, profile)", "Ajustes de la app (tema, idioma, tamaño del texto, carpetas elegidas, perfil)"),
+        CoreL.X("Cache-uri și fișiere locale din directoarele de date ale aplicației", "Caches and local files in the app data folders", "Cachés y archivos locales en las carpetas de datos de la app"),
+        CoreL.X("Parola de aplicație SMTP (dacă a fost salvată)", "SMTP app password (if saved)", "Contraseña de aplicación SMTP (si se guardó)"),
+        CoreL.X("NU se șterg: licența/starea de acces, conturile rclone, jurnalele, instantaneul Modului Randare", "NOT deleted: the licence/access state, rclone accounts, logs, the Render Mode snapshot", "NO se borran: la licencia y el estado de acceso, las cuentas de rclone, los registros y la instantánea del modo de renderizado"),
     };
 
     /// Resetarea configurației utilizatorului, cu COPIE DE SIGURANȚĂ (zip) făcută înainte. Se cheamă DOAR dintr-o acțiune explicită a utilizatorului.

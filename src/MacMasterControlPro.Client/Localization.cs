@@ -27,13 +27,15 @@ public static class LanguageStore
 
     public static event Action? Changed;
 
-    private static AppLanguage _current = Load();
+    private static AppLanguage _current = InitCore(Load());
+    private static AppLanguage InitCore(AppLanguage l) { CoreL.Code = l.ToString().ToLowerInvariant(); return l; }
     public static AppLanguage Current
     {
         get => _current;
         set
         {
             _current = value;
+            CoreL.Code = value.ToString().ToLowerInvariant();
             Save(value);
             Changed?.Invoke();
         }
@@ -41,6 +43,7 @@ public static class LanguageStore
 
     private static AppLanguage Load()
     {
+        if (DemoHooks.Language is { } demo && Enum.TryParse<AppLanguage>(demo, true, out var forced)) return forced;
         try
         {
             if (File.Exists(FilePath) && Enum.TryParse<AppLanguage>(File.ReadAllText(FilePath).Trim(), out var saved))

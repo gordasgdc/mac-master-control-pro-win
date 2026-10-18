@@ -33,7 +33,7 @@ public sealed class CleanupService
     {
         ("DaVinci Resolve CacheClip", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Blackmagic Design", "DaVinci Resolve", "CacheClip")),
         ("Adobe Media Cache", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Adobe", "Common", "Media Cache Files")),
-        ("Fișiere temporare (%Temp%)", Path.GetTempPath()),
+        (CoreL.X("Fișiere temporare (%Temp%)", "Temporary files (%Temp%)", "Archivos temporales (%Temp%)"), Path.GetTempPath()),
         // Categorii tip CleanMyMac (2026-08-31) — Delivery Optimization
         // (cache Windows Update, se reface automat, sigur de golit).
         ("Delivery Optimization (cache Windows Update)", @"C:\Windows\SoftwareDistribution\DeliveryOptimization"),
@@ -71,9 +71,9 @@ public sealed class CleanupService
     {
         foreach (var item in selected)
         {
-            log?.Invoke($"Ștergere: {item.Name}…");
+            log?.Invoke(CoreL.X($"Ștergere: {item.Name}…", $"Deleting: {item.Name}…", $"Eliminando: {item.Name}…"));
             var (deleted, skipped) = DeleteContents(item.Path, log);
-            log?.Invoke($"  ✔ {item.Name}: {deleted} șterse, {skipped} sărite (în uz/blocate).");
+            log?.Invoke(CoreL.X($"  ✔ {item.Name}: {deleted} șterse, {skipped} sărite (în uz/blocate).", $"  ✔ {item.Name}: {deleted} deleted, {skipped} skipped (in use/locked).", $"  ✔ {item.Name}: {deleted} eliminados, {skipped} omitidos (en uso o bloqueados)."));
         }
         ScanReclaimable();
     }

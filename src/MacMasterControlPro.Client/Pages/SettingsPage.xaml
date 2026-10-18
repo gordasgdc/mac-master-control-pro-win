@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.SettingsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
@@ -9,17 +10,17 @@
             <StackPanel>
                 <TextBlock x:Name="ThemeLabel" FontWeight="SemiBold" Margin="0,0,0,4" />
                 <ComboBox x:Name="ThemeCombo" SelectionChanged="OnThemeChanged" Margin="0,0,0,12">
-                    <ComboBoxItem Content="Sistem" Tag="System" />
-                    <ComboBoxItem Content="Luminos" Tag="Light" />
-                    <ComboBoxItem Content="Întunecat" Tag="Dark" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Sistem', En='System', Es='Sistema'}" Tag="System" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Luminos', En='Light', Es='Claro'}" Tag="Light" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Întunecat', En='Dark', Es='Oscuro'}" Tag="Dark" />
                 </ComboBox>
 
                 <TextBlock x:Name="TextScaleLabel" FontWeight="SemiBold" Margin="0,0,0,4" />
                 <ComboBox x:Name="TextScaleCombo" SelectionChanged="OnTextScaleChanged" Margin="0,0,0,12">
-                    <ComboBoxItem Content="Mic" Tag="Small" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Mic', En='Small', Es='Pequeño'}" Tag="Small" />
                     <ComboBoxItem Content="Normal" Tag="Normal" />
-                    <ComboBoxItem Content="Mare" Tag="Large" />
-                    <ComboBoxItem Content="Foarte mare" Tag="XLarge" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Mare', En='Large', Es='Grande'}" Tag="Large" />
+                    <ComboBoxItem Content="{loc:Loc Ro='Foarte mare', En='Extra large', Es='Muy grande'}" Tag="XLarge" />
                 </ComboBox>
 
                 <TextBlock x:Name="LanguageLabel" FontWeight="SemiBold" Margin="0,0,0,4" />

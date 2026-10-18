@@ -1,11 +1,12 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.NetworkPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
-        <TextBlock Text="🌐 Rețea" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock Text="{loc:Loc Ro='🌐 Rețea', En='🌐 Network', Es='🌐 Red'}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Plăci de rețea detectate" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Plăci de rețea detectate', En='Network adapters detected', Es='Adaptadores de red detectados'}" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
@@ -13,8 +14,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Margin="0,0,6,0" Click="OnSelectAllClicked" />
-                    <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="{loc:Loc Ro='Selectează tot', En='Select all', Es='Seleccionar todo'}" Margin="0,0,6,0" Click="OnSelectAllClicked" />
+                    <ui:Button Grid.Column="2" Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnRescanClicked" />
                 </Grid>
                 <StackPanel x:Name="AdaptersPanel" />
                 <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,0" />
@@ -23,8 +24,8 @@
 
         <ui:CardExpander Header="Tuning TCP" IsExpanded="True">
             <StackPanel>
-                <TextBlock Text="Auto-tuning TCP, RSS, DNS Cloudflare/Google — pe plăcile bifate." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
-                <ui:Button x:Name="ApplyButton" Content="Aplică Tuning pe selecție" Appearance="Primary" Click="OnApplyTuningClicked" />
+                <TextBlock Text="{loc:Loc Ro='Auto-tuning TCP, RSS, DNS Cloudflare/Google — pe plăcile bifate.', En='TCP auto-tuning, RSS, Cloudflare/Google DNS — on the ticked adapters.', Es='Autoajuste de TCP, RSS, DNS de Cloudflare/Google en los adaptadores marcados.'}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10" TextWrapping="Wrap" />
+                <ui:Button x:Name="ApplyButton" Content="{loc:Loc Ro='Aplică Tuning pe selecție', En='Apply tuning to the selection', Es='Aplicar el ajuste a la selección'}" Appearance="Primary" Click="OnApplyTuningClicked" />
             </StackPanel>
         </ui:CardExpander>
 

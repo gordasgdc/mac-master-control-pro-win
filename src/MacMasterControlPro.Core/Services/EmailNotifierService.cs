@@ -63,9 +63,9 @@ public static class EmailNotifierService
     public static (bool ok, string? error) Send(string subject, string body)
     {
         var s = Settings;
-        if (!s.Enabled) return (false, "Notificarea pe email e dezactivată.");
+        if (!s.Enabled) return (false, CoreL.X("Notificarea pe email e dezactivată.", "Email notification is turned off.", "La notificación por correo está desactivada."));
         if (string.IsNullOrWhiteSpace(s.Username) || string.IsNullOrWhiteSpace(s.AppPassword) || string.IsNullOrWhiteSpace(s.Recipient))
-            return (false, "Completează email, parolă de aplicație și destinatar în Setări.");
+            return (false, CoreL.X("Completează email, parolă de aplicație și destinatar în Setări.", "Fill in email, app password and recipient in Settings.", "Completa el correo, la contraseña de aplicación y el destinatario en Ajustes."));
 
         try
         {

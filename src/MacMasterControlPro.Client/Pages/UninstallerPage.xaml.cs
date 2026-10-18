@@ -48,7 +48,7 @@ public partial class UninstallerPage : UserControl
                 IsChecked = _bulkSelected.Contains(app.DisplayName),
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 6, 0),
-                ToolTip = $"Bifează ca să incluzi {app.DisplayName} la o ștergere în masă a mai multor aplicații deodată.",
+                ToolTip = L.X($"Bifează ca să incluzi {app.DisplayName} la o ștergere în masă a mai multor aplicații deodată.", $"Tick to include {app.DisplayName} in a bulk removal of several apps at once.", $"Marca para incluir {app.DisplayName} en una eliminación múltiple de varias apps a la vez."),
             };
             check.Checked += (_, _) => { _bulkSelected.Add(app.DisplayName); UpdateBulkButton(); };
             check.Unchecked += (_, _) => { _bulkSelected.Remove(app.DisplayName); UpdateBulkButton(); };
@@ -73,7 +73,7 @@ public partial class UninstallerPage : UserControl
     private void UpdateBulkButton()
     {
         BulkDeleteButton.Visibility = _bulkSelected.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-        BulkDeleteButton.Content = $"Dezinstalează selectate ({_bulkSelected.Count})";
+        BulkDeleteButton.Content = L.X($"Dezinstalează selectate ({_bulkSelected.Count})", $"Uninstall selected ({_bulkSelected.Count})", $"Desinstalar seleccionadas ({_bulkSelected.Count})");
     }
 
     private void SelectApp(InstalledAppWin app)
@@ -94,7 +94,7 @@ public partial class UninstallerPage : UserControl
 
         if (_categories.Count == 0)
         {
-            DetailsPanel.Children.Add(new TextBlock { Text = "Nicio urmă găsită în afara aplicației înseși.", Foreground = System.Windows.Media.Brushes.Gray });
+            DetailsPanel.Children.Add(new TextBlock { Text = L.X("Nicio urmă găsită în afara aplicației înseși.", "No leftovers found outside the app itself.", "No se encontraron restos fuera de la propia app."), Foreground = System.Windows.Media.Brushes.Gray });
         }
         else
         {
@@ -124,10 +124,10 @@ public partial class UninstallerPage : UserControl
 
         var deleteButton = new Wpf.Ui.Controls.Button
         {
-            Content = "Șterge selectate",
+            Content = L.X("Șterge selectate", "Delete selected", "Eliminar seleccionados"),
             Appearance = Wpf.Ui.Controls.ControlAppearance.Danger,
             Margin = new Thickness(0, 12, 0, 8),
-            ToolTip = $"Șterge doar categoriile bifate mai sus pentru {_selectedApp.DisplayName} — folosește asta ca să păstrezi ceva anume.",
+            ToolTip = L.X($"Șterge doar categoriile bifate mai sus pentru {_selectedApp.DisplayName} — folosește asta ca să păstrezi ceva anume.", $"Deletes only the categories ticked above for {_selectedApp.DisplayName} — use this to keep something specific.", $"Elimina solo las categorías marcadas arriba para {_selectedApp.DisplayName}; úsalo para conservar algo concreto."),
         };
         deleteButton.Click += (_, _) => PerformDelete();
         DetailsPanel.Children.Add(deleteButton);
@@ -138,7 +138,7 @@ public partial class UninstallerPage : UserControl
     {
         if (_selectedApp is null || !RequireLicense()) return;
         _log.Clear();
-        _log.Append($"Încep ștergerea urmelor pentru {_selectedApp.DisplayName}…");
+        _log.Append(L.X($"Încep ștergerea urmelor pentru {_selectedApp.DisplayName}…", $"Starting leftover removal for {_selectedApp.DisplayName}…", $"Iniciando la eliminación de restos de {_selectedApp.DisplayName}…"));
         UninstallerService.TerminateIfRunning(_selectedApp.InstallLocation);
         var toDelete = _categories.Where(c => _selectedCategoryIds.Contains(c.Id)).ToList();
         UninstallerService.Delete(toDelete, line => _log.Append(line));
@@ -149,18 +149,18 @@ public partial class UninstallerPage : UserControl
             var ok = UninstallerService.RunOfficialUninstaller(_selectedApp);
             if (!ok)
             {
-                _log.Append("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).");
+                _log.Append(L.X("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).", "ERROR running the official uninstaller (the UAC prompt was declined).", "ERROR al ejecutar el desinstalador oficial (se rechazó el aviso de UAC)."));
             }
             else if (UninstallerService.IsStillRegistered(_selectedApp.DisplayName))
             {
-                _log.Append("⚠ Aplicația a rulat comanda de dezinstalare, dar tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click (Next/Uninstall/Finish). Verifică dacă a apărut o fereastră pe ecran.");
+                _log.Append(L.X("⚠ Aplicația a rulat comanda de dezinstalare, dar tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click (Next/Uninstall/Finish). Verifică dacă a apărut o fereastră pe ecran.", "⚠ The app ran its uninstall command but still shows as installed — its uninstaller probably shows its own window waiting for a click (Next/Uninstall/Finish). Check whether a window appeared on screen.", "⚠ La app ejecutó su comando de desinstalación pero sigue apareciendo como instalada; probablemente su desinstalador muestra una ventana propia que espera un clic (Next/Uninstall/Finish). Comprueba si apareció una ventana en pantalla."));
             }
             else
             {
-                _log.Append("✔ Dezinstalator oficial rulat — aplicația a dispărut din Programe și caracteristici.");
+                _log.Append(L.X("✔ Dezinstalator oficial rulat — aplicația a dispărut din Programe și caracteristici.", "✔ Official uninstaller ran — the app is gone from Programs and Features.", "✔ Desinstalador oficial ejecutado: la app desapareció de Programas y características."));
             }
         }
-        _log.Append("Gata.");
+        _log.Append(L.X("Gata.", "Done.", "Listo."));
         _apps = UninstallerService.ScanInstalledApps();
         RenderAppsList();
     }
@@ -177,13 +177,13 @@ public partial class UninstallerPage : UserControl
         if (targets.Count == 0) return;
 
         var confirm = System.Windows.MessageBox.Show(
-            $"Ștergi definitiv {targets.Count} aplicații, cu toate urmele lor?",
+            L.X($"Ștergi definitiv {targets.Count} aplicații, cu toate urmele lor?", $"Permanently delete {targets.Count} apps, with all their leftovers?", $"¿Eliminar definitivamente {targets.Count} apps, con todos sus restos?"),
             "Confirmare", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (confirm != MessageBoxResult.Yes) return;
 
         _isBulkBusy = true;
         _log.Clear();
-        _log.Append($"Încep ștergerea în masă pentru {targets.Count} aplicații…");
+        _log.Append(L.X($"Încep ștergerea în masă pentru {targets.Count} aplicații…", $"Starting bulk removal of {targets.Count} apps…", $"Iniciando la eliminación múltiple de {targets.Count} apps…"));
         DetailsPanel.Children.Clear();
         DetailsPanel.Children.Add(_log);
 
@@ -199,16 +199,16 @@ public partial class UninstallerPage : UserControl
                 {
                     var ok = UninstallerService.RunOfficialUninstaller(app);
                     string status;
-                    if (!ok) status = "EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).";
+                    if (!ok) status = L.X("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).", "ERROR running the official uninstaller (the UAC prompt was declined).", "ERROR al ejecutar el desinstalador oficial (se rechazó el aviso de UAC).");
                     else if (UninstallerService.IsStillRegistered(app.DisplayName))
-                        status = "⚠ Tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click.";
-                    else status = "✔ Dezinstalator oficial rulat — dispărută din Programe și caracteristici.";
+                        status = L.X("⚠ Tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click.", "⚠ Still shows as installed — its uninstaller probably shows its own window waiting for a click.", "⚠ Sigue apareciendo como instalada; probablemente su desinstalador muestra una ventana propia que espera un clic.");
+                    else status = L.X("✔ Dezinstalator oficial rulat — dispărută din Programe și caracteristici.", "✔ Official uninstaller ran — gone from Programs and Features.", "✔ Desinstalador oficial ejecutado: desapareció de Programas y características.");
                     Dispatcher.Invoke(() => _log.Append(status));
                 }
             }
             Dispatcher.Invoke(() =>
             {
-                _log.Append("Gata.");
+                _log.Append(L.X("Gata.", "Done.", "Listo."));
                 _apps = UninstallerService.ScanInstalledApps();
                 _bulkSelected.Clear();
                 _selectedApp = null;

@@ -71,8 +71,8 @@ public partial class CleanupPage : UserControl
     {
         var selectedBytes = _service.Items.Where(i => _selected.Contains(i.Id)).Sum(i => i.SizeBytes);
         var totalBytes = _service.Items.Sum(i => i.SizeBytes);
-        SelectionText.Text = $"Selectat {selectedBytes / 1024.0 / 1024.0 / 1024.0:F2} GB din {totalBytes / 1024.0 / 1024.0 / 1024.0:F2} GB";
-        SelectAllButton.Content = _selected.Count == _service.Items.Count && _service.Items.Count > 0 ? "Deselectează tot" : "Selectează tot";
+        SelectionText.Text = L.X($"Selectat {selectedBytes / 1024.0 / 1024.0 / 1024.0:F2} GB din {totalBytes / 1024.0 / 1024.0 / 1024.0:F2} GB", $"Selected {selectedBytes / 1024.0 / 1024.0 / 1024.0:F2} GB of {totalBytes / 1024.0 / 1024.0 / 1024.0:F2} GB", $"Seleccionados {selectedBytes / 1024.0 / 1024.0 / 1024.0:F2} GB de {totalBytes / 1024.0 / 1024.0 / 1024.0:F2} GB");
+        SelectAllButton.Content = _selected.Count == _service.Items.Count && _service.Items.Count > 0 ? L.X("Deselectează tot", "Deselect all", "Deseleccionar todo") : L.X("Selectează tot", "Select all", "Seleccionar todo");
         DeleteButton.IsEnabled = _selected.Count > 0;
     }
 
@@ -80,13 +80,13 @@ public partial class CleanupPage : UserControl
     {
         if (!RequireLicense()) return;
         Log.Clear();
-        Log.Append("$ Ștergere cache-uri selectate…");
+        Log.Append(L.X("$ Ștergere cache-uri selectate…", "$ Deleting selected caches…", "$ Eliminando las cachés seleccionadas…"));
         DeleteButton.IsEnabled = false;
         var toDelete = _service.Items.Where(i => _selected.Contains(i.Id)).ToList();
         _service.DeleteSelected(toDelete, line => Log.Append(line));
         _selected.Clear();
         Render();
-        StatusText.Text = "✔ Gata — vezi detaliile mai jos.";
+        StatusText.Text = L.X("✔ Gata — vezi detaliile mai jos.", "✔ Done — see the details below.", "✔ Listo: mira los detalles abajo.");
         DeleteButton.IsEnabled = true;
     }
 
@@ -137,7 +137,7 @@ public partial class CleanupPage : UserControl
 
     private void OnAddCustomFolderClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Alege un folder de scanat" };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = L.X("Alege un folder de scanat", "Choose a folder to scan", "Elige una carpeta que analizar") };
         if (dialog.ShowDialog() == true)
         {
             BigFileScanFolders.Shared.AddCustomFolder(dialog.FolderName);
@@ -198,10 +198,10 @@ public partial class CleanupPage : UserControl
     {
         if (!RequireLicense()) return;
         Log.Clear();
-        Log.Append("$ Golesc Coșul de reciclare…");
+        Log.Append(L.X("$ Golesc Coșul de reciclare…", "$ Emptying the Recycle Bin…", "$ Vaciando la Papelera de reciclaje…"));
         var ok = _service.EmptyRecycleBin();
-        Log.Append(ok ? "✔ Coș de reciclare golit." : "EROARE la golirea Coșului de reciclare.");
-        StatusText.Text = ok ? "✔ Coș de reciclare golit." : "EROARE.";
+        Log.Append(ok ? L.X("✔ Coș de reciclare golit.", "✔ Recycle Bin emptied.", "✔ Papelera de reciclaje vaciada.") : L.X("EROARE la golirea Coșului de reciclare.", "ERROR emptying the Recycle Bin.", "ERROR al vaciar la Papelera de reciclaje."));
+        StatusText.Text = ok ? L.X("✔ Coș de reciclare golit.", "✔ Recycle Bin emptied.", "✔ Papelera de reciclaje vaciada.") : "EROARE.";
     }
 
     private bool RequireLicense()

@@ -1,17 +1,18 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.DependenciesPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <StackPanel>
-        <TextBlock Text="🧩 Dependențe &amp; Cerințe Sistem" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock Text="{loc:Loc Ro='🧩 Dependențe &amp; Cerințe Sistem', En='🧩 Dependencies and System Requirements', Es='🧩 Dependencias y requisitos del sistema'}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
         <ui:CardExpander Header="Status pachete" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"
-                           Text="Fiecare componentă are propriul buton de instalare — roșu (neinstalat) devine verde (instalat) după ce comanda reușește." />
+                           Text="{loc:Loc Ro='Fiecare componentă are propriul buton de instalare — roșu (neinstalat) devine verde (instalat) după ce comanda reușește.', En='Each component has its own install button — red (not installed) turns green (installed) once the command succeeds.', Es='Cada componente tiene su propio botón de instalación: rojo (no instalado) pasa a verde (instalado) cuando el comando termina bien.'}" />
                 <ItemsControl x:Name="ItemsList" Margin="0,0,0,10" />
-                <ui:Button Content="Rescanează" Click="OnRescanClicked" />
+                <ui:Button Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnRescanClicked" />
             </StackPanel>
         </ui:CardExpander>
 

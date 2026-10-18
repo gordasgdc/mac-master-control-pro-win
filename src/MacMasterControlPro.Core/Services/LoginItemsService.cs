@@ -62,7 +62,7 @@ public static class LoginItemsService
             Directory.CreateDirectory(StartupHoldingDir);
             var dest = Path.Combine(StartupHoldingDir, Path.GetFileName(item.Command));
             log($"$ move \"{item.Command}\" \"{dest}\"");
-            try { File.Move(item.Command, dest, overwrite: true); log($"✔ {item.Name} mutat în carantină."); }
+            try { File.Move(item.Command, dest, overwrite: true); log(CoreL.X($"✔ {item.Name} mutat în carantină.", $"✔ {item.Name} moved to quarantine.", $"✔ {item.Name} movido a cuarentena.")); }
             catch (Exception ex) { log($"✘ {ex.Message}"); }
             return;
         }
@@ -80,7 +80,7 @@ public static class LoginItemsService
             using var key = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true);
             key?.DeleteValue(item.Name, throwOnMissingValue: false);
         }
-        log($"✔ {item.Name} dezactivat — reversibil din „Reactivează”.");
+        log(CoreL.X($"✔ {item.Name} dezactivat — reversibil din „Reactivează”.", $"✔ {item.Name} disabled — reversible via “Re-enable”.", $"✔ {item.Name} desactivado; reversible con «Reactivar»."));
     }
 
     public static void Enable(LoginItem item, Action<string> log)

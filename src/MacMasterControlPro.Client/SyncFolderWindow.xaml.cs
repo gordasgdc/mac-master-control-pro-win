@@ -27,7 +27,7 @@ public partial class SyncFolderWindow
 
     private void OnPickFolderClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "Alege folderul local" };
+        var dialog = new OpenFolderDialog { Title = L.X("Alege folderul local", "Choose the local folder", "Elige la carpeta local") };
         if (dialog.ShowDialog() != true) return;
         _localFolder = dialog.FolderName;
         FolderText.Text = _localFolder;
@@ -48,7 +48,7 @@ public partial class SyncFolderWindow
     private void OnRunClicked(object sender, RoutedEventArgs e)
     {
         RunButton.IsEnabled = false;
-        RunButton.Content = "Se sincronizează…";
+        RunButton.Content = L.X("Se sincronizează…", "Syncing…", "Sincronizando…");
         Log.Clear();
         var direction = UploadRadio.IsChecked == true ? SyncDirection.Upload : SyncDirection.Download;
         _service.SyncFolder(_localFolder, _remoteName, _remotePath, direction, MirrorCheck.IsChecked == true,

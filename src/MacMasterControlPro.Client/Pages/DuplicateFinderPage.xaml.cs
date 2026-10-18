@@ -37,14 +37,14 @@ public partial class DuplicateFinderPage : UserControl
         }
         if (store.Folders.Count == 0)
         {
-            FoldersPanel.Children.Add(new TextBlock { Text = "Niciun folder ales — adaugă cel puțin unul.", Foreground = System.Windows.Media.Brushes.Orange, FontSize = 11 });
+            FoldersPanel.Children.Add(new TextBlock { Text = L.X("Niciun folder ales — adaugă cel puțin unul.", "No folder chosen — add at least one.", "No se ha elegido ninguna carpeta; añade al menos una."), Foreground = System.Windows.Media.Brushes.Orange, FontSize = 11 });
         }
         ScanButton.IsEnabled = store.Folders.Count > 0;
     }
 
     private void OnAddFolderClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = "Alege un folder de căutat" };
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = L.X("Alege un folder de căutat", "Choose a folder to search", "Elige una carpeta donde buscar") };
         if (dialog.ShowDialog() == true)
         {
             DuplicateScanFolders.Shared.AddFolder(dialog.FolderName);
@@ -57,7 +57,7 @@ public partial class DuplicateFinderPage : UserControl
         var roots = DuplicateScanFolders.Shared.Folders;
         if (roots.Count == 0) return;
         ScanButton.IsEnabled = false;
-        ScanStatusText.Text = "Se scanează…";
+        ScanStatusText.Text = L.X("Se scanează…", "Scanning…", "Analizando…");
         GroupsPanel.Children.Clear();
         SummaryText.Text = "";
         DeleteRow.Visibility = Visibility.Collapsed;
@@ -71,7 +71,7 @@ public partial class DuplicateFinderPage : UserControl
             {
                 _groups = result;
                 ScanButton.IsEnabled = true;
-                ScanStatusText.Text = result.Count == 0 ? "Niciun duplicat găsit." : "";
+                ScanStatusText.Text = result.Count == 0 ? L.X("Niciun duplicat găsit.", "No duplicates found.", "No se encontraron duplicados.") : "";
                 // Sugestie implicita: pastreaza cel mai vechi ("originalul"
                 // probabil), bifeaza restul spre stergere - userul poate
                 // debifa/rebifa oricare inainte de a apasa Sterge.
@@ -91,7 +91,7 @@ public partial class DuplicateFinderPage : UserControl
         if (_groups.Count > 0)
         {
             var reclaimable = _groups.Sum(g => g.ReclaimableBytes);
-            SummaryText.Text = $"{_groups.Count} grupuri de duplicate găsite. Potențial recuperabil: {FormatBytes(reclaimable)}";
+            SummaryText.Text = L.X($"{_groups.Count} grupuri de duplicate găsite. Potențial recuperabil: {FormatBytes(reclaimable)}", $"{_groups.Count} duplicate groups found. Potentially recoverable: {FormatBytes(reclaimable)}", $"{_groups.Count} grupos de duplicados encontrados. Potencialmente recuperable: {FormatBytes(reclaimable)}");
         }
 
         foreach (var group in _groups)
@@ -125,7 +125,7 @@ public partial class DuplicateFinderPage : UserControl
                 {
                     Content = "📁",
                     Padding = new Thickness(6, 0, 6, 0),
-                    ToolTip = "Deschide în Explorer — verifică fișierul înainte de a-l șterge.",
+                    ToolTip = L.X("Deschide în Explorer — verifică fișierul înainte de a-l șterge.", "Open in Explorer — check the file before deleting it.", "Abrir en el Explorador: revisa el archivo antes de eliminarlo."),
                 };
                 openButton.Click += (_, _) => OpenInExplorer(file.Path);
                 Grid.SetColumn(openButton, 1);
@@ -143,8 +143,8 @@ public partial class DuplicateFinderPage : UserControl
     {
         DeleteRow.Visibility = _groups.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
         var markedBytes = _groups.SelectMany(g => g.Files).Where(f => _marked.Contains(f.Path)).Sum(f => f.SizeBytes);
-        MarkedText.Text = $"Bifate spre ștergere: {FormatBytes(markedBytes)}";
-        DeleteMarkedButton.Content = $"Șterge fișierele bifate ({_marked.Count})";
+        MarkedText.Text = L.X($"Bifate spre ștergere: {FormatBytes(markedBytes)}", $"Ticked for deletion: {FormatBytes(markedBytes)}", $"Marcados para eliminar: {FormatBytes(markedBytes)}");
+        DeleteMarkedButton.Content = L.X($"Șterge fișierele bifate ({_marked.Count})", $"Delete ticked files ({_marked.Count})", $"Eliminar los archivos marcados ({_marked.Count})");
         DeleteMarkedButton.IsEnabled = _marked.Count > 0;
     }
 

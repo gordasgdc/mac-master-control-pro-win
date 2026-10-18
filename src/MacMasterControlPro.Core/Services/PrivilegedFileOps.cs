@@ -35,9 +35,9 @@ public static class PrivilegedFileOps
 
         var escaped = path.Replace("'", "''");
         var ok = PrivilegedRunner.Run($"Remove-Item -LiteralPath '{escaped}' -Force -Recurse -ErrorAction Stop");
-        if (!ok) return "acces refuzat, chiar și cu drepturi de administrator";
+        if (!ok) return CoreL.X("acces refuzat, chiar și cu drepturi de administrator", "access denied, even with administrator rights", "acceso denegado, incluso con derechos de administrador");
         return (File.Exists(path) || Directory.Exists(path))
-            ? "tot există după ștergerea privilegiată"
+            ? CoreL.X("tot există după ștergerea privilegiată", "still exists after the privileged deletion", "sigue existiendo tras la eliminación con privilegios")
             : null;
     }
 }

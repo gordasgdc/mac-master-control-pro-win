@@ -34,8 +34,8 @@ public partial class TweaksPage : UserControl
     private void UpdateSelectionText()
     {
         var count = (ExplorerCheck.IsChecked == true ? 1 : 0) + (ThumbsCheck.IsChecked == true ? 1 : 0);
-        SelectionText.Text = $"Selectat {count} din 2";
-        SelectAllButton.Content = count == 2 ? "Deselectează tot" : "Selectează tot";
+        SelectionText.Text = L.X($"Selectat {count} din 2", $"Selected {count} of 2", $"Seleccionados {count} de 2");
+        SelectAllButton.Content = count == 2 ? L.X("Deselectează tot", "Deselect all", "Deseleccionar todo") : L.X("Selectează tot", "Select all", "Seleccionar todo");
         ApplyButton.IsEnabled = count > 0;
     }
 
@@ -87,7 +87,7 @@ public partial class TweaksPage : UserControl
         {
             SpotlightItemsPanel.Children.Add(new TextBlock
             {
-                Text = "Niciun disc extern conectat și niciun folder adăugat.",
+                Text = L.X("Niciun disc extern conectat și niciun folder adăugat.", "No external drive connected and no folder added.", "Ningún disco externo conectado ni carpeta añadida."),
                 FontSize = 11,
                 Foreground = System.Windows.Media.Brushes.Gray,
             });
@@ -131,9 +131,9 @@ public partial class TweaksPage : UserControl
 
     private void UpdateSpotlightSelectionText()
     {
-        SpotlightSelectionText.Text = $"Protejate {_spotlightSelected.Count} din {_spotlightTargets.Count}";
+        SpotlightSelectionText.Text = L.X($"Protejate {_spotlightSelected.Count} din {_spotlightTargets.Count}", $"Protected {_spotlightSelected.Count} of {_spotlightTargets.Count}", $"Protegidos {_spotlightSelected.Count} de {_spotlightTargets.Count}");
         SpotlightSelectAllButton.Content = _spotlightSelected.Count == _spotlightTargets.Count && _spotlightTargets.Count > 0
-            ? "Deselectează tot" : "Selectează tot";
+            ? L.X("Deselectează tot", "Deselect all", "Deseleccionar todo") : L.X("Selectează tot", "Select all", "Seleccionar todo");
     }
 
     private bool RequireLicense()

@@ -14,7 +14,7 @@ public static class RecycleBinService
 
     public static Outcome MoveToRecycleBin(string path)
     {
-        if (!File.Exists(path) && !Directory.Exists(path)) return Outcome.Fail("nu mai există");
+        if (!File.Exists(path) && !Directory.Exists(path)) return Outcome.Fail(CoreL.X("nu mai există", "no longer exists", "ya no existe"));
         var op = new SHFILEOPSTRUCT
         {
             wFunc = 3 /* FO_DELETE */,
@@ -23,15 +23,15 @@ public static class RecycleBinService
         };
         var rc = SHFileOperation(ref op);
         if (rc != 0 || op.fAnyOperationsAborted) return Outcome.Fail(Describe(rc));
-        return File.Exists(path) || Directory.Exists(path) ? Outcome.Fail("tot există după mutare") : Outcome.Ok;
+        return File.Exists(path) || Directory.Exists(path) ? Outcome.Fail(CoreL.X("tot există după mutare", "still exists after moving", "sigue existiendo tras moverlo")) : Outcome.Ok;
     }
 
     private static string Describe(int rc) => rc switch
     {
-        0x20 or 0x21 => "fișier în uz de altă aplicație",
+        0x20 or 0x21 => CoreL.X("fișier în uz de altă aplicație", "file in use by another app", "archivo en uso por otra app"),
         0x5 or 0x78 => "acces refuzat",
-        0x7C => "cale invalidă",
-        0x75 => "operațiune anulată",
+        0x7C => CoreL.X("cale invalidă", "invalid path", "ruta no válida"),
+        0x75 => CoreL.X("operațiune anulată", "operation cancelled", "operación cancelada"),
         _ => $"eroare Windows 0x{rc:X}",
     };
 

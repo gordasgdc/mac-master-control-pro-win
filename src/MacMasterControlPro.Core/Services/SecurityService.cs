@@ -28,10 +28,10 @@ public static class SecurityService
         return new SecurityCheck("bitlocker", "BitLocker (criptare disc)", on, on ? "Activ" : "Dezactivat",
             on ? Array.Empty<string>() : new[]
             {
-                "Apasă „Deschide Settings” mai jos — se deschide direct panoul BitLocker.",
-                "Apasă „Turn on BitLocker” lângă discul de sistem.",
-                "Alege cum salvezi cheia de recuperare (cont Microsoft, fișier, sau tipărită) — NOTEAZ-O undeva sigur. Fără ea, dacă uiți parola, datele devin irecuperabile.",
-                "Alege „Encrypt entire drive” și confirmă — criptarea continuă în fundal, poți folosi PC-ul normal cât timp se face.",
+                CoreL.X("Apasă „Deschide Settings” mai jos — se deschide direct panoul BitLocker.", "Press “Open Settings” below — it opens the BitLocker pane directly.", "Pulsa «Abrir Configuración» abajo: abre directamente el panel de BitLocker."),
+                CoreL.X("Apasă „Turn on BitLocker” lângă discul de sistem.", "Press “Turn on BitLocker” next to the system drive.", "Pulsa «Turn on BitLocker» junto a la unidad del sistema."),
+                CoreL.X("Alege cum salvezi cheia de recuperare (cont Microsoft, fișier, sau tipărită) — NOTEAZ-O undeva sigur. Fără ea, dacă uiți parola, datele devin irecuperabile.", "Choose how to save the recovery key (Microsoft account, file or printed) — WRITE IT DOWN somewhere safe. Without it, if you forget the password, the data becomes unrecoverable.", "Elige cómo guardar la clave de recuperación (cuenta Microsoft, archivo o impresa) y ANÓTALA en un lugar seguro. Sin ella, si olvidas la contraseña, los datos serán irrecuperables."),
+                CoreL.X("Alege „Encrypt entire drive” și confirmă — criptarea continuă în fundal, poți folosi PC-ul normal cât timp se face.", "Choose “Encrypt entire drive” and confirm — encryption continues in the background, and you can use the PC normally meanwhile.", "Elige «Encrypt entire drive» y confirma: el cifrado continúa en segundo plano y puedes usar el PC con normalidad mientras tanto."),
             },
             "ms-settings:deviceencryption");
     }
@@ -40,12 +40,12 @@ public static class SecurityService
     {
         var output = Shell.Run("(Get-MpComputerStatus).RealTimeProtectionEnabled");
         var on = output.Trim().Equals("True", StringComparison.OrdinalIgnoreCase);
-        return new SecurityCheck("defender", "Windows Defender (protecție în timp real)", on, on ? "Activ" : "Dezactivat",
+        return new SecurityCheck("defender", CoreL.X("Windows Defender (protecție în timp real)", "Windows Defender (real-time protection)", "Windows Defender (protección en tiempo real)"), on, on ? "Activ" : "Dezactivat",
             on ? Array.Empty<string>() : new[]
             {
-                "Apasă „Deschide Settings” mai jos.",
-                "Mergi la „Virus & threat protection” → „Manage settings”.",
-                "Activează switch-ul „Real-time protection”.",
+                CoreL.X("Apasă „Deschide Settings” mai jos.", "Press “Open Settings” below.", "Pulsa «Abrir Configuración» abajo."),
+                CoreL.X("Mergi la „Virus & threat protection” → „Manage settings”.", "Go to “Virus & threat protection” → “Manage settings”.", "Ve a «Virus & threat protection» → «Manage settings»."),
+                CoreL.X("Activează switch-ul „Real-time protection”.", "Turn on the “Real-time protection” switch.", "Activa el interruptor «Real-time protection»."),
             },
             "windowsdefender:");
     }
@@ -54,11 +54,11 @@ public static class SecurityService
     {
         var output = Shell.Run("(Get-NetFirewallProfile -Profile Domain,Public,Private).Enabled -join ','");
         var on = output.Contains("True");
-        return new SecurityCheck("firewall", "Firewall Windows", on, on ? "Activ" : "Dezactivat pe cel puțin un profil",
+        return new SecurityCheck("firewall", "Firewall Windows", on, on ? "Activ" : CoreL.X("Dezactivat pe cel puțin un profil", "Off on at least one profile", "Desactivado en al menos un perfil"),
             on ? Array.Empty<string>() : new[]
             {
-                "Cel mai simplu: butonul „Activează Firewall pe toate profilele” din Acțiuni rapide, mai jos — un singur click.",
-                "Manual: „Deschide Settings” → activează toate cele 3 switch-uri (Domain/Private/Public network).",
+                CoreL.X("Cel mai simplu: butonul „Activează Firewall pe toate profilele” din Acțiuni rapide, mai jos — un singur click.", "Simplest: the “Enable Firewall (all profiles)” button in Quick actions below — one click.", "Lo más sencillo: el botón «Activar el cortafuegos (todos los perfiles)» de Acciones rápidas, abajo; un solo clic."),
+                CoreL.X("Manual: „Deschide Settings” → activează toate cele 3 switch-uri (Domain/Private/Public network).", "Manual: “Open Settings” → turn on all 3 switches (Domain/Private/Public network).", "Manual: «Abrir Configuración» → activa los 3 interruptores (Domain/Private/Public network)."),
             },
             "ms-settings:windowsdefender");
     }
@@ -67,13 +67,13 @@ public static class SecurityService
     {
         var output = Shell.Run("Confirm-SecureBootUEFI");
         var on = output.Trim().Equals("True", StringComparison.OrdinalIgnoreCase);
-        return new SecurityCheck("secureboot", "Secure Boot", on, on ? "Activ" : "Dezactivat sau nesuportat (BIOS legacy)",
+        return new SecurityCheck("secureboot", "Secure Boot", on, on ? "Activ" : CoreL.X("Dezactivat sau nesuportat (BIOS legacy)", "Off or unsupported (legacy BIOS)", "Desactivado o no compatible (BIOS heredado)"),
             on ? Array.Empty<string>() : new[]
             {
-                "Nu se poate activa din Windows Settings — necesită BIOS/UEFI.",
-                "Repornește PC-ul și apasă tasta de BIOS (de obicei Del, F2 sau F10 — apare pe ecran la pornire).",
-                "Caută secțiunea „Boot” sau „Security” din BIOS și activează „Secure Boot”.",
-                "Salvează și ieși (de obicei F10) — PC-ul repornește normal.",
+                CoreL.X("Nu se poate activa din Windows Settings — necesită BIOS/UEFI.", "It cannot be enabled from Windows Settings — it needs BIOS/UEFI.", "No se puede activar desde Configuración de Windows: requiere BIOS/UEFI."),
+                CoreL.X("Repornește PC-ul și apasă tasta de BIOS (de obicei Del, F2 sau F10 — apare pe ecran la pornire).", "Restart the PC and press the BIOS key (usually Del, F2 or F10 — it shows on screen at startup).", "Reinicia el PC y pulsa la tecla de la BIOS (normalmente Supr, F2 o F10; aparece en pantalla al iniciar)."),
+                CoreL.X("Caută secțiunea „Boot” sau „Security” din BIOS și activează „Secure Boot”.", "Find the “Boot” or “Security” section in the BIOS and enable “Secure Boot”.", "Busca la sección «Boot» o «Security» de la BIOS y activa «Secure Boot»."),
+                CoreL.X("Salvează și ieși (de obicei F10) — PC-ul repornește normal.", "Save and exit (usually F10) — the PC restarts normally.", "Guarda y sal (normalmente F10); el PC se reinicia con normalidad."),
             },
             null);
     }

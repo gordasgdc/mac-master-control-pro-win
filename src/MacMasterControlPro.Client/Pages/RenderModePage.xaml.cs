@@ -17,8 +17,8 @@ public partial class RenderModePage : UserControl
         _suppressEvent = false;
         if (_service.RecoveredFromPreviousSession)
         {
-            StatusIndicator.Text = "Mod Randare ACTIV";
-            StatusText.Text = "Modul Randare era activ când aplicația s-a închis. Windows Search și File History pot fi încă oprite. Dezactivează comutatorul pentru a restaura exact starea de dinainte.";
+            StatusIndicator.Text = L.X("Mod Randare ACTIV", "Render Mode ON", "Modo de renderizado ACTIVO");
+            StatusText.Text = L.X("Modul Randare era activ când aplicația s-a închis. Windows Search și File History pot fi încă oprite. Dezactivează comutatorul pentru a restaura exact starea de dinainte.", "Render Mode was active when the app closed. Windows Search and File History may still be paused. Turn the switch off to restore the exact previous state.", "El modo de renderizado estaba activo al cerrarse la app. Windows Search y el Historial de archivos pueden seguir pausados. Desactiva el interruptor para restaurar exactamente el estado anterior.");
         }
         else
         {
@@ -47,9 +47,9 @@ public partial class RenderModePage : UserControl
         {
             _service.Deactivate(line => Log.Append(line));
         }
-        StatusIndicator.Text = _service.IsActive ? "Mod Randare ACTIV" : "Mod Randare inactiv";
+        StatusIndicator.Text = _service.IsActive ? L.X("Mod Randare ACTIV", "Render Mode ON", "Modo de renderizado ACTIVO") : L.X("Mod Randare inactiv", "Render Mode off", "Modo de renderizado inactivo");
         StatusText.Text = _service.IsActive
-            ? "Nu uita să dezactivezi Modul Randare după export."
+            ? L.X("Nu uita să dezactivezi Modul Randare după export.", "Remember to turn Render Mode off after the export.", "No olvides desactivar el modo de renderizado tras exportar.")
             : "";
     }
 

@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.SecurityPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
@@ -8,20 +9,20 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="🛡️ Securitate &amp; Confidențialitate" FontSize="22" FontWeight="Bold" />
-            <ui:Button Grid.Column="1" Content="Rescanează" Click="OnRescanClicked" />
+            <TextBlock Grid.Column="0" Text="{loc:Loc Ro='🛡️ Securitate &amp; Confidențialitate', En='🛡️ Security and Privacy', Es='🛡️ Seguridad y privacidad'}" FontSize="22" FontWeight="Bold" />
+            <ui:Button Grid.Column="1" Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnRescanClicked" />
         </Grid>
-        <ui:CardExpander Header="Verificări sistem" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Verificări sistem', En='System checks', Es='Comprobaciones del sistema'}" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel x:Name="ChecksPanel" />
         </ui:CardExpander>
-        <ui:CardExpander Header="Acțiuni rapide" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Acțiuni rapide', En='Quick actions', Es='Acciones rápidas'}" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
-                <ui:Button Content="Activează Firewall (toate profilurile)" Margin="0,0,0,8" Click="OnEnableFirewallClicked" />
-                <ui:Button Content="Cere parolă imediat la trezire" Click="OnRequirePasswordClicked" />
+                <ui:Button Content="{loc:Loc Ro='Activează Firewall (toate profilurile)', En='Enable Firewall (all profiles)', Es='Activar el cortafuegos (todos los perfiles)'}" Margin="0,0,0,8" Click="OnEnableFirewallClicked" />
+                <ui:Button Content="{loc:Loc Ro='Cere parolă imediat la trezire', En='Require password immediately on wake', Es='Pedir contraseña inmediatamente al reactivar'}" Click="OnRequirePasswordClicked" />
                 <TextBlock x:Name="StatusText" Margin="0,8,0,0" Foreground="LightGreen" FontSize="11" />
             </StackPanel>
         </ui:CardExpander>
         <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
-                   Text="BitLocker (cere cheie de recuperare confirmată manual) și dezactivarea protecțiilor de sistem rămân decizii luate direct din Windows Settings, niciodată dintr-un buton." />
+                   Text="{loc:Loc Ro='BitLocker (cere cheie de recuperare confirmată manual) și dezactivarea protecțiilor de sistem rămân decizii luate direct din Windows Settings, niciodată dintr-un buton.', En='BitLocker (needs a manually confirmed recovery key) and disabling system protections remain decisions made directly in Windows Settings, never from a button.', Es='BitLocker (requiere una clave de recuperación confirmada a mano) y desactivar las protecciones del sistema siguen siendo decisiones que se toman directamente en Configuración de Windows, nunca desde un botón.'}" />
     </StackPanel>
 </UserControl>

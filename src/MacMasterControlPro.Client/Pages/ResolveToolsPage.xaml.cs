@@ -30,8 +30,8 @@ public partial class ResolveToolsPage : UserControl
     {
         var exists = ResolveDatabaseBackupService.DatabaseExists();
         DbStatusText.Text = exists
-            ? $"Bază de date găsită — {FormatBytes(ResolveDatabaseBackupService.DatabaseSizeBytes())}"
-            : "Nicio bază de date locală găsită pe acest PC.";
+            ? L.X($"Bază de date găsită — {FormatBytes(ResolveDatabaseBackupService.DatabaseSizeBytes())}", $"Database found — {FormatBytes(ResolveDatabaseBackupService.DatabaseSizeBytes())}", $"Base de datos encontrada: {FormatBytes(ResolveDatabaseBackupService.DatabaseSizeBytes())}")
+            : L.X("Nicio bază de date locală găsită pe acest PC.", "No local database found on this PC.", "No se encontró ninguna base de datos local en este PC.");
         BackupButton.IsEnabled = exists;
 
         BackupsList.Items.Clear();
@@ -41,7 +41,7 @@ public partial class ResolveToolsPage : UserControl
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             row.Children.Add(new TextBlock { Text = entry.Date.ToString("g"), FontSize = 11 });
-            var openButton = new Wpf.Ui.Controls.Button { Content = "Arată în Explorer", Padding = new Thickness(6, 1, 6, 1) };
+            var openButton = new Wpf.Ui.Controls.Button { Content = L.X("Arată în Explorer", "Show in Explorer", "Mostrar en el Explorador"), Padding = new Thickness(6, 1, 6, 1) };
             openButton.Click += (_, _) => ResolveDatabaseBackupService.RevealInExplorer(entry.Path);
             Grid.SetColumn(openButton, 1);
             row.Children.Add(openButton);
@@ -50,8 +50,8 @@ public partial class ResolveToolsPage : UserControl
 
         var zombie = ResolveDatabaseBackupService.IsResolveZombie();
         ZombieStatusText.Text = zombie
-            ? "Proces DaVinci Resolve activ, dar fără fereastră vizibilă — probabil blocat."
-            : "Fără proces Resolve blocat detectat.";
+            ? L.X("Proces DaVinci Resolve activ, dar fără fereastră vizibilă — probabil blocat.", "DaVinci Resolve process is running but has no visible window — probably stuck.", "Proceso de DaVinci Resolve activo pero sin ventana visible; probablemente bloqueado.")
+            : L.X("Fără proces Resolve blocat detectat.", "No stuck Resolve process detected.", "No se detectó ningún proceso de Resolve bloqueado.");
         ForceQuitButton.Visibility = zombie ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -101,13 +101,13 @@ public partial class ResolveToolsPage : UserControl
             _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
             _timer.Tick += (_, _) => PollRenderJobsOnce();
             _timer.Start();
-            NotifierStatusText.Text = "Activă — verifică la 5 secunde";
+            NotifierStatusText.Text = L.X("Activă — verifică la 5 secunde", "Active — checks every 5 seconds", "Activo: comprueba cada 5 segundos");
         }
         else
         {
             _timer?.Stop();
             _timer = null;
-            NotifierStatusText.Text = "Inactivă";
+            NotifierStatusText.Text = L.X("Inactivă", "Inactive", "Inactivo");
         }
     }
 
@@ -134,7 +134,7 @@ public partial class ResolveToolsPage : UserControl
 
     private void FireNotification(string jobName, string status)
     {
-        var title = status == "Complete" ? "✔ Randare terminată" : $"✘ Randare {status.ToLower()}";
+        var title = status == "Complete" ? L.X("✔ Randare terminată", "✔ Render finished", "✔ Render terminado") : $"✘ Randare {status.ToLower()}";
         _trayIcon?.ShowBalloonTip(8000, title, jobName, System.Windows.Forms.ToolTipIcon.Info);
         Task.Run(() => EmailNotifierService.Send($"{title} — {jobName}", $"Job: {jobName}\nStatus: {status}"));
     }
@@ -193,14 +193,14 @@ public partial class ResolveToolsPage : UserControl
     {
         SaveEmailSettings();
         TestEmailButton.IsEnabled = false;
-        EmailTestStatusText.Text = "Se trimite…";
+        EmailTestStatusText.Text = L.X("Se trimite…", "Sending…", "Enviando…");
         Task.Run(() =>
         {
-            var (ok, error) = EmailNotifierService.Send("Test — Master Control Studio Pro", "Dacă vezi acest email, notificarea funcționează.");
+            var (ok, error) = EmailNotifierService.Send("Test — Master Control Studio Pro", L.X("Dacă vezi acest email, notificarea funcționează.", "If you see this email, the notification works.", "Si ves este correo, la notificación funciona."));
             Dispatcher.Invoke(() =>
             {
                 TestEmailButton.IsEnabled = true;
-                EmailTestStatusText.Text = ok ? "✔ Trimis — verifică inboxul." : $"✘ {error}";
+                EmailTestStatusText.Text = ok ? L.X("✔ Trimis — verifică inboxul.", "✔ Sent — check your inbox.", "✔ Enviado: revisa tu bandeja de entrada.") : $"✘ {error}";
             });
         });
     }
@@ -253,23 +253,23 @@ public partial class ResolveToolsPage : UserControl
     {
         var paths = _selectedForDeletion.ToList();
         Log.Clear();
-        Log.Append($"$ Ștergere {paths.Count} clip(uri) din Media Pool…");
+        Log.Append(L.X($"$ Ștergere {paths.Count} clip(uri) din Media Pool…", $"$ Deleting {paths.Count} clip(s) from the Media Pool…", $"$ Eliminando {paths.Count} clip(s) del Media Pool…"));
         Task.Run(() =>
         {
             var (deleted, error) = ResolveMediaAuditService.DeleteClips(paths);
             Dispatcher.Invoke(() =>
             {
                 if (error != null) Log.Append("✘ " + error);
-                else { Log.Append($"✔ {deleted} clip(uri) șterse din Media Pool."); OnScanClicked(this, new RoutedEventArgs()); }
+                else { Log.Append(L.X($"✔ {deleted} clip(uri) șterse din Media Pool.", $"✔ {deleted} clip(s) removed from the Media Pool.", $"✔ {deleted} clip(s) eliminados del Media Pool.")); OnScanClicked(this, new RoutedEventArgs()); }
             });
         });
     }
 
     private string DescribeAuditError(string error) => error switch
     {
-        "no_scripting_access" => "DaVinci Resolve nu rulează sau scripting-ul nu e activat (Preferences → General → External scripting using = Local).",
-        "no_project" => "Niciun proiect deschis în Resolve.",
-        "scripting_unavailable" => "Scripting API Resolve indisponibil (python.exe nu a fost găsit în PATH).",
+        "no_scripting_access" => L.X("DaVinci Resolve nu rulează sau scripting-ul nu e activat (Preferences → General → External scripting using = Local).", "DaVinci Resolve is not running or scripting is not enabled (Preferences → General → External scripting using = Local).", "DaVinci Resolve no se está ejecutando o el scripting no está activado (Preferences → General → External scripting using = Local)."),
+        "no_project" => L.X("Niciun proiect deschis în Resolve.", "No project open in Resolve.", "No hay ningún proyecto abierto en Resolve."),
+        "scripting_unavailable" => L.X("Scripting API Resolve indisponibil (python.exe nu a fost găsit în PATH).", "Resolve scripting API unavailable (python.exe was not found in PATH).", "API de scripting de Resolve no disponible (no se encontró python.exe en el PATH)."),
         _ => error,
     };
 
@@ -300,7 +300,7 @@ public partial class ResolveToolsPage : UserControl
         if (_cloud is null || RemoteCombo.SelectedItem is not string remoteName) return;
         var direction = UploadRadio.IsChecked == true ? SyncDirection.Upload : SyncDirection.Download;
         var folders = ResolveConfigSyncService.Folders.Where(f => f.Exists).ToList();
-        if (folders.Count == 0) { Log.Append("ℹ Niciun folder de configurare Resolve găsit local."); return; }
+        if (folders.Count == 0) { Log.Append(L.X("ℹ Niciun folder de configurare Resolve găsit local.", "ℹ No Resolve configuration folder found locally.", "ℹ No se encontró ninguna carpeta de configuración de Resolve.")); return; }
         SyncButton.IsEnabled = false;
         var remaining = folders.Count;
         foreach (var folder in folders)

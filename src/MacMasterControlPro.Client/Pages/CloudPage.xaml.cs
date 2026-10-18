@@ -37,7 +37,7 @@ public partial class CloudPage : UserControl
             var stats = _service.FetchStats(remoteName);
             textBlock.Text = stats is null
                 ? ""
-                : $"↕︎ {FormatBytes(stats.SpeedBytesPerSec)}/s · {FormatBytes(stats.BytesTransferred)} transferați · {stats.ActiveTransfers} active";
+                : L.X($"↕︎ {FormatBytes(stats.SpeedBytesPerSec)}/s · {FormatBytes(stats.BytesTransferred)} transferați · {stats.ActiveTransfers} active", $"↕︎ {FormatBytes(stats.SpeedBytesPerSec)}/s · {FormatBytes(stats.BytesTransferred)} transferred · {stats.ActiveTransfers} active", $"↕︎ {FormatBytes(stats.SpeedBytesPerSec)}/s · {FormatBytes(stats.BytesTransferred)} transferidos · {stats.ActiveTransfers} activas");
         }
     }
 
@@ -59,7 +59,7 @@ public partial class CloudPage : UserControl
 
     private void OnChooseMountFolderClicked(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "Alege folderul unde se montează conturile Cloud" };
+        var dialog = new OpenFolderDialog { Title = L.X("Alege folderul unde se montează conturile Cloud", "Choose the folder where cloud accounts are mounted", "Elige la carpeta donde se montan las cuentas en la nube") };
         if (dialog.ShowDialog() != true) return;
         CloudMountSettings.CustomMountFolder = dialog.FolderName;
         RenderMountFolderText();
@@ -75,8 +75,8 @@ public partial class CloudPage : UserControl
     {
         var folder = CloudMountSettings.CustomMountFolder;
         MountFolderText.Text = string.IsNullOrWhiteSpace(folder)
-            ? "Implicit: literă de disc nouă per cont."
-            : $"Folder curent: {folder}";
+            ? L.X("Implicit: literă de disc nouă per cont.", "Default: a new drive letter per account.", "Predeterminado: una letra de unidad nueva por cuenta.")
+            : L.X($"Folder curent: {folder}", $"Current folder: {folder}", $"Carpeta actual: {folder}");
         MountFolderText.Foreground = string.IsNullOrWhiteSpace(folder) ? System.Windows.Media.Brushes.Gray : System.Windows.Media.Brushes.LimeGreen;
     }
 
@@ -157,18 +157,18 @@ public partial class CloudPage : UserControl
 
             if (isMounted)
             {
-                var openButton = new Wpf.Ui.Controls.Button { Content = "Deschide", Margin = new Thickness(0, 0, 8, 0) };
+                var openButton = new Wpf.Ui.Controls.Button { Content = L.X("Deschide", "Open", "Abrir"), Margin = new Thickness(0, 0, 8, 0) };
                 openButton.Click += (_, _) => System.Diagnostics.Process.Start("explorer.exe", _service.MountedDriveLetters[remote.Name]);
                 AddButton(openButton);
             }
 
-            var browseButton = new Wpf.Ui.Controls.Button { Content = "Explorează", Margin = new Thickness(0, 0, 8, 0) };
+            var browseButton = new Wpf.Ui.Controls.Button { Content = L.X("Explorează", "Browse", "Explorar"), Margin = new Thickness(0, 0, 8, 0) };
             browseButton.Click += (_, _) => new RemoteBrowserWindow(_service, remote.Name) { Owner = Window.GetWindow(this) }.ShowDialog();
             AddButton(browseButton);
 
             var actionButton = new Wpf.Ui.Controls.Button
             {
-                Content = isMounted ? $"Demontează ({_service.MountedDriveLetters[remote.Name]})" : "Montează",
+                Content = isMounted ? L.X($"Demontează ({_service.MountedDriveLetters[remote.Name]})", $"Unmount ({_service.MountedDriveLetters[remote.Name]})", $"Desmontar ({_service.MountedDriveLetters[remote.Name]})") : L.X("Montează", "Mount", "Montar"),
                 Margin = new Thickness(0, 0, 8, 0),
             };
             actionButton.Click += (_, _) =>
@@ -181,7 +181,7 @@ public partial class CloudPage : UserControl
                     if (gate.ShowDialog() != true) return;
                 }
                 var target = _service.Mount(remote.Name, line => Log.Append(line));
-                StatusText.Text = target is not null ? $"✔ Montat pe {target}" : "Nicio literă de disc liberă.";
+                StatusText.Text = target is not null ? $"✔ Montat pe {target}" : L.X("Nicio literă de disc liberă.", "No free drive letter.", "No hay ninguna letra de unidad libre.");
                 Refresh();
             };
             AddButton(actionButton);
@@ -213,8 +213,8 @@ public partial class CloudPage : UserControl
 
     private void UpdateSelectionText()
     {
-        SelectionText.Text = $"Selectate {_selected.Count} din {_service.Remotes.Count}";
-        SelectAllButton.Content = _selected.Count == _service.Remotes.Count && _service.Remotes.Count > 0 ? "Deselectează tot" : "Selectează tot";
+        SelectionText.Text = L.X($"Selectate {_selected.Count} din {_service.Remotes.Count}", $"Selected {_selected.Count} of {_service.Remotes.Count}", $"Seleccionadas {_selected.Count} de {_service.Remotes.Count}");
+        SelectAllButton.Content = _selected.Count == _service.Remotes.Count && _service.Remotes.Count > 0 ? L.X("Deselectează tot", "Deselect all", "Deseleccionar todo") : L.X("Selectează tot", "Select all", "Seleccionar todo");
         MountSelectedButton.IsEnabled = _selected.Count > 0;
         UnmountSelectedButton.IsEnabled = _selected.Count > 0;
     }

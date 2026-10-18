@@ -63,7 +63,7 @@ public partial class DependenciesPage : UserControl
             {
                 var button = new Wpf.Ui.Controls.Button
                 {
-                    Content = item.IsInstalled ? "Instalat ✔" : "Instalează",
+                    Content = item.IsInstalled ? "Instalat ✔" : L.X("Instalează", "Install", "Instalar"),
                     IsEnabled = !item.IsInstalled,
                     Background = new SolidColorBrush(item.IsInstalled ? Color.FromRgb(0x1F, 0x6B, 0x2E) : Color.FromRgb(0x8B, 0x22, 0x1A)),
                     Foreground = Brushes.White,

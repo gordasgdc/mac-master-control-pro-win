@@ -28,7 +28,7 @@ public partial class LoginItemsPage : UserControl
         ItemsPanel.Children.Clear();
         if (_items.Count == 0)
         {
-            ItemsPanel.Children.Add(new TextBlock { Text = "Niciun serviciu de fundal terț găsit.", Foreground = System.Windows.Media.Brushes.Gray, Margin = new Thickness(0, 12, 0, 12) });
+            ItemsPanel.Children.Add(new TextBlock { Text = L.X("Niciun serviciu de fundal terț găsit.", "No third-party background item found.", "No se encontró ningún elemento de terceros en segundo plano."), Foreground = System.Windows.Media.Brushes.Gray, Margin = new Thickness(0, 12, 0, 12) });
             return;
         }
         foreach (var item in _items)
@@ -39,14 +39,14 @@ public partial class LoginItemsPage : UserControl
 
             var labelPanel = new StackPanel();
             labelPanel.Children.Add(new TextBlock { Text = item.Name, FontFamily = new System.Windows.Media.FontFamily("Consolas") });
-            labelPanel.Children.Add(new TextBlock { Text = item.IsHKLM ? "Sistem (necesită admin)" : "Utilizator", FontSize = 10, Foreground = System.Windows.Media.Brushes.Gray });
+            labelPanel.Children.Add(new TextBlock { Text = item.IsHKLM ? L.X("Sistem (necesită admin)", "System (needs admin)", "Sistema (requiere administrador)") : "Utilizator", FontSize = 10, Foreground = System.Windows.Media.Brushes.Gray });
             Grid.SetColumn(labelPanel, 0);
             row.Children.Add(labelPanel);
 
             var isDisabled = disabled.Contains(item.Name);
             var button = new Wpf.Ui.Controls.Button
             {
-                Content = isDisabled ? "Reactivează" : "Dezactivează",
+                Content = isDisabled ? L.X("Reactivează", "Re-enable", "Reactivar") : L.X("Dezactivează", "Disable", "Desactivar"),
                 Foreground = isDisabled ? System.Windows.Media.Brushes.LightGreen : System.Windows.Media.Brushes.OrangeRed,
             };
             button.Click += (_, _) => Toggle(item, enable: isDisabled);

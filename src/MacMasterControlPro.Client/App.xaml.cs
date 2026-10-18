@@ -71,7 +71,7 @@ public partial class App : Application
             DiagnosticLog.Write("App", $"CRASH la pornire: {DiagnosticLog.Describe(ex)}");
             MessageBox.Show(
                 $"Aplicatia nu a putut porni:\n\n{ex.Message}\n\nDetalii complete in: {DiagnosticLog.FilePath}\n\nTrimite acest fisier pentru diagnosticare.",
-                "Master Control Studio Pro — Eroare la pornire", MessageBoxButton.OK, MessageBoxImage.Error);
+                L.X("Master Control Studio Pro — Eroare la pornire", "Master Control Studio Pro — Startup error", "Master Control Studio Pro — Error al iniciar"), MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
     }

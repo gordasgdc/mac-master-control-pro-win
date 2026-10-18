@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.DiskHealthPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -9,11 +10,11 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="💽 Sănătate Discuri" FontSize="22" FontWeight="Bold" />
-                <ui:Button Grid.Column="1" Content="Rescanează" Click="OnRescanClicked" />
+                <TextBlock Grid.Column="0" Text="{loc:Loc Ro='💽 Sănătate Discuri', En='💽 Disk Health', Es='💽 Salud de discos'}" FontSize="22" FontWeight="Bold" />
+                <ui:Button Grid.Column="1" Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnRescanClicked" />
             </Grid>
             <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10"
-                       Text="Spațiu liber, status SMART și test opțional de viteză de scriere — un disc de scratch/cache aproape plin sau pe moarte e cauza cea mai frecventă a randărilor care se blochează la mijloc." />
+                       Text="{loc:Loc Ro='Spațiu liber, status SMART și test opțional de viteză de scriere — un disc de scratch/cache aproape plin sau pe moarte e cauza cea mai frecventă a randărilor care se blochează la mijloc.', En='Free space, SMART status and an optional write-speed test — a nearly full or failing scratch/cache drive is the most common cause of renders that stall midway.', Es='Espacio libre, estado SMART y una prueba opcional de velocidad de escritura: un disco de scratch/caché casi lleno o fallando es la causa más común de renders que se detienen a medias.'}" />
             <StackPanel x:Name="DisksPanel" />
         </StackPanel>
     </ScrollViewer>

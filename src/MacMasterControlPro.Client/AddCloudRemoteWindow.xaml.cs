@@ -43,7 +43,7 @@ public partial class AddCloudRemoteWindow : Window
         if (string.IsNullOrWhiteSpace(NameBox.Text)) return;
 
         CreateButton.IsEnabled = false;
-        StatusText.Text = type.IsOAuth() ? "Verifică browser-ul pentru autorizare…" : "Se creează…";
+        StatusText.Text = type.IsOAuth() ? L.X("Verifică browser-ul pentru autorizare…", "Check your browser to authorise…", "Revisa el navegador para autorizar…") : L.X("Se creează…", "Creating…", "Creando…");
 
         var values = _fieldBoxes.ToDictionary(kv => kv.Key, kv => kv.Value.Text);
         var (success, output) = _service.CreateRemote(NameBox.Text.Trim(), type, values);
@@ -56,7 +56,7 @@ public partial class AddCloudRemoteWindow : Window
         }
         else
         {
-            StatusText.Text = string.IsNullOrWhiteSpace(output) ? "Eroare la creare." : output;
+            StatusText.Text = string.IsNullOrWhiteSpace(output) ? L.X("Eroare la creare.", "Creation failed.", "Error al crear.") : output;
         }
     }
 

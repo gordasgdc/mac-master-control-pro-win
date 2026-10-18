@@ -1,5 +1,6 @@
 <ui:FluentWindow x:Class="MacMasterControlPro.Client.RemoteBrowserWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:MacMasterControlPro.Client"
@@ -27,7 +28,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <ui:Button Grid.Column="0" x:Name="BackButton" Content="⬅︎ Înapoi" Margin="0,0,8,0" Click="OnBackClicked" Visibility="Collapsed" />
+            <ui:Button Grid.Column="0" x:Name="BackButton" Content="{loc:Loc Ro='⬅︎ Înapoi', En='⬅︎ Back', Es='⬅︎ Atrás'}" Margin="0,0,8,0" Click="OnBackClicked" Visibility="Collapsed" />
             <TextBlock Grid.Column="1" x:Name="BreadcrumbText" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
         </Grid>
 
@@ -45,10 +46,10 @@
         </ListBox>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,10,0,0">
-            <ui:Button Content="⬆︎ Încarcă fișiere aici…" Margin="0,0,8,0" Click="OnUploadClicked" />
-            <ui:Button x:Name="DownloadButton" Content="⬇︎ Descarcă selecția" Margin="0,0,8,0" Click="OnDownloadClicked" IsEnabled="False" />
-            <ui:Button Content="🔄 Sincronizare folder…" Margin="0,0,8,0" Click="OnSyncClicked" />
-            <ui:Button x:Name="DeleteButton" Content="🗑 Șterge selecția" Click="OnDeleteClicked" IsEnabled="False" />
+            <ui:Button Content="{loc:Loc Ro='⬆︎ Încarcă fișiere aici…', En='⬆︎ Upload files here…', Es='⬆︎ Subir archivos aquí…'}" Margin="0,0,8,0" Click="OnUploadClicked" />
+            <ui:Button x:Name="DownloadButton" Content="{loc:Loc Ro='⬇︎ Descarcă selecția', En='⬇︎ Download selection', Es='⬇︎ Descargar la selección'}" Margin="0,0,8,0" Click="OnDownloadClicked" IsEnabled="False" />
+            <ui:Button Content="{loc:Loc Ro='🔄 Sincronizare folder…', En='🔄 Sync folder…', Es='🔄 Sincronizar carpeta…'}" Margin="0,0,8,0" Click="OnSyncClicked" />
+            <ui:Button x:Name="DeleteButton" Content="{loc:Loc Ro='🗑 Șterge selecția', En='🗑 Delete selection', Es='🗑 Eliminar la selección'}" Click="OnDeleteClicked" IsEnabled="False" />
         </StackPanel>
 
         <controls:TerminalLogView Grid.Row="4" x:Name="Log" Margin="0,10,0,0" />

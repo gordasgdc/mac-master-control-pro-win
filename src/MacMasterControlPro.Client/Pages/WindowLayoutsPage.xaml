@@ -1,13 +1,14 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.WindowLayoutsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
         <TextBlock Text="🪟 Layout Ferestre" FontSize="22" FontWeight="Bold" Margin="0,0,0,8" />
         <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,16"
-                   Text="Salvează pozițiile ferestrelor unei aplicații (ex. DaVinci Resolve) ca profil — util când schimbi frecvent între configurații de monitoare." />
+                   Text="{loc:Loc Ro='Salvează pozițiile ferestrelor unei aplicații (ex. DaVinci Resolve) ca profil — util când schimbi frecvent între configurații de monitoare.', En='Save an app’s window positions (e.g. DaVinci Resolve) as a profile — useful when you often switch between monitor setups.', Es='Guarda las posiciones de las ventanas de una app (p. ej. DaVinci Resolve) como perfil; útil si cambias a menudo de configuración de monitores.'}" />
 
-        <ui:CardExpander Header="Salvează layout-ul curent" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Salvează layout-ul curent', En='Save current layout', Es='Guardar la disposición actual'}" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <ComboBox x:Name="AppCombo" Margin="0,0,0,8" DisplayMemberPath="Item1" />
                 <Grid>
@@ -16,7 +17,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0" x:Name="ProfileNameBox" Margin="0,0,8,0" />
-                    <ui:Button Grid.Column="1" Content="Salvează" Click="OnSaveClicked" />
+                    <ui:Button Grid.Column="1" Content="{loc:Loc Ro='Salvează', En='Save', Es='Guardar'}" Click="OnSaveClicked" />
                 </Grid>
             </StackPanel>
         </ui:CardExpander>

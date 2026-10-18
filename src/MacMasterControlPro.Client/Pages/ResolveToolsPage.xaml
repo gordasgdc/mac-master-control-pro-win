@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.ResolveToolsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
@@ -7,28 +8,28 @@
         <StackPanel>
             <TextBlock Text="🎬 DaVinci Resolve" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-            <ui:CardExpander Header="Notificare la final de randare" IsExpanded="True" Margin="0,0,0,12">
+            <ui:CardExpander Header="{loc:Loc Ro='Notificare la final de randare', En='Notification when a render finishes', Es='Aviso al terminar un render'}" IsExpanded="True" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"
-                               Text="Primești o notificare Windows nativă când o randare din coada Resolve se termină — util când randarea durează ore." />
+                               Text="{loc:Loc Ro='Primești o notificare Windows nativă când o randare din coada Resolve se termină — util când randarea durează ore.', En='You get a native Windows notification when a render in the Resolve queue ends — handy when a render takes hours.', Es='Recibes una notificación nativa de Windows cuando termina un render de la cola de Resolve; útil cuando el render dura horas.'}" />
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="NotifierStatusText" Grid.Column="0" Text="Inactivă" VerticalAlignment="Center" />
+                        <TextBlock x:Name="NotifierStatusText" Grid.Column="0" Text="{loc:Loc Ro='Inactivă', En='Inactive', Es='Inactivo'}" VerticalAlignment="Center" />
                         <ui:ToggleSwitch x:Name="NotifierToggle" Grid.Column="1" Checked="OnNotifierToggled" Unchecked="OnNotifierToggled" />
                     </Grid>
                     <TextBlock x:Name="NotifierErrorText" FontSize="10.5" Foreground="{DynamicResource StatusWarningBrush}" TextWrapping="Wrap" Margin="0,0,0,8" />
 
                     <Separator Margin="0,4,0,10" />
-                    <CheckBox x:Name="EmailEnabledCheck" Content="Trimite și pe email (ajunge pe telefon)" Checked="OnEmailSettingChanged" Unchecked="OnEmailSettingChanged" Margin="0,0,0,6" />
+                    <CheckBox x:Name="EmailEnabledCheck" Content="{loc:Loc Ro='Trimite și pe email (ajunge pe telefon)', En='Also send by email (reaches your phone)', Es='Enviar también por correo (llega al teléfono)'}" Checked="OnEmailSettingChanged" Unchecked="OnEmailSettingChanged" Margin="0,0,0,6" />
                     <StackPanel x:Name="EmailFieldsPanel" Visibility="Collapsed">
                         <TextBlock TextWrapping="Wrap" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,6"
-                                   Text="Recomandat: folosește o „parolă de aplicație” Gmail/Outlook, NU parola reală a contului — se salvează local, în clar." />
+                                   Text="{loc:Loc Ro='Recomandat: folosește o „parolă de aplicație” Gmail/Outlook, NU parola reală a contului — se salvează local, în clar.', En='Recommended: use a Gmail/Outlook “app password”, NOT your real account password — it is stored protected by Windows (DPAPI) on this PC.', Es='Recomendado: usa una «contraseña de aplicación» de Gmail/Outlook, NO la contraseña real de tu cuenta; se guarda protegida por Windows (DPAPI) en este PC.'}" />
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                            <ui:Button Content="Generează parolă Gmail" Click="OnOpenGmailAppPasswordClicked" Margin="0,0,8,0" />
-                            <ui:Button Content="Generează parolă Outlook" Click="OnOpenOutlookAppPasswordClicked" />
+                            <ui:Button Content="{loc:Loc Ro='Generează parolă Gmail', En='Generate Gmail password', Es='Generar contraseña de Gmail'}" Click="OnOpenGmailAppPasswordClicked" Margin="0,0,8,0" />
+                            <ui:Button Content="{loc:Loc Ro='Generează parolă Outlook', En='Generate Outlook password', Es='Generar contraseña de Outlook'}" Click="OnOpenOutlookAppPasswordClicked" />
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -48,14 +49,14 @@
                             <TextBox Grid.Row="1" Grid.Column="1" x:Name="SmtpPortBox" Margin="0,2" />
                             <TextBlock Grid.Row="2" Grid.Column="0" Text="Email expeditor" VerticalAlignment="Center" />
                             <TextBox Grid.Row="2" Grid.Column="1" x:Name="UsernameBox" Margin="0,2" />
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Parolă aplicație" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="{loc:Loc Ro='Parolă aplicație', En='App password', Es='Contraseña de aplicación'}" VerticalAlignment="Center" />
                             <PasswordBox Grid.Row="3" Grid.Column="1" x:Name="AppPasswordBox" Margin="0,2" />
                             <TextBlock Grid.Row="4" Grid.Column="0" Text="Destinatar" VerticalAlignment="Center" />
                             <TextBox Grid.Row="4" Grid.Column="1" x:Name="RecipientBox" Margin="0,2" />
                         </Grid>
                         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                            <ui:Button Content="Salvează" Click="OnSaveEmailSettings" Margin="0,0,6,0" />
-                            <ui:Button x:Name="TestEmailButton" Content="Trimite email de test" Click="OnSendTestEmail" />
+                            <ui:Button Content="{loc:Loc Ro='Salvează', En='Save', Es='Guardar'}" Click="OnSaveEmailSettings" Margin="0,0,6,0" />
+                            <ui:Button x:Name="TestEmailButton" Content="{loc:Loc Ro='Trimite email de test', En='Send test email', Es='Enviar correo de prueba'}" Click="OnSendTestEmail" />
                         </StackPanel>
                         <TextBlock x:Name="EmailTestStatusText" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,6,0,0" />
                     </StackPanel>
@@ -65,39 +66,39 @@
             <ui:CardExpander Header="Auditor Media Pool — media offline &amp; clipuri duplicate" IsExpanded="True" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"
-                               Text="Citește proiectul curent deschis în Resolve (doar citire) și semnalează clipuri offline sau duplicate." />
+                               Text="{loc:Loc Ro='Citește proiectul curent deschis în Resolve (doar citire) și semnalează clipuri offline sau duplicate.', En='Reads the project currently open in Resolve (read-only) and flags offline or duplicate clips.', Es='Lee el proyecto abierto en Resolve (solo lectura) y señala clips sin conexión o duplicados.'}" />
                     <Grid Margin="0,0,0,8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <ui:Button Grid.Column="0" x:Name="ScanButton" Content="Scanează proiectul curent" Click="OnScanClicked" Margin="0,0,8,0" />
+                        <ui:Button Grid.Column="0" x:Name="ScanButton" Content="{loc:Loc Ro='Scanează proiectul curent', En='Scan current project', Es='Analizar el proyecto actual'}" Click="OnScanClicked" Margin="0,0,8,0" />
                         <TextBlock Grid.Column="1" x:Name="ScanResultText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
                     </Grid>
                     <TextBlock x:Name="ScanErrorText" FontSize="11" Foreground="{DynamicResource StatusWarningBrush}" TextWrapping="Wrap" Margin="0,0,0,8" />
                     <ItemsControl x:Name="FlagsList" />
-                    <ui:Button x:Name="DeleteSelectedButton" Content="Șterge selecția din Media Pool" Foreground="OrangeRed" Click="OnDeleteSelectedClicked" IsEnabled="False" Margin="0,8,0,0" />
+                    <ui:Button x:Name="DeleteSelectedButton" Content="{loc:Loc Ro='Șterge selecția din Media Pool', En='Delete selection from Media Pool', Es='Eliminar la selección del Media Pool'}" Foreground="OrangeRed" Click="OnDeleteSelectedClicked" IsEnabled="False" Margin="0,8,0,0" />
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardExpander Header="Sincronizare LUT-uri &amp; Fusion între stații" IsExpanded="True" Margin="0,0,0,12">
+            <ui:CardExpander Header="{loc:Loc Ro='Sincronizare LUT-uri &amp; Fusion între stații', En='LUT and Fusion sync between workstations', Es='Sincronización de LUT y Fusion entre equipos'}" IsExpanded="True" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,8"
-                               Text="Urcă/descarcă LUT-urile și macro-urile/șabloanele Fusion printr-un cont Cloud deja configurat. PowerGrade-urile NU sunt incluse (TODO separat)." />
+                               Text="{loc:Loc Ro='Urcă/descarcă LUT-urile și macro-urile/șabloanele Fusion printr-un cont Cloud deja configurat. PowerGrade-urile NU sunt incluse (TODO separat).', En='Upload/download LUTs and Fusion macros/templates through an already configured cloud account. PowerGrades are NOT included.', Es='Sube/descarga LUT y macros/plantillas de Fusion mediante una cuenta en la nube ya configurada. Los PowerGrade NO se incluyen.'}" />
                     <ItemsControl x:Name="ConfigFoldersList" Margin="0,0,0,8" />
                     <ComboBox x:Name="RemoteCombo" Margin="0,0,0,6" />
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <RadioButton x:Name="UploadRadio" Content="Urcă în Cloud" IsChecked="True" Margin="0,0,12,0" />
-                        <RadioButton x:Name="DownloadRadio" Content="Descarcă din Cloud" />
+                        <RadioButton x:Name="UploadRadio" Content="{loc:Loc Ro='Urcă în Cloud', En='Upload to cloud', Es='Subir a la nube'}" IsChecked="True" Margin="0,0,12,0" />
+                        <RadioButton x:Name="DownloadRadio" Content="{loc:Loc Ro='Descarcă din Cloud', En='Download from cloud', Es='Descargar de la nube'}" />
                     </StackPanel>
-                    <ui:Button x:Name="SyncButton" Content="Sincronizează" Click="OnSyncClicked" />
+                    <ui:Button x:Name="SyncButton" Content="{loc:Loc Ro='Sincronizează', En='Sync', Es='Sincronizar'}" Click="OnSyncClicked" />
                 </StackPanel>
             </ui:CardExpander>
 
-            <ui:CardExpander Header="Backup bază de date proiecte" IsExpanded="True" Margin="0,0,0,12">
+            <ui:CardExpander Header="{loc:Loc Ro='Backup bază de date proiecte', En='Project database backup', Es='Copia de la base de datos de proyectos'}" IsExpanded="True" Margin="0,0,0,12">
                 <StackPanel>
                     <TextBlock x:Name="DbStatusText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4" />
-                    <TextBlock Text="Închide Resolve înainte de backup — o copiere „la cald” poate corupe arhiva." FontSize="10" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,0,0,8" />
+                    <TextBlock Text="{loc:Loc Ro='Închide Resolve înainte de backup — o copiere „la cald” poate corupe arhiva.', En='Quit Resolve before backing up — a “hot” copy can corrupt the archive.', Es='Cierra Resolve antes de la copia: una copia «en caliente» puede dañar el archivo.'}" FontSize="10" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,0,0,8" />
                     <ui:Button x:Name="BackupButton" Content="Backup acum" Click="OnBackupClicked" />
                     <TextBlock x:Name="BackupStatusText" FontSize="11" Margin="0,6,0,8" />
                     <ItemsControl x:Name="BackupsList" />
@@ -111,7 +112,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" x:Name="ZombieStatusText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                    <ui:Button Grid.Column="1" x:Name="ForceQuitButton" Content="Închide forțat" Foreground="OrangeRed" Click="OnForceQuitClicked" Visibility="Collapsed" />
+                    <ui:Button Grid.Column="1" x:Name="ForceQuitButton" Content="{loc:Loc Ro='Închide forțat', En='Force quit', Es='Forzar cierre'}" Foreground="OrangeRed" Click="OnForceQuitClicked" Visibility="Collapsed" />
                 </Grid>
             </ui:CardExpander>
 

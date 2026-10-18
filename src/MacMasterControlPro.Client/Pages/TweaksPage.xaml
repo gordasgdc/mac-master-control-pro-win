@@ -1,9 +1,10 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.TweaksPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <StackPanel>
-        <TextBlock Text="🛠️ Tweak-uri Sistem" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock Text="{loc:Loc Ro='🛠️ Tweak-uri Sistem', En='🛠️ System Tweaks', Es='🛠️ Ajustes del sistema'}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
         <ui:CardExpander Header="Explorer" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
@@ -12,31 +13,31 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Click="OnSelectAllClicked" />
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="{loc:Loc Ro='Selectează tot', En='Select all', Es='Seleccionar todo'}" Click="OnSelectAllClicked" />
                 </Grid>
-                <CheckBox x:Name="ExplorerCheck" Content="Activează vizualizare avansată Explorer" Margin="0,0,0,6" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
-                <CheckBox x:Name="ThumbsCheck" Content="Blochează thumbs.db pe unități de rețea" Margin="0,0,0,10" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
+                <CheckBox x:Name="ExplorerCheck" Content="{loc:Loc Ro='Activează vizualizare avansată Explorer', En='Enable advanced Explorer view', Es='Activar la vista avanzada del Explorador'}" Margin="0,0,0,6" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
+                <CheckBox x:Name="ThumbsCheck" Content="{loc:Loc Ro='Blochează thumbs.db pe unități de rețea', En='Block thumbs.db on network drives', Es='Bloquear thumbs.db en unidades de red'}" Margin="0,0,0,10" Checked="OnCheckChanged" Unchecked="OnCheckChanged" />
                 <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,10" />
-                <ui:Button x:Name="ApplyButton" Content="Aplică tweak-urile selectate" Appearance="Primary" Click="OnApplyClicked" />
+                <ui:Button x:Name="ApplyButton" Content="{loc:Loc Ro='Aplică tweak-urile selectate', En='Apply selected tweaks', Es='Aplicar los ajustes seleccionados'}" Appearance="Primary" Click="OnApplyClicked" />
             </StackPanel>
         </ui:CardExpander>
 
         <ui:CardExpander Header="Spotlight Shield — Discuri &amp; Foldere" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,8"
-                           Text="Bifează un disc/folder pentru a-l proteja de Windows Search (indexare); debifează pentru a elimina protecția." />
+                           Text="{loc:Loc Ro='Bifează un disc/folder pentru a-l proteja de Windows Search (indexare); debifează pentru a elimina protecția.', En='Tick a drive/folder to protect it from Windows Search indexing; untick to remove the protection.', Es='Marca un disco o carpeta para protegerlo de la indexación de Windows Search; desmárcalo para quitar la protección.'}" />
                 <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" x:Name="SpotlightSelectAllButton" Content="Selectează tot" Margin="0,0,6,0" Click="OnSpotlightSelectAllClicked" />
-                    <ui:Button Grid.Column="2" Content="+ Adaugă foldere…" Click="OnAddFoldersClicked" />
+                    <ui:Button Grid.Column="1" x:Name="SpotlightSelectAllButton" Content="{loc:Loc Ro='Selectează tot', En='Select all', Es='Seleccionar todo'}" Margin="0,0,6,0" Click="OnSpotlightSelectAllClicked" />
+                    <ui:Button Grid.Column="2" Content="{loc:Loc Ro='+ Adaugă foldere…', En='+ Add folders…', Es='+ Añadir carpetas…'}" Click="OnAddFoldersClicked" />
                 </Grid>
                 <StackPanel x:Name="SpotlightItemsPanel" />
                 <TextBlock x:Name="SpotlightSelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,10" />
-                <ui:Button Content="Rescanează" Click="OnSpotlightRescanClicked" />
+                <ui:Button Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnSpotlightRescanClicked" />
             </StackPanel>
         </ui:CardExpander>
 

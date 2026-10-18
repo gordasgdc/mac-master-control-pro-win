@@ -22,7 +22,7 @@ public sealed class DependencyChecker
 
         // winget - vine implicit cu Windows 11 si Windows 10 recente (App Installer).
         var wingetVersion = Shell.Run("winget --version 2>$null");
-        var wingetInstalled = !string.IsNullOrWhiteSpace(wingetVersion) && !wingetVersion.Contains("Eroare");
+        var wingetInstalled = !string.IsNullOrWhiteSpace(wingetVersion) && !wingetVersion.Contains(CoreL.X("Eroare", "Error", "Error"));
         results.Add(new DependencyItem { Id = "winget", Name = "Windows Package Manager", IsInstalled = wingetInstalled, Version = wingetInstalled ? wingetVersion : null });
 
         // Rclone - fie in PATH, fie instalat prin winget.
@@ -60,7 +60,7 @@ public sealed class DependencyChecker
             log?.Invoke($"$ winget install {wingetId}");
             var output = Shell.Run($"winget install --id {wingetId} -e --silent --accept-package-agreements --accept-source-agreements 2>&1");
             foreach (var line in output.Split('\n')) log?.Invoke(line);
-            log?.Invoke($"✔ {name}: comandă terminată.");
+            log?.Invoke(CoreL.X($"✔ {name}: comandă terminată.", $"✔ {name}: command finished.", $"✔ {name}: comando terminado."));
         }
         CheckAll();
     }

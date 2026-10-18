@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.CleanupPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
@@ -10,7 +11,7 @@
          scroll care sa arate ca mai exista continut. -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
     <StackPanel>
-        <TextBlock Text="🧹 Curățare &amp; RAM" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock Text="{loc:Loc Ro='🧹 Curățare &amp; RAM', En='🧹 Cleanup and RAM', Es='🧹 Limpieza y RAM'}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
         <ui:CardExpander Header="Cache-uri recuperabile" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
@@ -20,29 +21,29 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="Selectează tot" Margin="0,0,6,0" Click="OnSelectAllClicked" />
-                    <ui:Button Grid.Column="2" Content="Rescanează" Click="OnRescanClicked" />
+                    <ui:Button Grid.Column="1" x:Name="SelectAllButton" Content="{loc:Loc Ro='Selectează tot', En='Select all', Es='Seleccionar todo'}" Margin="0,0,6,0" Click="OnSelectAllClicked" />
+                    <ui:Button Grid.Column="2" Content="{loc:Loc Ro='Rescanează', En='Rescan', Es='Volver a analizar'}" Click="OnRescanClicked" />
                 </Grid>
                 <StackPanel x:Name="ItemsPanel" />
                 <TextBlock x:Name="SelectionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,10" />
-                <ui:Button x:Name="DeleteButton" Content="Șterge cache-urile selectate" Appearance="Primary" Click="OnDeleteClicked" />
+                <ui:Button x:Name="DeleteButton" Content="{loc:Loc Ro='Șterge cache-urile selectate', En='Delete selected caches', Es='Eliminar las cachés seleccionadas'}" Appearance="Primary" Click="OnDeleteClicked" />
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Header="Fișiere mari" IsExpanded="False" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Fișiere mari', En='Large files', Es='Archivos grandes'}" IsExpanded="False" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock Text="Foldere de scanat — alege ce vrei, adaugă orice folder propriu:" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                <TextBlock Text="{loc:Loc Ro='Foldere de scanat — alege ce vrei, adaugă orice folder propriu:', En='Folders to scan — pick what you want, add any folder of your own:', Es='Carpetas que analizar: elige las que quieras y añade cualquiera propia:'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4" />
                 <StackPanel x:Name="ScanFoldersPanel" Margin="0,0,0,4" />
-                <ui:Button Content="+ Adaugă folder…" Click="OnAddCustomFolderClicked" HorizontalAlignment="Left" Margin="0,0,0,8" />
+                <ui:Button Content="{loc:Loc Ro='+ Adaugă folder…', En='+ Add folder…', Es='+ Añadir carpeta…'}" Click="OnAddCustomFolderClicked" HorizontalAlignment="Left" Margin="0,0,0,8" />
                 <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:Button Grid.Column="1" x:Name="ScanBigFilesButton" Content="Scanează (&gt; 200 MB)" Click="OnScanBigFilesClicked" />
+                    <ui:Button Grid.Column="1" x:Name="ScanBigFilesButton" Content="{loc:Loc Ro='Scanează (&gt; 200 MB)', En='Scan (&gt; 200 MB)', Es='Analizar (&gt; 200 MB)'}" Click="OnScanBigFilesClicked" />
                 </Grid>
                 <StackPanel x:Name="BigFilesPanel" />
-                <ui:Button x:Name="DeleteBigFilesButton" Content="Șterge fișierele selectate" Appearance="Danger" Margin="0,8,0,0" Click="OnDeleteBigFilesClicked" IsEnabled="False" />
+                <ui:Button x:Name="DeleteBigFilesButton" Content="{loc:Loc Ro='Șterge fișierele selectate', En='Delete selected files', Es='Eliminar los archivos seleccionados'}" Appearance="Danger" Margin="0,8,0,0" Click="OnDeleteBigFilesClicked" IsEnabled="False" />
             </StackPanel>
         </ui:CardExpander>
 
@@ -50,8 +51,8 @@
             <ui:Button Content="Purjare RAM + Flush DNS" Click="OnPurgeClicked" />
         </ui:CardExpander>
 
-        <ui:CardExpander Header="Coș de reciclare" IsExpanded="True">
-            <ui:Button Content="Golește Coșul de reciclare" Click="OnEmptyRecycleBinClicked" />
+        <ui:CardExpander Header="{loc:Loc Ro='Coș de reciclare', En='Recycle Bin', Es='Papelera de reciclaje'}" IsExpanded="True">
+            <ui:Button Content="{loc:Loc Ro='Golește Coșul de reciclare', En='Empty the Recycle Bin', Es='Vaciar la Papelera de reciclaje'}" Click="OnEmptyRecycleBinClicked" />
         </ui:CardExpander>
 
         <TextBlock x:Name="StatusText" Margin="0,12,0,8" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />

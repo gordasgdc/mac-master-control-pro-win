@@ -139,8 +139,8 @@ public static class BigFileFinderService
         {
             var error = PrivilegedFileOps.Delete(file.Path);
             log(error is null
-                ? $"Mutat/șters ({file.SizeDescription}): {file.Path}"
-                : $"EROARE, nu s-a putut șterge {file.Path}: {error}");
+                ? CoreL.X($"Mutat/șters ({file.SizeDescription}): {file.Path}", $"Moved/deleted ({file.SizeDescription}): {file.Path}", $"Movido o eliminado ({file.SizeDescription}): {file.Path}")
+                : CoreL.X($"EROARE, nu s-a putut șterge {file.Path}: {error}", $"ERROR, could not delete {file.Path}: {error}", $"ERROR, no se pudo eliminar {file.Path}: {error}"));
         }
     }
 }

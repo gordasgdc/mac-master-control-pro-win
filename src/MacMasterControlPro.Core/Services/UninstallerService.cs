@@ -169,7 +169,7 @@ public static class UninstallerService
         var shortcutRoots = new (string id, string title, string root)[]
         {
             ("startmenu-user", "Comenzi rapide (Start Menu, user)", Environment.GetFolderPath(Environment.SpecialFolder.StartMenu)),
-            ("startmenu-common", "Comenzi rapide (Start Menu, toți userii)", Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu)),
+            ("startmenu-common", CoreL.X("Comenzi rapide (Start Menu, toți userii)", "Shortcuts (Start Menu, all users)", "Accesos directos (menú Inicio, todos los usuarios)"), Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu)),
             ("desktop-user", "Comenzi rapide (Desktop)", Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)),
         };
         foreach (var (id, title, root) in shortcutRoots)
@@ -289,19 +289,19 @@ public static class UninstallerService
                 {
                     if (File.Exists(path)) File.Delete(path);
                     else Directory.Delete(path, recursive: true);
-                    log($"Șters: {path}");
+                    log(CoreL.X($"Șters: {path}", $"Deleted: {path}", $"Eliminado: {path}"));
                 }
                 catch (Exception ex)
                 {
-                    log($"EROARE la ștergerea {path}: {ex.Message}");
+                    log(CoreL.X($"EROARE la ștergerea {path}: {ex.Message}", $"ERROR deleting {path}: {ex.Message}", $"ERROR al eliminar {path}: {ex.Message}"));
                 }
             }
         }
         if (privileged.Count > 0)
         {
-            log($"Solicit privilegii de administrator pentru {privileged.Count} elemente (Registry/sarcini programate/comenzi rapide de sistem)…");
+            log(CoreL.X($"Solicit privilegii de administrator pentru {privileged.Count} elemente (Registry/sarcini programate/comenzi rapide de sistem)…", $"Requesting administrator privileges for {privileged.Count} items (Registry/scheduled tasks/system shortcuts)…", $"Solicitando privilegios de administrador para {privileged.Count} elementos (Registro, tareas programadas, accesos directos del sistema)…"));
             var ok = PrivilegedRunner.Run(privileged, line => log("  " + line));
-            log(ok ? "Elemente privilegiate curățate." : "EROARE la curățarea elementelor privilegiate (promptul UAC a fost respins).");
+            log(ok ? CoreL.X("Elemente privilegiate curățate.", "Privileged items cleaned.", "Elementos con privilegios limpiados.") : CoreL.X("EROARE la curățarea elementelor privilegiate (promptul UAC a fost respins).", "ERROR cleaning privileged items (the UAC prompt was declined).", "ERROR al limpiar los elementos con privilegios (se rechazó el aviso de UAC)."));
         }
     }
 }

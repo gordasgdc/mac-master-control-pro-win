@@ -45,9 +45,9 @@ public static class ResolveDatabaseBackupService
     public static string CreateBackup()
     {
         if (IsResolveRunning())
-            throw new InvalidOperationException("Închide DaVinci Resolve înainte de backup — copierea „la cald” poate corupe arhiva.");
+            throw new InvalidOperationException(CoreL.X("Închide DaVinci Resolve înainte de backup — copierea „la cald” poate corupe arhiva.", "Quit DaVinci Resolve before backing up — a “hot” copy can corrupt the archive.", "Cierra DaVinci Resolve antes de la copia: una copia «en caliente» puede dañar el archivo."));
         if (!DatabaseExists())
-            throw new InvalidOperationException("Nu am găsit baza de date de proiecte a Resolve pe acest PC.");
+            throw new InvalidOperationException(CoreL.X("Nu am găsit baza de date de proiecte a Resolve pe acest PC.", "Could not find the Resolve project database on this PC.", "No se encontró la base de datos de proyectos de Resolve en este PC."));
 
         Directory.CreateDirectory(BackupsDirectory);
         var destination = Path.Combine(BackupsDirectory, $"ResolveProjectLibrary-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.zip");

@@ -31,6 +31,7 @@ public static class ThemeManager
 
     private static AppTheme Load()
     {
+        if (Client.DemoHooks.Theme is { } demo && Enum.TryParse<AppTheme>(demo, true, out var forced)) return forced;
         if (File.Exists(SettingsFilePath) && Enum.TryParse<AppTheme>(File.ReadAllText(SettingsFilePath).Trim(), out var saved))
         {
             return saved;

@@ -1,21 +1,22 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.RenderModePage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
     <StackPanel>
-        <TextBlock Text="⚡️ Mod Randare" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
+        <TextBlock Text="{loc:Loc Ro='⚡️ Mod Randare', En='⚡️ Render Mode', Es='⚡️ Modo de renderizado'}" FontSize="22" FontWeight="Bold" Margin="0,0,0,16" />
 
-        <ui:CardExpander Header="Optimizare temporară pentru export/randare" IsExpanded="True" Margin="0,0,0,12">
+        <ui:CardExpander Header="{loc:Loc Ro='Optimizare temporară pentru export/randare', En='Temporary optimisation for export/render', Es='Optimización temporal para exportar o renderizar'}" IsExpanded="True" Margin="0,0,0,12">
             <StackPanel>
                 <TextBlock TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,0,0,10"
-                           Text="Pentru export-uri/randări lungi: oprește indexarea Windows Search, pune pe pauză File History, și ridică prioritatea procesului DaVinci Resolve, dacă rulează." />
+                           Text="{loc:Loc Ro='Pentru export-uri/randări lungi: oprește indexarea Windows Search, pune pe pauză File History, și ridică prioritatea procesului DaVinci Resolve, dacă rulează.', En='For long exports/renders: pauses Windows Search indexing, pauses File History and raises the priority of DaVinci Resolve if it is running.', Es='Para exportaciones o renders largos: pausa la indexación de Windows Search, pausa el Historial de archivos y sube la prioridad de DaVinci Resolve si se está ejecutando.'}" />
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="StatusIndicator" Grid.Column="0" Text="Mod Randare inactiv" VerticalAlignment="Center" FontWeight="Bold" />
+                    <TextBlock x:Name="StatusIndicator" Grid.Column="0" Text="{loc:Loc Ro='Mod Randare inactiv', En='Render Mode off', Es='Modo de renderizado inactivo'}" VerticalAlignment="Center" FontWeight="Bold" />
                     <ui:ToggleSwitch x:Name="RenderModeToggle" Grid.Column="1" Checked="OnToggled" Unchecked="OnToggled" />
                 </Grid>
             </StackPanel>

@@ -55,8 +55,8 @@ public partial class NetworkPage : UserControl
 
     private void UpdateSelectionText()
     {
-        SelectionText.Text = $"Selectate {_selected.Count} din {_service.Adapters.Count} plăci de rețea";
-        SelectAllButton.Content = _selected.Count == _service.Adapters.Count && _service.Adapters.Count > 0 ? "Deselectează tot" : "Selectează tot";
+        SelectionText.Text = L.X($"Selectate {_selected.Count} din {_service.Adapters.Count} plăci de rețea", $"Selected {_selected.Count} of {_service.Adapters.Count} network adapters", $"Seleccionados {_selected.Count} de {_service.Adapters.Count} adaptadores de red");
+        SelectAllButton.Content = _selected.Count == _service.Adapters.Count && _service.Adapters.Count > 0 ? L.X("Deselectează tot", "Deselect all", "Deseleccionar todo") : L.X("Selectează tot", "Select all", "Seleccionar todo");
         ApplyButton.IsEnabled = _selected.Count > 0;
     }
 
@@ -68,6 +68,6 @@ public partial class NetworkPage : UserControl
             if (gate.ShowDialog() != true) return;
         }
         var ok = _service.ApplyTuning(_selected);
-        StatusText.Text = ok ? "✔ Tuning aplicat." : "Anulat sau eșuat (UAC respins?).";
+        StatusText.Text = ok ? "✔ Tuning aplicat." : L.X("Anulat sau eșuat (UAC respins?).", "Cancelled or failed (UAC declined?).", "Cancelado o fallido (¿UAC rechazado?).");
     }
 }

@@ -1,5 +1,6 @@
 <UserControl x:Class="MacMasterControlPro.Client.Pages.UninstallerPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:controls="clr-namespace:MacMasterControlPro.Client.Controls">
@@ -16,19 +17,19 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="🗑️ Dezinstalator" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
-                <ui:Button Grid.Column="1" x:Name="BulkDeleteButton" Content="Dezinstalează selectate"
+                <TextBlock Grid.Column="0" Text="{loc:Loc Ro='🗑️ Dezinstalator', En='🗑️ Uninstaller', Es='🗑️ Desinstalador'}" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
+                <ui:Button Grid.Column="1" x:Name="BulkDeleteButton" Content="{loc:Loc Ro='Dezinstalează selectate', En='Uninstall selected', Es='Desinstalar seleccionadas'}"
                            Appearance="Danger" Visibility="Collapsed" Click="OnBulkDeleteClicked"
-                           ToolTip="Șterge complet toate aplicațiile bifate mai jos — bundle-ul + toate urmele lor, într-un singur pas." />
+                           ToolTip="{loc:Loc Ro='Șterge complet toate aplicațiile bifate mai jos — bundle-ul + toate urmele lor, într-un singur pas.', En='Fully remove every app ticked below — the app plus all its leftovers, in one step.', Es='Elimina por completo todas las apps marcadas abajo, con todos sus restos, en un solo paso.'}" />
             </Grid>
-            <ui:TextBox x:Name="SearchBox" PlaceholderText="Caută aplicație…" Margin="0,0,0,8" TextChanged="OnSearchChanged" />
+            <ui:TextBox x:Name="SearchBox" PlaceholderText="{loc:Loc Ro='Caută aplicație…', En='Search app…', Es='Buscar app…'}" Margin="0,0,0,8" TextChanged="OnSearchChanged" />
             <ScrollViewer MaxHeight="560" VerticalScrollBarVisibility="Auto">
                 <StackPanel x:Name="AppsPanel" />
             </ScrollViewer>
         </StackPanel>
 
         <StackPanel Grid.Column="2" x:Name="DetailsPanel">
-            <TextBlock Text="Alege o aplicație din listă." Foreground="{DynamicResource TextSecondaryBrush}" />
+            <TextBlock Text="{loc:Loc Ro='Alege o aplicație din listă.', En='Choose an app from the list.', Es='Elige una app de la lista.'}" Foreground="{DynamicResource TextSecondaryBrush}" />
         </StackPanel>
     </Grid>
 </UserControl>

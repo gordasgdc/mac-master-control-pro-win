@@ -1,5 +1,6 @@
 <ui:FluentWindow x:Class="MacMasterControlPro.Client.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:loc="clr-namespace:MacMasterControlPro.Client"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         Title="Master Control Studio Pro" Height="680" Width="1000" MinWidth="820" MinHeight="520"
@@ -37,11 +38,11 @@
             <Grid Grid.Column="0" Background="{DynamicResource SidebarBackgroundBrush}">
                 <Grid.Resources>
                     <Style TargetType="ListBoxItem">
-                        <Setter Property="Foreground" Value="#EDEFF2" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                         <Setter Property="Padding" Value="10,8" />
                     </Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="#EDEFF2" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
                     </Style>
                 </Grid.Resources>
                 <Grid.RowDefinitions>
@@ -63,7 +64,7 @@
                         <TextBlock Grid.Column="0" Text="🔍" Margin="0,0,6,0" VerticalAlignment="Center" />
                         <ui:TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" BorderThickness="0"
                                     Foreground="{DynamicResource TextPrimaryBrush}" CaretBrush="{DynamicResource TextPrimaryBrush}"
-                                    PlaceholderText="Caută (duplicate, dezinstalare, reglare)…"
+                                    PlaceholderText="{loc:Loc Ro='Caută (duplicate, dezinstalare, reglare)…', En='Search (duplicates, uninstall, tweaks)…', Es='Buscar (duplicados, desinstalar, ajustes)…'}"
                                     TextChanged="OnSearchTextChanged" />
                     </Grid>
                 </Border>
@@ -120,7 +121,7 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <TextBlock x:Name="VersionText" FontSize="10.5" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                            <ui:Button x:Name="CheckUpdatesButton" Grid.Column="1" Content="Caută actualizări" FontSize="10.5"
+                            <ui:Button x:Name="CheckUpdatesButton" Grid.Column="1" Content="{loc:Loc Ro='Caută actualizări', En='Check for updates', Es='Buscar actualizaciones'}" FontSize="10.5"
                                        Appearance="Transparent" Foreground="{DynamicResource LinkAccentBrush}" Click="OnCheckUpdatesClicked" />
                         </Grid>
                     </StackPanel>
@@ -133,9 +134,9 @@
                 <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28" CornerRadius="14" MaxWidth="520"
                         Background="{DynamicResource ApplicationBackgroundBrush}">
                     <StackPanel>
-                        <TextBlock Text="Sesiunea de probă s-a încheiat" FontSize="20" FontWeight="Bold" />
-                        <TextBlock Text="Aplicația rămâne deschisă. Următoarea sesiune de probă (10 minute de utilizare activă) devine disponibilă la 48 de ore după epuizare; în probă, setările și cache-urile nu se păstrează." TextWrapping="Wrap" Margin="0,8,0,14" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <ui:Button Content="Detalii și licență" Appearance="Primary" Click="OnLicenseBadgeClicked" HorizontalAlignment="Left" />
+                        <TextBlock Text="{loc:Loc Ro='Sesiunea de probă s-a încheiat', En='The trial session has ended', Es='La sesión de prueba ha terminado'}" FontSize="20" FontWeight="Bold" />
+                        <TextBlock Text="{loc:Loc Ro='Aplicația rămâne deschisă. Următoarea sesiune de probă (10 minute de utilizare activă) devine disponibilă la 48 de ore după epuizare; în probă, setările și cache-urile nu se păstrează.', En='The app stays open. The next trial session (10 minutes of active use) becomes available 48 hours after the previous one ends. The trial never changes or deletes your settings.', Es='La app sigue abierta. La próxima sesión de prueba (10 minutos de uso activo) estará disponible 48 horas después de agotarse la anterior. La prueba nunca modifica ni borra tus ajustes.'}" TextWrapping="Wrap" Margin="0,8,0,14" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ui:Button Content="{loc:Loc Ro='Detalii și licență', En='Details and licence', Es='Detalles y licencia'}" Appearance="Primary" Click="OnLicenseBadgeClicked" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Border>
             </Border>

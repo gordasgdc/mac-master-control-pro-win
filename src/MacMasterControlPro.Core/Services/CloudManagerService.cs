@@ -66,7 +66,7 @@ public static class CloudProviderTypeExtensions
         CloudProviderType.Degoo or CloudProviderType.Mega => new()
         {
             new CloudField { Key = "user", Label = "Email" },
-            new CloudField { Key = "pass", Label = "Parolă", IsSecure = true },
+            new CloudField { Key = "pass", Label = CoreL.X("Parolă", "Password", "Contraseña"), IsSecure = true },
         },
         CloudProviderType.S3 => new()
         {
@@ -80,20 +80,20 @@ public static class CloudProviderTypeExtensions
             new CloudField { Key = "url", Label = "URL server" },
             new CloudField { Key = "vendor", Label = "Vendor (nextcloud/owncloud/other)" },
             new CloudField { Key = "user", Label = "Utilizator" },
-            new CloudField { Key = "pass", Label = "Parolă", IsSecure = true },
+            new CloudField { Key = "pass", Label = CoreL.X("Parolă", "Password", "Contraseña"), IsSecure = true },
         },
         CloudProviderType.Sftp => new()
         {
             new CloudField { Key = "host", Label = "IP / Host NAS" },
             new CloudField { Key = "user", Label = "Utilizator" },
-            new CloudField { Key = "pass", Label = "Parolă", IsSecure = true },
+            new CloudField { Key = "pass", Label = CoreL.X("Parolă", "Password", "Contraseña"), IsSecure = true },
             new CloudField { Key = "port", Label = "Port (implicit 22)" },
         },
         CloudProviderType.Ftp => new()
         {
             new CloudField { Key = "host", Label = "Host" },
             new CloudField { Key = "user", Label = "Utilizator" },
-            new CloudField { Key = "pass", Label = "Parolă", IsSecure = true },
+            new CloudField { Key = "pass", Label = CoreL.X("Parolă", "Password", "Contraseña"), IsSecure = true },
         },
         _ => new(),
     };
@@ -201,7 +201,7 @@ public sealed class CloudManagerService
         try
         {
             using var process = new Process { StartInfo = psi, EnableRaisingEvents = true };
-            if (!process.Start()) return (false, "Nu s-a putut porni rclone.");
+            if (!process.Start()) return (false, CoreL.X("Nu s-a putut porni rclone.", "Could not start rclone.", "No se pudo iniciar rclone."));
             // [2026-09-03] FIX REAL, port 1:1 de pe Mac (Shell.swift) - vezi
             // acelasi fix in Shell.cs. `ReadToEnd()` pe stdout, urmat de
             // `ReadToEnd()` pe stderr, se poate bloca la nesfarsit daca
@@ -244,9 +244,9 @@ public sealed class CloudManagerService
         {
             if (!Directory.Exists(customFolder))
             {
-                log?.Invoke($"⚠ Folderul de mount configurat ({customFolder}) nu există (disc extern deconectat?) — folosesc o literă de disc în loc.");
+                log?.Invoke(CoreL.X($"⚠ Folderul de mount configurat ({customFolder}) nu există (disc extern deconectat?) — folosesc o literă de disc în loc.", $"⚠ The configured mount folder ({customFolder}) does not exist (external drive disconnected?) — using a drive letter instead.", $"⚠ La carpeta de montaje configurada ({customFolder}) no existe (¿disco externo desconectado?); se usa una letra de unidad."));
                 target = FirstFreeDriveLetter() ?? "";
-                if (target == "") { log?.Invoke("✗ Nicio literă de disc liberă."); return null; }
+                if (target == "") { log?.Invoke(CoreL.X("✗ Nicio literă de disc liberă.", "✗ No free drive letter.", "✗ No hay ninguna letra de unidad libre.")); return null; }
             }
             else
             {
@@ -257,7 +257,7 @@ public sealed class CloudManagerService
         else
         {
             target = FirstFreeDriveLetter() ?? "";
-            if (target == "") { log?.Invoke("✗ Nicio literă de disc liberă."); return null; }
+            if (target == "") { log?.Invoke(CoreL.X("✗ Nicio literă de disc liberă.", "✗ No free drive letter.", "✗ No hay ninguna letra de unidad libre.")); return null; }
         }
 
         var port = RcBasePort + _rcPorts.Count;
@@ -353,7 +353,7 @@ public sealed class CloudManagerService
                 var output = Shell.Run($"rclone copy \"{path}\" \"{target}\" -P 2>&1");
                 if (!string.IsNullOrWhiteSpace(output)) log(output);
             }
-            log("✔ Încărcare terminată.");
+            log(CoreL.X("✔ Încărcare terminată.", "✔ Upload finished.", "✔ Subida terminada."));
             completion(true);
         });
     }
@@ -367,7 +367,7 @@ public sealed class CloudManagerService
             log($"$ rclone copy \"{source}\" \"{localDestFolder}\" --progress");
             var output = Shell.Run($"rclone copy \"{source}\" \"{localDestFolder}\" -P 2>&1");
             if (!string.IsNullOrWhiteSpace(output)) log(output);
-            log($"✔ Descărcare terminată în {localDestFolder}.");
+            log(CoreL.X($"✔ Descărcare terminată în {localDestFolder}.", $"✔ Download finished in {localDestFolder}.", $"✔ Descarga terminada en {localDestFolder}."));
             completion(true);
         });
     }
@@ -381,7 +381,7 @@ public sealed class CloudManagerService
         log($"$ {command}");
         var output = Shell.Run($"{command} 2>&1");
         if (!string.IsNullOrWhiteSpace(output)) log(output);
-        log($"✔ Șters: {remotePath}");
+        log(CoreL.X($"✔ Șters: {remotePath}", $"✔ Deleted: {remotePath}", $"✔ Eliminado: {remotePath}"));
     }
 
     /// Sincronizare folder local <-> remote. `mirror: true` = oglinda EXACTA
@@ -395,10 +395,10 @@ public sealed class CloudManagerService
         var verb = mirror ? "sync" : "copy";
         Task.Run(() =>
         {
-            log($"$ rclone {verb} \"{source}\" \"{dest}\" --progress" + (mirror ? "  (oglindă - șterge ce lipsește la sursă)" : ""));
+            log($"$ rclone {verb} \"{source}\" \"{dest}\" --progress" + (mirror ? CoreL.X("  (oglindă - șterge ce lipsește la sursă)", "  (mirror - deletes what is missing at the source)", "  (espejo: borra lo que falta en el origen)") : ""));
             var output = Shell.Run($"rclone {verb} \"{source}\" \"{dest}\" -P 2>&1");
             if (!string.IsNullOrWhiteSpace(output)) log(output);
-            log("✔ Sincronizare terminată.");
+            log(CoreL.X("✔ Sincronizare terminată.", "✔ Sync finished.", "✔ Sincronización terminada."));
             completion(true);
         });
     }

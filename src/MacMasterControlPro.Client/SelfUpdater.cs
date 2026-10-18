@@ -27,11 +27,11 @@ public static class SelfUpdater
             var tempDir = Path.Combine(Path.GetTempPath(), "mmc-update-" + Guid.NewGuid());
             Directory.CreateDirectory(tempDir);
 
-            progress.SetStatus("Se descarcă actualizarea…");
+            progress.SetStatus(L.X("Se descarcă actualizarea…", "Downloading the update…", "Descargando la actualización…"));
             var exePath = Path.Combine(tempDir, $"MacMasterControlProSetup-{version}.exe");
             await DownloadAsync(UpdateChecker.DirectDownloadUrl.ToString(), exePath);
 
-            progress.SetStatus("Se lansează instalatorul…");
+            progress.SetStatus(L.X("Se lansează instalatorul…", "Launching the installer…", "Iniciando el instalador…"));
             Process.Start(new ProcessStartInfo(exePath) { UseShellExecute = true });
 
             progress.Close();
@@ -49,7 +49,7 @@ public static class SelfUpdater
         using var response = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         if (!response.IsSuccessStatusCode)
         {
-            throw new InvalidOperationException($"Descărcarea a eșuat: HTTP {(int)response.StatusCode}");
+            throw new InvalidOperationException(L.X($"Descărcarea a eșuat: HTTP {(int)response.StatusCode}", $"Download failed: HTTP {(int)response.StatusCode}", $"Falló la descarga: HTTP {(int)response.StatusCode}"));
         }
         await using var httpStream = await response.Content.ReadAsStreamAsync();
         await using var fileStream = File.Create(destination);
@@ -60,9 +60,9 @@ public static class SelfUpdater
     {
         var box = new Wpf.Ui.Controls.MessageBox
         {
-            Title = "Actualizarea a eșuat",
-            Content = $"{message}\n\nPoți descărca manual ultima versiune de pe pagina de GitHub.",
-            PrimaryButtonText = "Deschide pagina",
+            Title = L.X("Actualizarea a eșuat", "The update failed", "Falló la actualización"),
+            Content = L.X($"{message}\n\nPoți descărca manual ultima versiune de pe pagina de GitHub.", $"{message}\n\nYou can download the latest version manually from the GitHub page.", $"{message}\n\nPuedes descargar la última versión a mano desde la página de GitHub."),
+            PrimaryButtonText = L.X("Deschide pagina", "Open page", "Abrir la página"),
             CloseButtonText = "OK",
         };
         _ = ShowFailureAsync(box);
