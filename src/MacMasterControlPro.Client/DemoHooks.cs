@@ -8,5 +8,6 @@ public static class DemoHooks
     private static string? Get(string name) => AppProfile.IsIsolated && Environment.GetEnvironmentVariable(name) is { Length: > 0 } v ? v : null;
     public static string? Language => Get("MCSP_DEMO_LANG");
     public static string? Theme => Get("MCSP_DEMO_THEME");
+    public static string? ScanPath => Get("MCSP_DEMO_SCAN_PATH");
     public static string? Page => Get("MCSP_DEMO_PAGE");
 }

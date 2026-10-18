@@ -13,7 +13,8 @@
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <ui:Button x:Name="RequestButton" Appearance="Primary" Click="OnRequestClicked" Margin="0,0,8,0" />
                 <ui:Button x:Name="PageButton" Click="OnPageClicked" Margin="0,0,8,0" />
-                <ui:Button x:Name="CopyIdButton" Click="OnCopyMachineId" />
+                <ui:Button x:Name="CopyIdButton" Click="OnCopyMachineId" Margin="0,0,8,0" />
+                <ui:Button x:Name="CopyRequestButton" Click="OnCopyRequest" />
             </StackPanel>
             <Grid Margin="0,0,0,6">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>

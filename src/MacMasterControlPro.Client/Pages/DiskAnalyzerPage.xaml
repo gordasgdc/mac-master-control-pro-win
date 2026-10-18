@@ -26,8 +26,9 @@
             <ItemsControl x:Name="VolumesList" Margin="0,12,0,0">
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
             </ItemsControl>
+            <TextBlock x:Name="NoticeText" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,10,0,0" FontWeight="SemiBold" Visibility="Collapsed" TextWrapping="Wrap" />
             <TextBlock x:Name="PickerHint" Text="Alege un volum ca să-l analizezi. Rezultatul rămâne salvat; la următoarea deschidere nu se reia scanarea." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
-            <ContentControl x:Name="PickerArt" HorizontalAlignment="Left" Margin="0,18,0,0" IsTabStop="False" />
+            <ContentControl x:Name="PickerArt" HorizontalAlignment="Stretch" Margin="0,18,0,0" IsTabStop="False" />
             <StackPanel x:Name="IndexingPanel" Visibility="Collapsed" Margin="0,16,0,0">
                 <StackPanel Orientation="Horizontal">
                     <ui:ProgressRing IsIndeterminate="True" Width="18" Height="18" Margin="0,0,10,0" />
@@ -47,7 +48,6 @@
                     <ui:Button x:Name="ResetCacheButton" Content="Resetează cache" Appearance="Transparent" Click="OnResetCacheClicked" />
                 </StackPanel>
             </Grid>
-            <TextBlock x:Name="NoticeText" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,4,0,0" Visibility="Collapsed" TextWrapping="Wrap" />
         </StackPanel>
 
         <Grid Grid.Row="2" x:Name="ResultPanel" Visibility="Collapsed" Margin="0,6,0,0">

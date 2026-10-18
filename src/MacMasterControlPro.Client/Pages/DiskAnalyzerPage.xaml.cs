@@ -35,6 +35,35 @@ public partial class DiskAnalyzerPage : UserControl
     private DiskNode? CurrentNode => _pathStack.Count > 0 ? _pathStack[^1] : _tree;
     private List<DiskNode> CurrentChildren => CurrentNode?.SortedChildren.ToList() ?? new();
 
+
+    /// Starea initiala: pasii (ce urmeaza) + ilustratia, intr-o compozitie; dispare cand incepe o analiza.
+    private UIElement BuildPickerPanel()
+    {
+        var grid = new Grid { Margin = new Thickness(0, 6, 0, 0) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var steps = new StackPanel { Margin = new Thickness(0, 4, 24, 0) };
+        void Step(string n, string title, string detail)
+        {
+            var sp = new StackPanel { Margin = new Thickness(0, 0, 0, 16) };
+            sp.Children.Add(new TextBlock { Text = $"{n}. {title}", FontWeight = FontWeights.SemiBold });
+            sp.Children.Add(new TextBlock { Text = detail, FontSize = 12.5, TextWrapping = TextWrapping.Wrap, Foreground = (Brush)FindResource("TextSecondaryBrush") });
+            steps.Children.Add(sp);
+        }
+        Step("1", L.X("Alege un volum", "Pick a volume", "Elige un volumen"), L.X("Harta arată proporțiile reale; intri în foldere cu un click.", "The map shows the real proportions; step into folders with one click.", "El mapa muestra las proporciones reales; entras en las carpetas con un clic."));
+        Step("2", L.X("Bifează ce vrei să revizuiești", "Tick what you want to review", "Marca lo que quieras revisar"), L.X("Fără regulă verificată nu intră în totalul recuperabil.", "Without a verified rule it does not count as recoverable.", "Sin regla verificada no cuenta como recuperable."));
+        Step("3", L.X("Revizuiești și muți în Coș", "Review, then move to the Recycle Bin", "Revisas y mueves a la Papelera"), L.X("Nimic nu se șterge definitiv; poți restaura din Coșul de reciclare.", "Nothing is deleted permanently; you can restore from the Recycle Bin.", "No se borra nada de forma definitiva; puedes restaurar desde la Papelera de reciclaje."));
+        grid.Children.Add(steps);
+        var img = new Image { Stretch = Stretch.UniformToFill, Visibility = Visibility.Collapsed };
+        img.OpacityMask = new LinearGradientBrush(new GradientStopCollection { new(Color.FromArgb(0, 0, 0, 0), 0), new(Color.FromArgb(255, 0, 0, 0), 0.30), new(Color.FromArgb(255, 0, 0, 0), 1) }, new Point(0, 0), new Point(1, 0));
+        var card = new Border { Width = 430, Height = 300, CornerRadius = new CornerRadius(24), ClipToBounds = true, BorderThickness = new Thickness(1), Child = img,
+            Background = (Brush)FindResource("CardBackgroundBrush"), BorderBrush = (Brush)FindResource("CardStrokeBrush") };
+        Grid.SetColumn(card, 1); grid.Children.Add(card);
+        System.Windows.Automation.AutomationProperties.SetIsOffscreenBehavior(card, System.Windows.Automation.IsOffscreenBehavior.Offscreen);
+        _ = Services.StudioArt.LoadAsync("disk-empty-glass").ContinueWith(t => { if (t.Result is { } src) Dispatcher.Invoke(() => { img.Source = src; img.Visibility = Visibility.Visible; }); });
+        return grid;
+    }
+
     private void ApplyLanguage()
     {
         HeadTitle.Text = L.X("Ce ocupă spațiul", "What takes up space", "Qué ocupa espacio");
@@ -57,12 +86,13 @@ public partial class DiskAnalyzerPage : UserControl
     {
         InitializeComponent();
         ApplyLanguage();
-        PickerArt.Content = Services.StudioArt.Create("disk-empty-glass", 300, 189);
+        PickerArt.Content = BuildPickerPanel();
         Chart.Tapped += n => { _focus = n; if (!ToggleSelection(n)) System.Media.SystemSounds.Beep.Play(); RenderResult(); };
         Chart.Drilled += n => Drill(n);
         Chart.HoverChanged += n => HighlightRow(n);
         RenderVolumes();
         RenderState();
+        if (DemoHooks.ScanPath is { } demoPath) Loaded += (_, _) => StartIndexing(new DiskEntry(System.IO.Path.GetFileName(demoPath), demoPath, 0));
     }
 
     // MARK: - Volume (iconuri Shell, asincron)
@@ -112,6 +142,11 @@ public partial class DiskAnalyzerPage : UserControl
     private void StartIndexing(DiskEntry root)
     {
         _currentRootPath = root.Path; _pathStack.Clear(); _focus = null; _scanNotice = null;
+        if (!System.IO.Directory.Exists(root.Path))
+        {
+            _scanNotice = string.Format(L.X("\u2718 \u201e{0}\u201d nu există sau unitatea nu mai este montată.", "\u2718 \u201c{0}\u201d does not exist or the drive is no longer available.", "\u2718 \u00ab{0}\u00bb no existe o la unidad ya no está disponible."), root.Path);
+            _tree = null; RenderState(); return;
+        }
         var cached = DiskCacheStore.Load(root.Path);
         if (cached is not null)
         {
@@ -210,8 +245,9 @@ public partial class DiskAnalyzerPage : UserControl
         ResultPanel.Visibility = hasTree ? Visibility.Visible : Visibility.Collapsed;
         CrumbBar.Visibility = hasTree ? Visibility.Visible : Visibility.Collapsed;
         ViewToggle.Visibility = hasTree ? Visibility.Visible : Visibility.Collapsed;
-        NoticeText.Visibility = hasTree && _scanNotice is not null ? Visibility.Visible : Visibility.Collapsed;
+        NoticeText.Visibility = _scanNotice is not null ? Visibility.Visible : Visibility.Collapsed;
         NoticeText.Text = _scanNotice ?? "";
+        NoticeText.SetResourceReference(TextBlock.ForegroundProperty, _scanNotice?.StartsWith("\u2718") == true ? "StatusErrorBrush" : "StatusWarningBrush");
     }
 
     private void RenderResult()

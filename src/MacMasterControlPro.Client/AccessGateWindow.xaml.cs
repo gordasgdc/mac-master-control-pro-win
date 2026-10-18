@@ -56,6 +56,7 @@ public partial class AccessGateWindow : Window
         RequestButton.Content = L.X("Cere o licență", "Request a licence", "Solicitar una licencia");
         PageButton.Content = L.X("Deschide pagina produsului", "Open the product page", "Abrir la página del producto");
         CopyIdButton.Content = L.X("Copiază Machine ID", "Copy Machine ID", "Copiar Machine ID");
+        CopyRequestButton.Content = L.X("Copiază cererea", "Copy request", "Copiar solicitud");
         ApplyButton.Content = L.X("Aplică", "Apply", "Aplicar"); CloseButton.Content = L.X("Închide", "Close", "Cerrar");
         KeyBox.PlaceholderText = L.X("Lipește licența primită", "Paste the licence you received", "Pega la licencia recibida");
         EditionText.Text = p.IsOfficialEdition ? L.X("Ediție oficială GDC", "Official GDC edition", "Edición oficial de GDC") : L.X("Ediție comunitară (cod sursă MIT)", "Community edition (MIT source code)", "Edición comunitaria (código fuente MIT)");
@@ -65,6 +66,7 @@ public partial class AccessGateWindow : Window
         Process.Start(new ProcessStartInfo(WhatsAppLink.Url(LicenseManager.Shared.Provider.ActivationRequestText())) { UseShellExecute = true });
     private void OnPageClicked(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("https://gordas.dev/mac-master-control-pro/") { UseShellExecute = true });
+    private void OnCopyRequest(object sender, RoutedEventArgs e) => Clipboard.SetText(LicenseManager.Shared.Provider.ActivationRequestText());
     private void OnCopyMachineId(object sender, RoutedEventArgs e) => Clipboard.SetText(MachineID.Display);
     private async void OnApplyClicked(object sender, RoutedEventArgs e)
     {

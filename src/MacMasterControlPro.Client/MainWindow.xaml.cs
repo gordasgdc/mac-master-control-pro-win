@@ -211,7 +211,7 @@ public partial class MainWindow
         var mode = LicenseManager.Shared.Mode;
         LicenseBadge.Content = mode switch
         {
-            MacMasterControlPro.Core.Services.Access.AccessMode.Full => "Acces complet",
+            MacMasterControlPro.Core.Services.Access.AccessMode.Full => L.X("Acces complet", "Full access", "Acceso completo"),
             MacMasterControlPro.Core.Services.Access.AccessMode.DemoAvailable d => $"{L.X("Probă", "Trial", "Prueba")} {d.RemainingSeconds / 60}:{d.RemainingSeconds % 60:00}",
             _ => L.X("Probă încheiată", "Trial ended", "Prueba finalizada"),
         };
