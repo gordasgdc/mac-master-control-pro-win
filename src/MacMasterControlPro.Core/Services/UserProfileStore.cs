@@ -3,9 +3,7 @@ namespace MacMasterControlPro.Core.Services;
 /// Profil optional in sidebar (Regula 12) - Nume/Email persistate local.
 public static class UserProfileStore
 {
-    private static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Master Control Studio Pro", "profile.txt");
+    private static string FilePath => Path.Combine(AppProfile.Local("Master Control Studio Pro"), "profile.txt");
 
     public static string Name
     {

@@ -26,8 +26,7 @@ public static class RenderModeState
 {
     public static readonly string[] ManagedServices = { "WSearch", "fhsvc" };
 
-    public static string SnapshotPath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MacMasterControlPro", "RenderModeSnapshot.json");
+    public static string SnapshotPath => Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "RenderModeSnapshot.json");
 
     public static string StartArg(ServiceState s) => s.StartType switch
     {

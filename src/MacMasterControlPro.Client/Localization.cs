@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
+using MacMasterControlPro.Core.Services;
 namespace MacMasterControlPro.Client;
 
 public enum AppLanguage { Ro, En, Es }
@@ -22,9 +23,7 @@ public static class AppLanguageExtensions
 /// chrome-ul principal (sidebar, dashboard, setari, poarta de trial).
 public static class LanguageStore
 {
-    private static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Master Control Studio Pro", "language.txt");
+    private static string FilePath => Path.Combine(AppProfile.Local("Master Control Studio Pro"), "language.txt");
 
     public static event Action? Changed;
 

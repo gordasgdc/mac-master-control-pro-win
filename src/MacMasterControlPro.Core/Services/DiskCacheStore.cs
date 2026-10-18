@@ -33,9 +33,7 @@ public static class DiskCacheStore
     {
         get
         {
-            var dir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "MacMasterControlPro", "DiskCache");
+            var dir = Path.Combine(AppProfile.Local("MacMasterControlPro"), "DiskCache");
             Directory.CreateDirectory(dir);
             return dir;
         }

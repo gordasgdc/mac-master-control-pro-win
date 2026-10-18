@@ -47,6 +47,9 @@ public partial class SettingsPage : UserControl
         NameBox.PlaceholderText = L.T("settings.name");
         EmailBox.PlaceholderText = L.T("settings.email");
         GuideButton.Content = L.T("settings.guide");
+        ConfigCard.Header = "Configurație";
+        ConfigText.Text = "Setările, folderele alese și cache-urile aplicației. Resetarea este o acțiune separată: nu se întâmplă automat la expirarea probei și face mai întâi o copie de siguranță.";
+        ResetConfigButton.Content = "Resetează configurația aplicației…";
         DiagCard.Header = L.T("diag.title");
         DiagSession.Text = L.T("diag.session") + ": " + MacMasterControlPro.Core.Services.DiagnosticLog.SessionId;
         DiagOpenButton.Content = L.T("diag.open");
@@ -89,6 +92,14 @@ public partial class SettingsPage : UserControl
         UserProfileStore.Name = NameBox.Text;
         UserProfileStore.Email = EmailBox.Text;
         _mainWindow?.RefreshProfile();
+    }
+
+    private void OnResetConfigClicked(object sender, RoutedEventArgs e)
+    {
+        if (MessageBox.Show("Resetezi configurația aplicației?\n\n" + string.Join("\n", MacMasterControlPro.Core.Services.AppProfile.ResetPreview()),
+            "Confirmare", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
+        try { ResetResultText.Text = "Copie de siguranță: " + MacMasterControlPro.Core.Services.AppProfile.ResetUserConfiguration(); }
+        catch (Exception ex) { ResetResultText.Text = "Resetarea a eșuat: " + ex.Message; }
     }
 
     private void OnDiagOpenFolder(object sender, RoutedEventArgs e)

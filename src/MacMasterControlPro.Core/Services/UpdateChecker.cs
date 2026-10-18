@@ -94,9 +94,7 @@ public sealed class UpdateChecker : INotifyPropertyChanged
     }
 
     private static string DismissedVersionFilePath =>
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "MacMasterControlPro", "dismissed-update-version.txt");
+        Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "dismissed-update-version.txt");
 
     private static string? ReadDismissedVersion()
     {

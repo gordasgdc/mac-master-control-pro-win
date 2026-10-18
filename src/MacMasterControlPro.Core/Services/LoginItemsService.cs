@@ -18,11 +18,9 @@ public sealed class LoginItem
 public static class LoginItemsService
 {
     private static readonly string DisabledStorePath =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "MacMasterControlPro", "DisabledLoginItems.json");
+        Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "DisabledLoginItems.json");
     private static readonly string StartupHoldingDir =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "MacMasterControlPro", "DisabledStartupItems");
+        Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "DisabledStartupItems");
 
     private const string RunKeyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
 

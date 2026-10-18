@@ -11,9 +11,7 @@ public sealed class DuplicateScanFolders
 {
     public static readonly DuplicateScanFolders Shared = new();
 
-    private static readonly string ConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "MacMasterControlPro", "duplicates-folders.json");
+    private static readonly string ConfigPath = Path.Combine(AppProfile.Local("MacMasterControlPro"), "duplicates-folders.json");
 
     public List<string> Folders { get; private set; } = new();
 

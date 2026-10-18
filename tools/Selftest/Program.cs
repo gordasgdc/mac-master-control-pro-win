@@ -1,3 +1,4 @@
+using System.Text;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -25,6 +26,42 @@ string Fixture()
     File.WriteAllBytes(Path.Combine(d, "a", "g.bin"), new byte[500]);
     File.WriteAllBytes(Path.Combine(d, "a", "big.bin"), new byte[2_000_000]);
     return d;
+}
+
+
+string OfficialFingerprint()
+{
+    var sb = new StringBuilder();
+    foreach (var d in new[] { AppProfile.OfficialRoaming("MacMasterControlPro"), AppProfile.OfficialLocal("MacMasterControlPro"), AppProfile.OfficialLocal("Master Control Studio Pro") })
+    {
+        sb.AppendLine("dir:" + d + ":" + Directory.Exists(d));
+        if (!Directory.Exists(d)) continue;
+        foreach (var f in Directory.EnumerateFiles(d, "*", SearchOption.AllDirectories).OrderBy(x => x, StringComparer.Ordinal))
+            try { var fi = new FileInfo(f); sb.AppendLine($"{f}|{fi.Length}|{fi.LastWriteTimeUtc.Ticks}|{Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(File.ReadAllBytes(f)))}"); } catch { sb.AppendLine(f + "|locked"); }
+    }
+    foreach (var k in new[] { @"Software\GDC\MasterControlStudioPro\State" })
+    {
+        using var rk = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(k);
+        sb.AppendLine("reg:" + k + ":" + (rk is null ? "absent" : string.Join(",", rk.GetValueNames().OrderBy(n => n).Select(n => n + ":" + (rk.GetValue(n) is byte[] b ? Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(b)) : rk.GetValue(n)?.ToString())))));
+    }
+    return Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(sb.ToString())));
+}
+
+if (args.Length >= 2 && args[0] == "isolation")
+{
+    // Probă la nivel de PROCES: lansează aplicația izolată, așteaptă, o închide; profilul oficial trebuie să fie identic.
+    var before = OfficialFingerprint();
+    var prof = Tmp("isoproc");
+    var psi = new ProcessStartInfo(args[1]) { UseShellExecute = false, WorkingDirectory = Path.GetDirectoryName(args[1])! };
+    psi.Environment["MCSP_PROFILE_DIR"] = prof;
+    var proc = Process.Start(psi)!;
+    Thread.Sleep(14000);
+    var alive = !proc.HasExited; try { if (alive) proc.Kill(true); } catch { }
+    var after = OfficialFingerprint();
+    Console.WriteLine($"proces pornit si inchis (alive={alive}); profil izolat: {string.Join(",", Directory.EnumerateFileSystemEntries(prof, "*", SearchOption.AllDirectories).Select(x => Path.GetRelativePath(prof, x)).Take(6))}");
+    Console.WriteLine($"inainte: {before}\ndupa:    {after}");
+    Console.WriteLine(before == after ? "OK: profilul oficial este identic" : "ESEC: profilul oficial s-a modificat");
+    return before == after && alive ? 0 : 1;
 }
 
 if (args.Length >= 2 && args[0] == "bench")
@@ -137,7 +174,7 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
 
 // ---- Secrete SMTP (DPAPI) ----
 {
-    var store = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MacMasterControlPro", "EmailNotifierSettings.json");
+    var store = Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "EmailNotifierSettings.json");
     Directory.CreateDirectory(Path.GetDirectoryName(store)!);
     var backup = File.Exists(store) ? File.ReadAllText(store) : null; var oldSecret = SecretStore.Get("smtp.appPassword");
     try
@@ -241,6 +278,22 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
     var r = RecycleBinService.MoveToRecycleBin(f);
     Check("Cos: fisier mutat recuperabil (nu sters definitiv)", r.Moved && !File.Exists(f), r.Error ?? "");
     Check("Cos: cale inexistenta => eroare, fara efect", !RecycleBinService.MoveToRecycleBin(@"C:\nu\exista\" + Guid.NewGuid()).Moved);
+}
+
+// ---- Izolarea profilului oficial ----
+{
+    Check("izolare: procesul de test e izolat", AppProfile.IsIsolated && AppProfile.Roaming("MacMasterControlPro") != AppProfile.OfficialRoaming("MacMasterControlPro"));
+    var before = OfficialFingerprint();
+    var t0 = new DateTimeOffset(2027, 3, 1, 12, 0, 0, TimeSpan.Zero); var clk = t0;
+    var acct = "iso-" + Guid.NewGuid().ToString("N")[..6];
+    var a = new MacMasterControlPro.Core.Services.Access.CommunityAccess(acct, () => clk); a.Tick(true);
+    for (int i = 0; i < 650; i++) { clk = clk.AddSeconds(1); a.Tick(true); }
+    clk = clk.AddSeconds(172900); a.Tick(false);
+    Directory.CreateDirectory(AppProfile.Local("MacMasterControlPro")); File.WriteAllText(Path.Combine(AppProfile.Local("MacMasterControlPro"), "x.json"), "x");
+    MacMasterControlPro.Core.Services.Access.DemoProfile.Wipe();
+    var bk = AppProfile.ResetUserConfiguration(Tmp("bk"));
+    DiagnosticLog.Log("info", "iso", "probe");
+    Check("izolare: profilul oficial identic dupa pornire, expirare, resetare (backup creat)", before == OfficialFingerprint() && File.Exists(bk));
 }
 
 Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");

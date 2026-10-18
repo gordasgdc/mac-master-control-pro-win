@@ -2,15 +2,14 @@ using System;
 using System.IO;
 using Wpf.Ui.Appearance;
 
+using MacMasterControlPro.Core.Services;
 namespace MacMasterControlPro.Client.Services;
 
 public enum AppTheme { System, Light, Dark }
 
 public static class ThemeManager
 {
-    private static readonly string SettingsFilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Master Control Studio Pro", "theme.txt");
+    private static readonly string SettingsFilePath = Path.Combine(AppProfile.Local("Master Control Studio Pro"), "theme.txt");
 
     public static AppTheme Current { get; private set; } = Load();
 

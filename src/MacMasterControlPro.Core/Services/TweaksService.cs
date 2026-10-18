@@ -13,9 +13,7 @@ public sealed record SpotlightTarget(string Name, string Path, bool IsVolume);
 /// registry in loc de `defaults write`.
 public sealed class TweaksService
 {
-    private static string CustomFoldersPath => System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "MacMasterControlPro", "spotlight-shield-folders.json");
+    private static string CustomFoldersPath => Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "spotlight-shield-folders.json");
 
     /// Discuri fixe/detasabile (exclus discul de sistem, C:\ tipic) +
     /// folderele custom persistate.

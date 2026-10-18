@@ -21,9 +21,7 @@ public sealed class EmailNotifierSettings
 
 public static class EmailNotifierService
 {
-    private static readonly string StorePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "MacMasterControlPro", "EmailNotifierSettings.json");
+    private static readonly string StorePath = Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "EmailNotifierSettings.json");
 
     private const string PasswordAccount = "smtp.appPassword";
 

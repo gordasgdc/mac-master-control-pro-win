@@ -1,19 +1,22 @@
 namespace MacMasterControlPro.Core.Services.Access;
 
-/// În Demo, aplicația pornește de fiecare dată de la zero: setările utilizatorului și cache-urile aferente nu se păstrează.
-/// Nu se ating: starea de acces (secrete DPAPI), instantaneul Modului Randare (siguranța sistemului) și jurnalele.
+/// Resetarea de probă („de la zero”) se aplică NUMAI profilului izolat (build demonstrativ/test) sau unor ținte date explicit (teste).
+/// Pe profilul oficial nu face NIMIC: proba nu șterge niciodată setările, conturile, credențialele sau datele utilizatorului
+/// (hotărâre proprietar, 2026-10-18). Starea de acces (secrets) și instantaneul Modului Randare nu se ating nici în profil izolat.
 public static class DemoProfile
 {
     private static readonly string[] KeepFiles = { "RenderModeSnapshot.json" };
-    private static readonly string[] KeepDirs = { "secrets" };
+    private static readonly string[] KeepDirs = { "secrets", "Logs" };
 
     public static void Wipe(string? roamingDir = null, string? localDir = null)
     {
-        roamingDir ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MacMasterControlPro");
-        localDir ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MacMasterControlPro");
+        var explicitTargets = roamingDir is not null || localDir is not null;
+        if (!AppProfile.IsIsolated && !explicitTargets) { DiagnosticLog.Log("info", "access", "demo.wipe-skipped-official-profile"); return; }
+        roamingDir ??= AppProfile.Roaming("MacMasterControlPro");
+        localDir ??= AppProfile.Local("MacMasterControlPro");
         Clear(roamingDir, KeepFiles, KeepDirs);
-        Clear(localDir, Array.Empty<string>(), new[] { "Logs" });   // include DiskCache; jurnalele rămân
-        SecretStore.Set("smtp.appPassword", "");
+        Clear(localDir, Array.Empty<string>(), KeepDirs);
+        if (!explicitTargets) { Clear(AppProfile.Local("Master Control Studio Pro"), Array.Empty<string>(), KeepDirs); SecretStore.Set("smtp.appPassword", ""); }
         DiagnosticLog.Log("info", "access", "demo.profile-wiped");
     }
 

@@ -19,8 +19,7 @@ public static class DiagnosticLog
     private static readonly string[] Levels = { "trace", "debug", "info", "warning", "error", "critical" };
     private static readonly object Gate = new();
 
-    public static string Directory_ => DirectoryOverride ?? Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MacMasterControlPro", "Logs");
+    public static string Directory_ => DirectoryOverride ?? Path.Combine(AppProfile.Local("MacMasterControlPro"), "Logs");
     public static string FilePath => Path.Combine(Directory_, "mcsp.log");
     public static string AppVersion { get; } = ResolveVersion();
     private static string ResolveVersion()

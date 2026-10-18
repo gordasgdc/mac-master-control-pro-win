@@ -49,6 +49,14 @@
             </StackPanel>
         </ui:CardExpander>
 
+        <ui:CardExpander x:Name="ConfigCard" IsExpanded="False" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock x:Name="ConfigText" TextWrapping="Wrap" Margin="0,0,0,8" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ui:Button x:Name="ResetConfigButton" Click="OnResetConfigClicked" />
+                <TextBlock x:Name="ResetResultText" TextWrapping="Wrap" Margin="0,8,0,0" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+            </StackPanel>
+        </ui:CardExpander>
+
         <ui:Button x:Name="GuideButton" Click="OnOpenGuideClicked" />
     </StackPanel>
 </UserControl>

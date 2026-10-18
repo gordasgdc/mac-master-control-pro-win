@@ -112,9 +112,7 @@ public sealed class CloudRemote
 /// (prima litera libera).
 public static class CloudMountSettings
 {
-    private static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "MacMasterControlPro", "cloud-mount-settings.json");
+    private static string FilePath => Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "cloud-mount-settings.json");
 
     public static string? CustomMountFolder
     {

@@ -43,9 +43,7 @@ public static class WindowLayoutService
     [StructLayout(LayoutKind.Sequential)]
     private struct Rect { public int Left, Top, Right, Bottom; }
 
-    private static readonly string StorePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "MacMasterControlPro", "WindowLayoutProfiles.json");
+    private static readonly string StorePath = Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "WindowLayoutProfiles.json");
 
     public static List<(string name, string processName, int pid)> RunningApps() =>
         Process.GetProcesses()

@@ -7,8 +7,7 @@ namespace MacMasterControlPro.Core.Services;
 /// Valorile nu se logheaza. Echivalentul nativ Windows al Keychain-ului de pe Mac.
 public static class SecretStore
 {
-    private static string PathFor(string account) => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MacMasterControlPro", "secrets",
+    private static string PathFor(string account) => Path.Combine(AppProfile.Roaming("MacMasterControlPro"), "secrets",
         Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(account)))[..16] + ".bin");
     private static readonly byte[] Entropy = Encoding.UTF8.GetBytes("com.gordasgdc.macmastercontrolpro.secrets");
 

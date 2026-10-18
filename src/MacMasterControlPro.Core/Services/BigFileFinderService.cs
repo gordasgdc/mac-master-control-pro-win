@@ -10,9 +10,7 @@ public sealed class BigFileScanFolders
 {
     public static readonly BigFileScanFolders Shared = new();
 
-    private static readonly string ConfigPath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "MacMasterControlPro", "bigfiles-folders.json");
+    private static readonly string ConfigPath = Path.Combine(AppProfile.Local("MacMasterControlPro"), "bigfiles-folders.json");
 
     private sealed record Persisted(List<string> EnabledDefaults, List<string> CustomFolders);
 

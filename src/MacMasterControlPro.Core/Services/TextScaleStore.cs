@@ -35,9 +35,7 @@ public static class TextScalePreferenceExtensions
 
 public static class TextScaleStore
 {
-    private static string FilePath => Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-        "Master Control Studio Pro", "text-scale.txt");
+    private static string FilePath => Path.Combine(AppProfile.Local("Master Control Studio Pro"), "text-scale.txt");
 
     public static TextScalePreference Load()
     {
