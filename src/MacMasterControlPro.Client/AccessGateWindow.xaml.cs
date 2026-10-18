@@ -67,7 +67,7 @@ public partial class AccessGateWindow : Window
     private void OnPageClicked(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("https://gordas.dev/mac-master-control-pro/") { UseShellExecute = true });
     private void OnCopyRequest(object sender, RoutedEventArgs e) => Clipboard.SetText(LicenseManager.Shared.Provider.ActivationRequestText());
-    private void OnCopyMachineId(object sender, RoutedEventArgs e) => Clipboard.SetText(MachineID.Display);
+    private void OnCopyMachineId(object sender, RoutedEventArgs e) => Clipboard.SetText(DemoHooks.DisplayMachineId);
     private async void OnApplyClicked(object sender, RoutedEventArgs e)
     {
         var err = await LicenseManager.Shared.Provider.SubmitLicenseAsync(KeyBox.Text);

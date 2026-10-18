@@ -71,6 +71,7 @@ public partial class DiskAnalyzerPage : UserControl
         AdvancedToggle.Content = L.X("Tabel avansat", "Advanced table", "Tabla avanzada");
         PickerHint.Text = L.X("Alege un volum ca să-l analizezi. Rezultatul rămâne salvat; la următoarea deschidere nu se reia scanarea.", "Choose a volume to analyze it. The result is saved; the next time you open it, it is not rescanned.", "Elige un volumen para analizarlo. El resultado se guarda y no se vuelve a escanear al abrirlo.");
         StopScanButton.Content = L.X("Oprește", "Stop", "Detener"); StopRescanButton.Content = StopScanButton.Content;
+        IndexingTitle.Text = L.X("Indexez discul…", "Indexing the disk…", "Indexando el disco…");
         ScanHint.Text = L.X("O singură trecere completă. După ce se termină, orice subfolder se deschide instant.", "One full pass. Once it finishes, any subfolder opens instantly.", "Una sola pasada completa. Al terminar, cualquier subcarpeta se abre al instante.");
         RescanButton.Content = L.X("Verifică modificările", "Check for changes", "Comprobar cambios");
         ResetCacheButton.Content = L.X("Resetează cache", "Reset cache", "Restablecer caché");

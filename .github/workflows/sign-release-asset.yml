@@ -1,0 +1,47 @@
+name: Semnează un asset de release (Windows)
+
+# Semnează cu mecanismul existent (secretele WIN_SELFSIGN_PFX_*) un installer deja încărcat pe un release
+# nepublicat (draft), apoi îl înlocuiește. Certificatul rămâne în secretele GitHub; nu iese din CI.
+# Semnătura este self-signed (test/cerc restrâns): NU garantează încredere publică și nu elimină SmartScreen.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag-ul release-ului (ex. v1.19.0)"
+        required: true
+      asset:
+        description: "Numele asset-ului de semnat"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  sign:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Descarcă asset-ul
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force work | Out-Null
+          gh release download "${{ inputs.tag }}" --repo "${{ github.repository }}" --pattern "${{ inputs.asset }}" --dir work --clobber
+      - name: Semnează
+        shell: pwsh
+        env:
+          WIN_SELFSIGN_PFX_BASE64: ${{ secrets.WIN_SELFSIGN_PFX_BASE64 }}
+          WIN_SELFSIGN_PFX_PASSWORD: ${{ secrets.WIN_SELFSIGN_PFX_PASSWORD }}
+        run: .\codesigning\sign-windows.ps1 -TargetPath "work\${{ inputs.asset }}"
+      - name: Verifică semnătura
+        shell: pwsh
+        run: |
+          $s = Get-AuthenticodeSignature "work\${{ inputs.asset }}"
+          "Status=$($s.Status) Signer=$($s.SignerCertificate.Subject) Thumbprint=$($s.SignerCertificate.Thumbprint)"
+          if (-not $s.SignerCertificate) { throw "Fără semnătură" }
+      - name: Înlocuiește asset-ul
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.tag }}" "work\${{ inputs.asset }}" --repo "${{ github.repository }}" --clobber

@@ -29,14 +29,17 @@
             <TextBlock x:Name="NoticeText" Foreground="{DynamicResource StatusWarningBrush}" Margin="0,10,0,0" FontWeight="SemiBold" Visibility="Collapsed" TextWrapping="Wrap" />
             <TextBlock x:Name="PickerHint" Text="Alege un volum ca să-l analizezi. Rezultatul rămâne salvat; la următoarea deschidere nu se reia scanarea." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
             <ContentControl x:Name="PickerArt" HorizontalAlignment="Stretch" Margin="0,18,0,0" IsTabStop="False" />
-            <StackPanel x:Name="IndexingPanel" Visibility="Collapsed" Margin="0,16,0,0">
-                <StackPanel Orientation="Horizontal">
-                    <ui:ProgressRing IsIndeterminate="True" Width="18" Height="18" Margin="0,0,10,0" />
-                    <TextBlock x:Name="IndexingStatusText" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <ui:Button x:Name="StopScanButton" Content="Oprește" Click="OnStopScanClicked" Margin="12,0,0,0" />
+            <Border x:Name="IndexingPanel" Visibility="Collapsed" Margin="0,16,0,0" Padding="22,20" CornerRadius="16" Background="{DynamicResource CardBackgroundBrush}" BorderBrush="{DynamicResource CardStrokeBrush}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock x:Name="IndexingTitle" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal">
+                        <ui:ProgressRing IsIndeterminate="True" Width="22" Height="22" Margin="0,0,12,0" />
+                        <TextBlock x:Name="IndexingStatusText" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ui:Button x:Name="StopScanButton" Content="Oprește" Click="OnStopScanClicked" Margin="16,0,0,0" />
+                    </StackPanel>
+                    <TextBlock x:Name="ScanHint" Text="O singură trecere completă. După ce se termină, orice subfolder se deschide instant." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
                 </StackPanel>
-                <TextBlock x:Name="ScanHint" Text="O singură trecere completă. După ce se termină, orice subfolder se deschide instant." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,6,0,0" />
-            </StackPanel>
+            </Border>
             <Grid x:Name="CrumbBar" Margin="0,8,0,0" Visibility="Collapsed">
                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                 <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal" VerticalAlignment="Center" />

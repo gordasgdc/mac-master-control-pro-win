@@ -19,7 +19,7 @@
                                 <ui:Button x:Name="CleanButton" Content="Curățare" Click="OnCleanClicked" />
                             </StackPanel>
                         </Grid>
-                        <Image x:Name="HeroImage" Grid.Column="1" Stretch="UniformToFill" HorizontalAlignment="Right" Visibility="Collapsed">
+                        <Image x:Name="HeroImage" Grid.Column="1" Stretch="UniformToFill" HorizontalAlignment="Right" Visibility="Collapsed" RenderOptions.BitmapScalingMode="HighQuality" SizeChanged="OnHeroImageSizeChanged">
                             <Image.OpacityMask>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
                                     <GradientStop Color="#00000000" Offset="0" />

@@ -23,7 +23,7 @@ public partial class MainWindow
         RefreshLicenseBadge();
         LicenseManager.Shared.Changed += () => Dispatcher.Invoke(RefreshLicenseBadge);
         MacMasterControlPro.Client.Services.AccessCoordinator.Start();
-        MachineIdButton.Content = $"Machine ID: {MachineID.Display[..Math.Min(13, MachineID.Display.Length)]}…";
+        MachineIdButton.Content = $"Machine ID: {DemoHooks.DisplayMachineId[..Math.Min(13, DemoHooks.DisplayMachineId.Length)]}…";
 
         _dependencyChecker.CheckAll();
         RefreshDependencyBadge();
@@ -227,7 +227,7 @@ public partial class MainWindow
 
     private void OnCopyMachineId(object sender, RoutedEventArgs e)
     {
-        Clipboard.SetText(MachineID.Display);
+        Clipboard.SetText(DemoHooks.DisplayMachineId);
         MachineIdButton.Content = "Copiat ✓";
     }
 

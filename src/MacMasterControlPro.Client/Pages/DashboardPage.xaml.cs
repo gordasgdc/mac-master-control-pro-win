@@ -107,4 +107,8 @@ public partial class DashboardPage : UserControl
     private static void Navigate(string tag) => (Application.Current.MainWindow as MainWindow)?.NavigateTo(tag);
     private void OnDiskClicked(object sender, RoutedEventArgs e) => Navigate("DiskAnalyzer");
     private void OnCleanClicked(object sender, RoutedEventArgs e) => Navigate("Cleanup");
+
+    /// Colțurile exterioare ale ilustrației urmează rotunjirea panoului (colțurile din stânga ies din cadru).
+    private void OnHeroImageSizeChanged(object sender, SizeChangedEventArgs e)
+        => HeroImage.Clip = new System.Windows.Media.RectangleGeometry(new Rect(-40, 0, e.NewSize.Width + 40, e.NewSize.Height), 23, 23);
 }

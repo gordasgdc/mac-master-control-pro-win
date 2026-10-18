@@ -13,6 +13,8 @@
 - Aspect „Studio Glass”; bara laterală urmează tema aleasă.
 
 ### Fixed
+- Analiza de disc arată un mesaj clar când folderul sau unitatea aleasă nu există sau nu mai este disponibilă.
+- Ilustrația de pe Acasă respectă rotunjirea panoului.
 - Pictograme decupate în listă; contrast insuficient al etichetelor pe tema întunecată; pagina Acasă ignora filtrul de volume.
 - Expirarea probei nu mai șterge setările sau conturile.
 
