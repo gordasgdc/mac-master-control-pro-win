@@ -23,7 +23,7 @@ public partial class RenderModePage : UserControl
         else
         {
             Task.Run(() => _service.PreviewChanges()).ContinueWith(t =>
-                Dispatcher.Invoke(() => { if (!_service.IsActive) StatusText.Text = "Ce va schimba activarea acum:\n• " + string.Join("\n• ", t.Result); }),
+                Dispatcher.Invoke(() => { if (!_service.IsActive) StatusText.Text = L.X("Ce va schimba activarea acum:", "What turning it on will change:", "Qué cambiará al activarlo:") + "\n• " + string.Join("\n• ", t.Result); }),
                 TaskContinuationOptions.OnlyOnRanToCompletion);
         }
     }

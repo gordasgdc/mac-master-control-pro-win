@@ -1,5 +1,21 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.19.0 (2026-10-18) — Studio Glass, analiză de disc nouă, acces Demo
+
+### Added
+- Analiză de disc nouă (hartă radială proporțională, listă scurtă, selecție comună, revizuire → Coșul de reciclare), cu totaluri fără dublă numărare și scanare care detectează modificări în loc.
+- Mod Randare reversibil (Windows Search / File History) cu restaurare exactă.
+- Acces Demo (10 minute de utilizare activă, apoi 48 de ore) și activare cu licență semnată în ediția oficială; parola SMTP protejată cu DPAPI.
+- Jurnal de diagnostic local cu export redactat.
+- Interfață completă în română, engleză și spaniolă.
+
+### Changed
+- Aspect „Studio Glass”; bara laterală urmează tema aleasă.
+
+### Fixed
+- Pictograme decupate în listă; contrast insuficient al etichetelor pe tema întunecată; pagina Acasă ignora filtrul de volume.
+- Expirarea probei nu mai șterge setările sau conturile.
+
 ## v1.18.2 (2026-09-14) — Teme si contrast
 
 ### Fixed
