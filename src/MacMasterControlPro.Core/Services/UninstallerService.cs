@@ -233,6 +233,13 @@ public static class UninstallerService
     ///    Registry (`IsStillRegistered`), nu doar codul de ieșire.
     public static bool RunOfficialUninstaller(InstalledAppWin app)
     {
+        var cmd = BuildOfficialUninstallCommand(app);
+        return cmd is not null && PrivilegedRunner.Run(cmd);
+    }
+
+    /// Comanda (PowerShell) care rulează dezinstalatorul oficial al aplicației; `null` dacă nu există.
+    public static string? BuildOfficialUninstallCommand(InstalledAppWin app)
+    {
         string? command = app.QuietUninstallString;
         if (string.IsNullOrWhiteSpace(command) && !string.IsNullOrWhiteSpace(app.UninstallString))
         {
@@ -252,56 +259,68 @@ public static class UninstallerService
                 command = raw;
             }
         }
-        if (string.IsNullOrWhiteSpace(command)) return false;
-        return PrivilegedRunner.Run($"Start-Process -FilePath cmd.exe -ArgumentList '/c {command.Replace("'", "''")}' -Wait");
+        return string.IsNullOrWhiteSpace(command) ? null : $"Start-Process -FilePath cmd.exe -ArgumentList '/c {command.Replace("'", "''")}' -Wait";
     }
+
 
     /// Cerinta (2026-09-01): "sa elimine tot tot tot" — extins sa recunoasca
     /// si categoriile noi (comenzi rapide = fisiere individuale, nu foldere;
     /// sarcini programate = nume, nu cale de disc/Registry), fiecare cu
     /// comanda de stergere corecta pentru tipul ei, nu doar Registry.
-    public static void Delete(List<UninstallCategoryWin> categories, Action<string> log)
+    public static void Delete(List<UninstallCategoryWin> categories, Action<string> log) =>
+        UninstallBatch(new[] { new Target(new InstalledAppWin("", null, null), categories) }, log);
+
+    /// O aplicație de dezinstalat, cu categoriile ei de urme asociate.
+    public sealed record Target(InstalledAppWin App, List<UninstallCategoryWin> Categories);
+
+    /// Dezinstalare pentru una sau mai multe aplicații ca UN SINGUR plan: urmele care merg cu drepturile utilizatorului se șterg întâi (fără prompt);
+    /// comenzile privilegiate (Registry, sarcini programate, foldere de sistem) și dezinstalatoarele oficiale ale TUTUROR aplicațiilor formează UN plan,
+    /// prezentat și autorizat o singură dată (un singur prompt UAC). Anulare/refuz = planul se oprește, fără prompturi succesive.
+    public static void UninstallBatch(IReadOnlyList<Target> targets, Action<string> log)
     {
-        var privileged = new List<string>();
-        foreach (var category in categories)
+        var steps = new List<PrivilegedPlan.Step>();
+        var uninstallers = new List<(InstalledAppWin App, string Label)>();
+        var n = 0;
+        foreach (var t in targets)
         {
-            foreach (var path in category.Paths)
+            foreach (var category in t.Categories)
             {
-                if (category.Id == "scheduledtasks")
+                foreach (var path in category.Paths)
                 {
-                    privileged.Add($"schtasks /delete /tn \"{path}\" /f");
-                    continue;
-                }
-                if (category.Id.StartsWith("registry"))
-                {
-                    privileged.Add($"Remove-Item -Path 'Registry::{path}' -Recurse -Force -ErrorAction SilentlyContinue");
-                    continue;
-                }
-                if (category.RequiresPrivilege)
-                {
-                    var isFile = File.Exists(path);
-                    privileged.Add(isFile
-                        ? $"Remove-Item -Path '{path}' -Force -ErrorAction SilentlyContinue"
-                        : $"Remove-Item -Path '{path}' -Recurse -Force -ErrorAction SilentlyContinue");
-                    continue;
-                }
-                try
-                {
-                    if (File.Exists(path)) File.Delete(path);
-                    else Directory.Delete(path, recursive: true);
-                    log(CoreL.X($"Șters: {path}", $"Deleted: {path}", $"Eliminado: {path}"));
-                }
-                catch (Exception ex)
-                {
-                    log(CoreL.X($"EROARE la ștergerea {path}: {ex.Message}", $"ERROR deleting {path}: {ex.Message}", $"ERROR al eliminar {path}: {ex.Message}"));
+                    string? cmd = null;
+                    if (category.Id == "scheduledtasks") cmd = $"schtasks /delete /tn \"{path}\" /f";
+                    else if (category.Id.StartsWith("registry")) cmd = $"Remove-Item -Path 'Registry::{path.Replace("'", "''")}' -Recurse -Force -ErrorAction SilentlyContinue";
+                    else if (category.RequiresPrivilege)
+                        cmd = File.Exists(path) ? $"Remove-Item -Path {PrivilegedPlan.Q(path)} -Force -ErrorAction SilentlyContinue" : $"Remove-Item -Path {PrivilegedPlan.Q(path)} -Recurse -Force -ErrorAction SilentlyContinue";
+                    if (cmd is not null) { steps.Add(new PrivilegedPlan.Step($"{t.App.DisplayName}: {path}#{n++}", cmd)); continue; }
+                    try
+                    {
+                        if (File.Exists(path)) File.Delete(path); else Directory.Delete(path, recursive: true);
+                        log(CoreL.X($"Șters: {path}", $"Deleted: {path}", $"Eliminado: {path}"));
+                    }
+                    catch (Exception ex)
+                    {
+                        log(CoreL.X($"EROARE la ștergerea {path}: {ex.Message}", $"ERROR deleting {path}: {ex.Message}", $"ERROR al eliminar {path}: {ex.Message}"));
+                    }
                 }
             }
+            if (!string.IsNullOrWhiteSpace(t.App.UninstallString) && BuildOfficialUninstallCommand(t.App) is { } uc)
+            {
+                var label = $"{t.App.DisplayName}: {CoreL.X("dezinstalator oficial", "official uninstaller", "desinstalador oficial")}#{n++}";
+                steps.Add(new PrivilegedPlan.Step(label, uc)); uninstallers.Add((t.App, label));
+            }
         }
-        if (privileged.Count > 0)
+        if (steps.Count == 0) return;
+        log(CoreL.X($"Plan cu drepturi de administrator: {steps.Count} pași, o singură autorizare.", $"Administrator plan: {steps.Count} steps, a single authorisation.", $"Plan con derechos de administrador: {steps.Count} pasos, una sola autorización."));
+        var outcome = PrivilegedPlan.Execute(CoreL.X("Dezinstalare cu drepturi de administrator", "Uninstall with administrator rights", "Desinstalación con derechos de administrador"), steps);
+        if (outcome.Cancelled) { log(CoreL.X("Anulat: nu s-a modificat nimic din planul privilegiat și nu se mai cere nicio autorizare.", "Cancelled: nothing in the privileged plan was changed and no further authorisation will be requested.", "Cancelado: no se modificó nada del plan con privilegios y no se pedirá ninguna otra autorización.")); return; }
+        foreach (var s in steps.Where(x => !uninstallers.Any(u => u.Label == x.Label)))
+            if (outcome.Results.TryGetValue(s.Label, out var err) && err is not null) log($"EROARE {s.Label}: {err}");
+        foreach (var (app, label) in uninstallers)
         {
-            log(CoreL.X($"Solicit privilegii de administrator pentru {privileged.Count} elemente (Registry/sarcini programate/comenzi rapide de sistem)…", $"Requesting administrator privileges for {privileged.Count} items (Registry/scheduled tasks/system shortcuts)…", $"Solicitando privilegios de administrador para {privileged.Count} elementos (Registro, tareas programadas, accesos directos del sistema)…"));
-            var ok = PrivilegedRunner.Run(privileged, line => log("  " + line));
-            log(ok ? CoreL.X("Elemente privilegiate curățate.", "Privileged items cleaned.", "Elementos con privilegios limpiados.") : CoreL.X("EROARE la curățarea elementelor privilegiate (promptul UAC a fost respins).", "ERROR cleaning privileged items (the UAC prompt was declined).", "ERROR al limpiar los elementos con privilegios (se rechazó el aviso de UAC)."));
+            if (outcome.Results[label] is not null) log(CoreL.X($"EROARE la rularea dezinstalatorului oficial pentru {app.DisplayName}.", $"ERROR running the official uninstaller for {app.DisplayName}.", $"ERROR al ejecutar el desinstalador oficial de {app.DisplayName}."));
+            else if (IsStillRegistered(app.DisplayName)) log(CoreL.X($"⚠ {app.DisplayName}: tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click.", $"⚠ {app.DisplayName}: still shows as installed — its uninstaller probably shows its own window waiting for a click.", $"⚠ {app.DisplayName}: sigue apareciendo instalada: su desinstalador probablemente muestra una ventana propia que espera un clic."));
+            else log(CoreL.X($"✔ {app.DisplayName}: dezinstalator oficial rulat — dispărută din Programe și caracteristici.", $"✔ {app.DisplayName}: official uninstaller ran — gone from Programs and Features.", $"✔ {app.DisplayName}: desinstalador oficial ejecutado; ya no aparece en Programas y características."));
         }
     }
 }

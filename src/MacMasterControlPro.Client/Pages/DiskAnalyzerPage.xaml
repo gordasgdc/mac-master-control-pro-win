@@ -45,6 +45,7 @@
                 <StackPanel x:Name="BreadcrumbPanel" Orientation="Horizontal" VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock x:Name="FreshnessText" FontSize="11.5" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <ui:Button x:Name="UnscannedButton" Appearance="Transparent" Click="OnUnscannedClicked" Visibility="Collapsed" Margin="0,0,8,0" Foreground="{DynamicResource StatusWarningBrush}" />
                     <ui:ProgressRing x:Name="RescanSpinner" IsIndeterminate="True" Width="14" Height="14" Margin="0,0,8,0" Visibility="Collapsed" />
                     <ui:Button x:Name="StopRescanButton" Content="Oprește" Click="OnStopScanClicked" Margin="0,0,8,0" Visibility="Collapsed" />
                     <ui:Button x:Name="RescanButton" Content="Verifică modificările" Appearance="Transparent" Click="OnRescanClicked" />

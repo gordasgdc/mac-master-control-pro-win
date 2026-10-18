@@ -141,25 +141,7 @@ public partial class UninstallerPage : UserControl
         _log.Append(L.X($"Încep ștergerea urmelor pentru {_selectedApp.DisplayName}…", $"Starting leftover removal for {_selectedApp.DisplayName}…", $"Iniciando la eliminación de restos de {_selectedApp.DisplayName}…"));
         UninstallerService.TerminateIfRunning(_selectedApp.InstallLocation);
         var toDelete = _categories.Where(c => _selectedCategoryIds.Contains(c.Id)).ToList();
-        UninstallerService.Delete(toDelete, line => _log.Append(line));
-
-        if (!string.IsNullOrWhiteSpace(_selectedApp.UninstallString))
-        {
-            _log.Append("Rulez dezinstalatorul oficial (Apps & Features)…");
-            var ok = UninstallerService.RunOfficialUninstaller(_selectedApp);
-            if (!ok)
-            {
-                _log.Append(L.X("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).", "ERROR running the official uninstaller (the UAC prompt was declined).", "ERROR al ejecutar el desinstalador oficial (se rechazó el aviso de UAC)."));
-            }
-            else if (UninstallerService.IsStillRegistered(_selectedApp.DisplayName))
-            {
-                _log.Append(L.X("⚠ Aplicația a rulat comanda de dezinstalare, dar tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click (Next/Uninstall/Finish). Verifică dacă a apărut o fereastră pe ecran.", "⚠ The app ran its uninstall command but still shows as installed — its uninstaller probably shows its own window waiting for a click (Next/Uninstall/Finish). Check whether a window appeared on screen.", "⚠ La app ejecutó su comando de desinstalación pero sigue apareciendo como instalada; probablemente su desinstalador muestra una ventana propia que espera un clic (Next/Uninstall/Finish). Comprueba si apareció una ventana en pantalla."));
-            }
-            else
-            {
-                _log.Append(L.X("✔ Dezinstalator oficial rulat — aplicația a dispărut din Programe și caracteristici.", "✔ Official uninstaller ran — the app is gone from Programs and Features.", "✔ Desinstalador oficial ejecutado: la app desapareció de Programas y características."));
-            }
-        }
+        UninstallerService.UninstallBatch(new[] { new UninstallerService.Target(_selectedApp, toDelete) }, line => _log.Append(line));
         _log.Append(L.X("Gata.", "Done.", "Listo."));
         _apps = UninstallerService.ScanInstalledApps();
         RenderAppsList();
@@ -189,23 +171,13 @@ public partial class UninstallerPage : UserControl
 
         Task.Run(() =>
         {
+            var plan = new List<UninstallerService.Target>();
             foreach (var app in targets)
             {
-                Dispatcher.Invoke(() => _log.Append($"— {app.DisplayName} —"));
                 UninstallerService.TerminateIfRunning(app.InstallLocation);
-                var found = UninstallerService.ScanRelatedFiles(app);
-                UninstallerService.Delete(found, line => Dispatcher.Invoke(() => _log.Append(line)));
-                if (!string.IsNullOrWhiteSpace(app.UninstallString))
-                {
-                    var ok = UninstallerService.RunOfficialUninstaller(app);
-                    string status;
-                    if (!ok) status = L.X("EROARE la rularea dezinstalatorului oficial (promptul UAC a fost respins).", "ERROR running the official uninstaller (the UAC prompt was declined).", "ERROR al ejecutar el desinstalador oficial (se rechazó el aviso de UAC).");
-                    else if (UninstallerService.IsStillRegistered(app.DisplayName))
-                        status = L.X("⚠ Tot apare instalată — probabil dezinstalatorul ei arată o fereastră proprie care așteaptă un click.", "⚠ Still shows as installed — its uninstaller probably shows its own window waiting for a click.", "⚠ Sigue apareciendo como instalada; probablemente su desinstalador muestra una ventana propia que espera un clic.");
-                    else status = L.X("✔ Dezinstalator oficial rulat — dispărută din Programe și caracteristici.", "✔ Official uninstaller ran — gone from Programs and Features.", "✔ Desinstalador oficial ejecutado: desapareció de Programas y características.");
-                    Dispatcher.Invoke(() => _log.Append(status));
-                }
+                plan.Add(new UninstallerService.Target(app, UninstallerService.ScanRelatedFiles(app)));
             }
+            UninstallerService.UninstallBatch(plan, line => Dispatcher.Invoke(() => _log.Append(line)));
             Dispatcher.Invoke(() =>
             {
                 _log.Append(L.X("Gata.", "Done.", "Listo."));

@@ -22,7 +22,11 @@ public sealed class DiskNode
     public string Name { get; set; } = "";
     public string Path { get; set; } = "";
     public bool IsDirectory { get; set; }
+    /// Mărimea LOGICĂ (Length); suma pe subarbore la foldere.
     public long SizeBytes { get; set; }
+
+    /// Spațiul ocupat PE DISC (alocat, raportat de sistem): măsura din „ce ocupă spațiul” (hartă, listă, procente, totaluri). Diferă de `SizeBytes` la fișiere sparse/comprimate/doar-în-cloud. NU garantează spațiu recuperat: hard link-urile, clonele ReFS și instantaneele pot ține aceleași blocuri.
+    public long UsedBytes => AllocatedBytes;
 
     /// Doar pentru foldere — 0 pentru fișiere (nefolosit acolo). Mtime-ul
     /// (UTC, `.Ticks`) folderului la ultima scanare — cheia scanării
@@ -56,13 +60,13 @@ public sealed class DiskNode
     }
 
     [JsonIgnore]
-    public IEnumerable<DiskNode> SortedChildren => Children.Values.OrderByDescending(c => c.SizeBytes);
+    public IEnumerable<DiskNode> SortedChildren => Children.Values.OrderByDescending(c => c.UsedBytes);
 
     [JsonIgnore]
     public int TotalFileCount => IsDirectory ? Children.Values.Sum(c => c.TotalFileCount) : 1;
 
     [JsonIgnore]
-    public string SizeDescription => FormatBytes(SizeBytes);
+    public string SizeDescription => FormatBytes(UsedBytes);
 
     public static string FormatBytes(long bytes)
     {

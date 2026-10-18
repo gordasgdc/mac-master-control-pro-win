@@ -18,6 +18,72 @@ string Tmp(string n) { var d = Path.Combine(Path.GetTempPath(), "mcsp-selftest-"
 DiskNode Scan(string p) => DiskScanEngine.BuildTree(p, _ => { }).Tree;
 (DiskNode Tree, DiskScanEngine.ScanOutcome Outcome) Inc(DiskNode t, DiskScanEngine.IncrementalMode m = DiskScanEngine.IncrementalMode.Verified) => DiskScanEngine.IncrementalUpdate(t, _ => { }, m);
 void Grow(string f, int n) { using var s = new FileStream(f, FileMode.Append); s.Write(new byte[n]); }
+
+if (args.Length >= 1 && args[0] == "sparse")
+{
+    // Fișier sparse real (NTFS): mărimea logică mare, spațiul alocat minim; harta/totalurile folosesc spațiul alocat, iar cache-ul vechi (fără măsura nouă) se respinge.
+    var d = Tmp("sparse"); var f = Path.Combine(d, "sparse.img"); File.WriteAllBytes(Path.Combine(d, "normal.bin"), new byte[3_000_000]);
+    using (File.Create(f)) { }
+    static int Fs(string a) { var p = Process.Start(new ProcessStartInfo("fsutil", a) { UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true })!; p.WaitForExit(); return p.ExitCode; }
+    var okSparse = Fs($"sparse setflag \"{f}\"") == 0 && Fs($"file seteof \"{f}\" 10737418240") == 0;   // 10 GiB logic
+    Check("fixture sparse creat (fsutil)", okSparse);
+    var t = Scan(d); var n = t.Children[Path.GetFileName(f)];
+    Console.WriteLine($"logic={n.SizeBytes} alocat={n.UsedBytes} total-alocat={t.UsedBytes}");
+    Check("sparse: mărime logică 10 GiB", n.SizeBytes == 10737418240);
+    Check("sparse: spațiul alocat mic (< 1 MB) și totalul pe disc nu depășește alocatul real", n.UsedBytes < 1_000_000 && t.UsedBytes < 5_000_000);
+    Check("ordine după spațiul alocat: fișierul normal înaintea celui sparse", t.SortedChildren.First().Name == "normal.bin");
+    var root = Path.Combine(d, "nu-exista-vizibil"); Directory.CreateDirectory(root); File.WriteAllText(Path.Combine(root, "x.txt"), "x");
+    var cache = new DiskCacheStore.Snapshot { RootPath = d, ScannedAtUtc = DateTime.UtcNow, Root = t };
+    DiskCacheStore.Save(cache);
+    Check("cache nou (măsură v2) se încarcă", DiskCacheStore.Load(d) is not null);
+    // Cache vechi (fără măsura nouă): se respinge. Îl scriem direct, ca un fișier al versiunii precedente.
+    var oldFile = Directory.GetFiles(Path.Combine(AppProfile.Local("MacMasterControlPro"), "DiskCache")).OrderByDescending(File.GetLastWriteTimeUtc).First();
+    var json = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(oldFile))!.AsObject(); json.Remove("MeasureVersion"); File.WriteAllText(oldFile, json.ToJsonString());
+    Check("cache vechi (fără măsura nouă) este respins controlat", DiskCacheStore.Load(d) is null);
+    Directory.Delete(d, true);
+    Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
+    return fail == 0 ? 0 : 1;
+}
+
+if (args.Length >= 1 && args[0] == "privilege")
+{
+    // Verificare plan privilegiat (profil izolat + MCSP_DEMO_ELEVATION=ok|cancel): numărul de solicitări UAC înainte/după și comportamentul la anulare.
+    var mode = Environment.GetEnvironmentVariable("MCSP_DEMO_ELEVATION") ?? "";
+    Console.WriteLine($"mod stub: {mode}; profil izolat: {AppProfile.IsIsolated}");
+    PrivilegedPlan.Approver = (_, _) => true;
+    (string Dir, List<string> Files) Fx(int n) { var d = Tmp("priv"); var l = Enumerable.Range(0, n).Select(i => Path.Combine(d, $"item{i}.bin")).ToList(); foreach (var f in l) File.WriteAllBytes(f, new byte[100]); return (d, l); }
+    if (mode == "ok")
+    {
+        var (d1, f1) = Fx(14);
+        var c0 = PrivilegedRunner.PromptCount;
+        foreach (var f in f1.Take(7)) PrivilegedFileOps.DeleteBatch(new[] { f }, recycleFirst: false);
+        var before = PrivilegedRunner.PromptCount - c0;
+        var c1 = PrivilegedRunner.PromptCount;
+        var batch = PrivilegedFileOps.DeleteBatch(f1.Skip(7), recycleFirst: false);
+        var after = PrivilegedRunner.PromptCount - c1;
+        Check($"selecție de 7: înainte {before} prompturi, după {after}", before == 7 && after == 1);
+        Check("tot ce era în plan a fost șters, nimic anulat", !batch.Cancelled && f1.Skip(7).All(f => !File.Exists(f) && batch.Results[f] is null));
+        Directory.Delete(d1, true);
+    }
+    else if (mode == "cancel")
+    {
+        var (d2, f2) = Fx(7);
+        var c0 = PrivilegedRunner.PromptCount;
+        var batch = PrivilegedFileOps.DeleteBatch(f2, recycleFirst: false);
+        Check("anulare: o singură solicitare, apoi oprire (fără ferestre succesive)", batch.Cancelled && PrivilegedRunner.PromptCount - c0 == 1);
+        Check("anulare: nimic modificat", f2.All(File.Exists));
+        Directory.Delete(d2, true);
+    }
+    PrivilegedPlan.Approver = (_, _) => false;
+    var (d3, f3) = Fx(3); var c3 = PrivilegedRunner.PromptCount;
+    var declined = PrivilegedFileOps.DeleteBatch(f3, recycleFirst: false);
+    Check("plan refuzat în fereastra de confirmare: niciun prompt UAC", declined.Cancelled && PrivilegedRunner.PromptCount == c3 && f3.All(File.Exists));
+    Directory.Delete(d3, true);
+    foreach (var bad in new[] { @"C:\", @"C:\Windows", @"C:\Windows\System32", @"C:\Program Files", @"C:\Users", "relativ\\cale" }) Check($"cale protejată refuzată: {bad}", !PrivilegedPlan.IsSafeDeletePath(bad));
+    Check("cale obișnuită acceptată", PrivilegedPlan.IsSafeDeletePath(@"C:\Program Files\Aplicatie\x.dll"));
+    Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
+    return fail == 0 ? 0 : 1;
+}
 string Fixture()
 {
     var d = Tmp("scan");

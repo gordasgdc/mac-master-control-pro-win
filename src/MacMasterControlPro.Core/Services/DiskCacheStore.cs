@@ -27,7 +27,11 @@ public static class DiskCacheStore
         public DateTime? VerifiedAtUtc { get; set; }
         /// Serialul volumului la momentul salvarii; alt volum la aceeasi litera invalideaza cache-ul.
         public string? VolumeSerial { get; set; }
+        /// 2 = spațiu alocat ca măsură principală + eșantion de căi neanalizate. Cache-urile mai vechi se resping (rescanare).
+        public int MeasureVersion { get; set; }
+        public List<string> AccessSamples { get; set; } = new();
     }
+    public const int CurrentMeasureVersion = 2;
 
     private static string CacheDirectory
     {
@@ -57,6 +61,8 @@ public static class DiskCacheStore
             if (!File.Exists(file)) return null;
             var snapshot = JsonSerializer.Deserialize<Snapshot>(File.ReadAllText(file));
             if (snapshot is null) return null;
+            // Măsurătoare veche (mărime logică drept „spațiu ocupat”): ar induce în eroare (ex. fișier sparse de TB alocat cățiva MB). Se respinge controlat; următoarea analiză o rescrie.
+            if (snapshot.MeasureVersion < CurrentMeasureVersion) { DiagnosticLog.Log("info", "disk", "cache.old-measure-rejected"); return null; }
             // Un cache cu alta radacina (coliziune de hash, practic
             // imposibila cu SHA-256, dar verificam explicit — Regula 30,
             // nu presupunem) nu se foloseste niciodata orb.
@@ -81,6 +87,7 @@ public static class DiskCacheStore
         try
         {
             snapshot.VolumeSerial ??= DiskScanEngine.VolumeSerial(snapshot.RootPath);
+            snapshot.MeasureVersion = CurrentMeasureVersion;   // orice salvare nouă poartă măsura corectă (spațiu alocat)
             var target = FileFor(snapshot.RootPath);
             var tmp = target + ".tmp";
             File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot));

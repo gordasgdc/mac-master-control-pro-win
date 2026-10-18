@@ -33,20 +33,20 @@ public sealed class SunburstControl : FrameworkElement
     private static List<Arc> Layout(DiskNode? root)
     {
         var list = new List<Arc>();
-        if (root is null || root.SizeBytes <= 0) return list;
-        double total = root.SizeBytes, a = -Math.PI / 2;
-        foreach (var k in root.SortedChildren.Where(c => c.SizeBytes > 0))
+        if (root is null || root.UsedBytes <= 0) return list;
+        double total = root.UsedBytes, a = -Math.PI / 2;
+        foreach (var k in root.SortedChildren.Where(c => c.UsedBytes > 0))
         {
-            var sweep = k.SizeBytes / total * 2 * Math.PI;
+            var sweep = k.UsedBytes / total * 2 * Math.PI;
             list.Add(new Arc(k, 1, a, a + sweep, k.Name));
             double b = a; long rest = 0;
-            foreach (var c in k.SortedChildren.Where(c => c.SizeBytes > 0))
+            foreach (var c in k.SortedChildren.Where(c => c.UsedBytes > 0))
             {
-                var cs = (double)c.SizeBytes / Math.Max(k.SizeBytes, 1) * sweep;
-                if (cs < 0.007) { rest += c.SizeBytes; continue; }
+                var cs = (double)c.UsedBytes / Math.Max(k.UsedBytes, 1) * sweep;
+                if (cs < 0.007) { rest += c.UsedBytes; continue; }
                 list.Add(new Arc(c, 2, b, b + cs, k.Name)); b += cs;
             }
-            if (rest > 0) list.Add(new Arc(null, 2, b, b + (double)rest / Math.Max(k.SizeBytes, 1) * sweep, ""));
+            if (rest > 0) list.Add(new Arc(null, 2, b, b + (double)rest / Math.Max(k.UsedBytes, 1) * sweep, ""));
             a += sweep;
         }
         return list;
@@ -90,8 +90,8 @@ public sealed class SunburstControl : FrameworkElement
         }
         var n = _hover ?? _root;
         DrawCentered(dc, n.Name.Length > 22 ? n.Name[..21] + "…" : n.Name, 14, FontWeights.SemiBold, fg, c.X, c.Y - hole * 0.40, hole * 1.7);
-        DrawCentered(dc, DiskNode.FormatBytes(n.SizeBytes), Math.Max(20, hole * 0.34), FontWeights.Bold, fg, c.X, c.Y - hole * 0.18, hole * 1.7);
-        var caption = ReferenceEquals(n, _root) ? L.X("în acest folder", "in this folder", "en esta carpeta") : $"{(double)n.SizeBytes / Math.Max(_root.SizeBytes, 1):P0} "+L.X("din folder", "of folder", "de la carpeta");
+        DrawCentered(dc, DiskNode.FormatBytes(n.UsedBytes), Math.Max(20, hole * 0.34), FontWeights.Bold, fg, c.X, c.Y - hole * 0.18, hole * 1.7);
+        var caption = ReferenceEquals(n, _root) ? L.X("în acest folder", "in this folder", "en esta carpeta") : $"{(double)n.UsedBytes / Math.Max(_root.UsedBytes, 1):P0} "+L.X("din folder", "of folder", "de la carpeta");
         DrawCentered(dc, caption, 11.5, FontWeights.Normal, muted, c.X, c.Y + hole * 0.30, hole * 1.7);
     }
 

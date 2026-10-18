@@ -47,7 +47,7 @@ public sealed class CommunityAccess : IAccessProvider
 
     public IReadOnlyList<OfferSummary> Offers => Array.Empty<OfferSummary>();
     public bool IsOfficialEdition => false;
-    public string ActivationRequestText() => CoreL.X($"Cerere de licență Master Control Studio Pro. Machine ID: {MachineID.Display}", $"Master Control Studio Pro licence request. Machine ID: {MachineID.Display}", $"Solicitud de licencia de Master Control Studio Pro. Machine ID: {MachineID.Display}");
+    public string ActivationRequestText(string? offerId) => CoreL.X($"Cerere de licență Master Control Studio Pro. Machine ID: {MachineID.Display}", $"Master Control Studio Pro licence request. Machine ID: {MachineID.Display}", $"Solicitud de licencia de Master Control Studio Pro. Machine ID: {MachineID.Display}");
     public Task<string?> SubmitLicenseAsync(string text) => Task.FromResult<string?>(CoreL.X("Ediția comunitară nu are activare. Licențele se aplică în ediția oficială distribuită de GDC.", "The community edition has no activation. Licences apply in the official edition distributed by GDC.", "La edición comunitaria no tiene activación. Las licencias se aplican en la edición oficial distribuida por GDC."));
     public Task RefreshAsync() => Task.CompletedTask;
 

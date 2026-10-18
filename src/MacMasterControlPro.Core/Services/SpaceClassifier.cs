@@ -138,8 +138,8 @@ public static class SpaceMath
             if (HasSelectedAncestor(n.Path)) continue;
             var f = SpaceClassifier.Flags(n.Path, n.IsDirectory, false, duplicateSurplus);
             if (f.Contains(SpaceFlag.Protected)) { s.Blocked.Add(n.Path); continue; }
-            if (f.Contains(SpaceFlag.Regenerable) || f.Contains(SpaceFlag.Duplicate)) { s.RecoverableBytes += n.SizeBytes; s.Recoverable.Add(n.Path); }
-            else { s.UnverifiedBytes += n.SizeBytes; s.Unverified.Add(n.Path); }
+            if (f.Contains(SpaceFlag.Regenerable) || f.Contains(SpaceFlag.Duplicate)) { s.RecoverableBytes += n.UsedBytes; s.Recoverable.Add(n.Path); }
+            else { s.UnverifiedBytes += n.UsedBytes; s.Unverified.Add(n.Path); }
         }
         return s;
     }
@@ -152,8 +152,8 @@ public static class SpaceMath
             var f = SpaceClassifier.Flags(n.Path, n.IsDirectory, false, duplicateSurplus);
             if (f.Contains(SpaceFlag.Protected)) return;
             var inReg = insideReg;
-            if (f.Contains(SpaceFlag.Regenerable) && !insideReg) { reg += n.SizeBytes; inReg = true; }
-            if (f.Contains(SpaceFlag.Duplicate)) { if (insideReg) overlap += n.SizeBytes; else dup += n.SizeBytes; }
+            if (f.Contains(SpaceFlag.Regenerable) && !insideReg) { reg += n.UsedBytes; inReg = true; }
+            if (f.Contains(SpaceFlag.Duplicate)) { if (insideReg) overlap += n.UsedBytes; else dup += n.UsedBytes; }
             foreach (var c in n.Children.Values) Walk(c, inReg);
         }
         Walk(root, false);

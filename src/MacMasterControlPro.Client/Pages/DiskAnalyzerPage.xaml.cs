@@ -20,6 +20,7 @@ public partial class DiskAnalyzerPage : UserControl
     private DateTime? _lastScannedAtUtc, _verifiedAtUtc;
     private bool _isIndexing, _isRescanning, _showAll, _advanced, _confirmUnverified;
     private int _accessErrors;
+    private IReadOnlyList<string> _accessSamples = Array.Empty<string>();
     private string? _scanNotice;
     private CancellationTokenSource? _cts;
     private IDisposable? _busy;
@@ -151,7 +152,7 @@ public partial class DiskAnalyzerPage : UserControl
         var cached = DiskCacheStore.Load(root.Path);
         if (cached is not null)
         {
-            _tree = cached.Root; _lastScannedAtUtc = cached.ScannedAtUtc; _verifiedAtUtc = cached.VerifiedAtUtc; _accessErrors = cached.AccessErrors;
+            _tree = cached.Root; _lastScannedAtUtc = cached.ScannedAtUtc; _verifiedAtUtc = cached.VerifiedAtUtc; _accessErrors = cached.AccessErrors; _accessSamples = cached.AccessSamples;
             RenderResult(); return;
         }
         PerformFullScan(root.Path);
@@ -175,8 +176,8 @@ public partial class DiskAnalyzerPage : UserControl
                     _scanNotice = outcome.Status == DiskScanEngine.ScanStatus.RootUnavailable ? L.X("Unitatea nu mai este disponibilă. Nu am salvat nimic.", "The drive is no longer available. Nothing was saved.", "La unidad ya no está disponible. No se guardó nada.") : null;
                     _tree = null; RenderState(); return;
                 }
-                _tree = node; _lastScannedAtUtc = DateTime.UtcNow; _verifiedAtUtc = _lastScannedAtUtc; _accessErrors = outcome.AccessErrors;
-                DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node, AccessErrors = outcome.AccessErrors, VerifiedAtUtc = _verifiedAtUtc });
+                _tree = node; _lastScannedAtUtc = DateTime.UtcNow; _verifiedAtUtc = _lastScannedAtUtc; _accessErrors = outcome.AccessErrors; _accessSamples = outcome.AccessSamples ?? Array.Empty<string>();
+                DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node, AccessErrors = outcome.AccessErrors, AccessSamples = (outcome.AccessSamples ?? Array.Empty<string>()).ToList(), VerifiedAtUtc = _verifiedAtUtc });
                 RenderResult();
             });
         });
@@ -200,15 +201,15 @@ public partial class DiskAnalyzerPage : UserControl
                 switch (outcome.Status)
                 {
                     case DiskScanEngine.ScanStatus.Complete:
-                        _tree = node; _lastScannedAtUtc = DateTime.UtcNow; _verifiedAtUtc = _lastScannedAtUtc; _accessErrors = outcome.AccessErrors;
-                        DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node, AccessErrors = outcome.AccessErrors, VerifiedAtUtc = _verifiedAtUtc });
+                        _tree = node; _lastScannedAtUtc = DateTime.UtcNow; _verifiedAtUtc = _lastScannedAtUtc; _accessErrors = outcome.AccessErrors; _accessSamples = outcome.AccessSamples ?? Array.Empty<string>();
+                        DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node, AccessErrors = outcome.AccessErrors, AccessSamples = (outcome.AccessSamples ?? Array.Empty<string>()).ToList(), VerifiedAtUtc = _verifiedAtUtc });
                         break;
                     case DiskScanEngine.ScanStatus.RootUnavailable:
                         _scanNotice = L.X("Unitatea nu mai este disponibilă. Datele afișate sunt din ultima analiză salvată.", "The drive is no longer available. The data shown is from the last saved analysis.", "La unidad ya no está disponible. Los datos mostrados son del último análisis guardado."); break;
                     default:
                         _scanNotice = L.X("Verificare anulată. S-a păstrat ultima analiză salvată.", "Check cancelled. The last saved analysis was kept.", "Comprobación cancelada. Se conservó el último análisis guardado.");
                         var snap = DiskCacheStore.Load(rootPath);
-                        if (snap is not null) { _tree = snap.Root; _lastScannedAtUtc = snap.ScannedAtUtc; _verifiedAtUtc = snap.VerifiedAtUtc; _accessErrors = snap.AccessErrors; _pathStack.Clear(); }
+                        if (snap is not null) { _tree = snap.Root; _lastScannedAtUtc = snap.ScannedAtUtc; _verifiedAtUtc = snap.VerifiedAtUtc; _accessErrors = snap.AccessErrors; _accessSamples = snap.AccessSamples; _pathStack.Clear(); }
                         break;
                 }
                 RenderResult();
@@ -265,8 +266,9 @@ public partial class DiskAnalyzerPage : UserControl
 
     private void RenderFreshness()
     {
-        FreshnessText.Text = (_lastScannedAtUtc is null ? "" : _verifiedAtUtc is { } v ? string.Format(Culture, L.X("Verificat {0:d MMMM, HH:mm}", "Verified {0:d MMMM, HH:mm}", "Verificado {0:d MMMM, HH:mm}"), v.ToLocalTime()) : string.Format(Culture, L.X("Din analiza de {0:d MMMM, HH:mm}, neverificată", "From the analysis of {0:d MMMM, HH:mm}, not verified", "Del análisis del {0:d MMMM, HH:mm}, sin verificar"), _lastScannedAtUtc.Value.ToLocalTime()))
-            + (_accessErrors > 0 ? $" · {_accessErrors} "+(_accessErrors == 1 ? L.X("inaccesibil", "inaccessible", "inaccesible") : L.X("inaccesibile", "inaccessible", "inaccesibles")) : "");
+        FreshnessText.Text = (_lastScannedAtUtc is null ? "" : _verifiedAtUtc is { } v ? string.Format(Culture, L.X("Verificat {0:d MMMM, HH:mm}", "Verified {0:d MMMM, HH:mm}", "Verificado {0:d MMMM, HH:mm}"), v.ToLocalTime()) : string.Format(Culture, L.X("Din analiza de {0:d MMMM, HH:mm}, neverificată", "From the analysis of {0:d MMMM, HH:mm}, not verified", "Del análisis del {0:d MMMM, HH:mm}, sin verificar"), _lastScannedAtUtc.Value.ToLocalTime()));
+        UnscannedButton.Visibility = _accessErrors > 0 ? Visibility.Visible : Visibility.Collapsed;
+        UnscannedButton.Content = string.Format(L.X("{0} neanalizate", "{0} not analysed", "{0} sin analizar"), _accessErrors);
         RescanSpinner.Visibility = StopRescanButton.Visibility = _isRescanning ? Visibility.Visible : Visibility.Collapsed;
         RescanButton.Visibility = ResetCacheButton.Visibility = _isRescanning ? Visibility.Collapsed : Visibility.Visible;
     }
@@ -294,7 +296,7 @@ public partial class DiskAnalyzerPage : UserControl
         FocusPanel.Children.Add(MakeIcon(f.Path, 56));
         var t = new StackPanel { Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
         t.Children.Add(new TextBlock { Text = f.Name, FontSize = 20, FontWeight = FontWeights.Bold, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 260 });
-        t.Children.Add(new TextBlock { Text = DiskNode.FormatBytes(f.SizeBytes), FontSize = 15, Foreground = (Brush)FindResource("TextSecondaryBrush") });
+        t.Children.Add(new TextBlock { Text = DiskNode.FormatBytes(f.UsedBytes), FontSize = 15, Foreground = (Brush)FindResource("TextSecondaryBrush") });
         FocusPanel.Children.Add(t);
         if (f.IsDirectory && !ReferenceEquals(f, CurrentNode))
         {
@@ -350,8 +352,8 @@ public partial class DiskAnalyzerPage : UserControl
         var icon = MakeIcon(n.Path, 32); icon.Margin = new Thickness(6, 0, 10, 0); Grid.SetColumn(icon, 1); grid.Children.Add(icon);
         var name = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         name.Children.Add(new TextBlock { Text = n.Name, FontWeight = FontWeights.SemiBold, TextTrimming = TextTrimming.CharacterEllipsis });
-        var cur = CurrentNode!.SizeBytes <= 0 ? 1 : CurrentNode.SizeBytes;
-        name.Children.Add(new TextBlock { Text = $"{DiskNode.FormatBytes(n.SizeBytes)} · {(double)n.SizeBytes / cur:P0}", FontSize = 11.5, Foreground = (Brush)FindResource("TextSecondaryBrush") });
+        var cur = CurrentNode!.UsedBytes <= 0 ? 1 : CurrentNode.UsedBytes;
+        name.Children.Add(new TextBlock { Text = $"{DiskNode.FormatBytes(n.UsedBytes)} · {(double)n.UsedBytes / cur:P0}", FontSize = 11.5, Foreground = (Brush)FindResource("TextSecondaryBrush") });
         Grid.SetColumn(name, 2); grid.Children.Add(name);
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         foreach (var f in flags.OrderBy(x => x)) chips.Children.Add(BuildChip(f));
@@ -389,8 +391,14 @@ public partial class DiskAnalyzerPage : UserControl
         var g = new Grid { Margin = new Thickness(40, 2, 0, 6) };
         g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) }); g.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         void Add(string k, string v) { var r = g.RowDefinitions.Count; g.RowDefinitions.Add(new RowDefinition()); var a = new TextBlock { Text = k, FontSize = 12, Foreground = (Brush)FindResource("TextSecondaryBrush") }; var b = new TextBlock { Text = v, FontSize = 12, TextWrapping = TextWrapping.Wrap }; Grid.SetRow(a, r); Grid.SetRow(b, r); Grid.SetColumn(b, 1); g.Children.Add(a); g.Children.Add(b); }
-        Add(L.X("Cale", "Path", "Ruta"), n.Path); Add(L.X("Mărime logică", "Logical size", "Tamaño lógico"), DiskNode.FormatBytes(n.SizeBytes));
-        if (n.AllocatedBytes > 0) Add(L.X("Spațiu alocat", "Allocated space", "Espacio asignado"), DiskNode.FormatBytes(n.AllocatedBytes));
+        Add(L.X("Cale", "Path", "Ruta"), n.Path);
+        Add(L.X("Spațiu ocupat pe disc (alocat)", "Space used on disk (allocated)", "Espacio ocupado en disco (asignado)"), DiskNode.FormatBytes(n.UsedBytes));
+        Add(L.X("Mărime logică", "Logical size", "Tamaño lógico"), DiskNode.FormatBytes(n.SizeBytes));
+        if (Math.Abs(n.SizeBytes - n.UsedBytes) > Math.Max(1_000_000, n.SizeBytes / 10))
+            Add("", n.SizeBytes > n.UsedBytes
+                ? L.X("Mărimea logică e mai mare decât spațiul alocat: fișier sparse, comprimat sau doar-în-cloud (golurile nu ocupă blocuri pe disc). Harta și procentele folosesc spațiul alocat raportat de sistem.", "The logical size is larger than the allocated space: a sparse, compressed or cloud-only file (holes take no blocks on disk). The map and percentages use the allocated space reported by the system.", "El tamaño lógico es mayor que el espacio asignado: archivo disperso, comprimido o solo en la nube (los huecos no ocupan bloques en disco). El mapa y los porcentajes usan el espacio asignado que informa el sistema.")
+                : L.X("Spațiul alocat e mai mare decât mărimea logică (rotunjire la clustere sau metadate).", "The allocated space is larger than the logical size (cluster rounding or metadata).", "El espacio asignado es mayor que el tamaño lógico (redondeo a clústeres o metadatos)."));
+        Add("", L.X("Spațiul alocat nu garantează spațiul eliberat: hard link-urile, clonele și instantaneele pot păstra aceleași date.", "Allocated space does not guarantee freed space: hard links, clones and snapshots may keep the same data.", "El espacio asignado no garantiza el espacio liberado: los enlaces duros, los clones y las instantáneas pueden conservar los mismos datos."));
         Add(L.X("De ce această stare", "Why this state", "Por qué este estado"), SpaceClassifier.Explanation(n.Path, n.IsDirectory, flags, L.X("ro", "en", "es")));
         var open = new Wpf.Ui.Controls.Button { Content = L.X("Arată în Explorer", "Show in Explorer", "Mostrar en el Explorador"), FontSize = 12, Margin = new Thickness(0, 6, 0, 0) };
         open.Click += (_, _) => OpenInExplorer(n);
@@ -409,7 +417,7 @@ public partial class DiskAnalyzerPage : UserControl
     private void RenderAdvanced()
     {
         if (!_advanced) return;
-        var cur = CurrentNode!.SizeBytes <= 0 ? 1 : CurrentNode.SizeBytes;
+        var cur = CurrentNode!.UsedBytes <= 0 ? 1 : CurrentNode.UsedBytes;
         var rows = new List<object>();
         foreach (var k in CurrentChildren)
         {
@@ -486,7 +494,7 @@ public partial class DiskAnalyzerPage : UserControl
         var head = new Grid { Margin = new Thickness(12, 10, 12, 6) };
         head.ColumnDefinitions.Add(new ColumnDefinition()); head.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         head.Children.Add(new TextBlock { Text = title, FontWeight = FontWeights.SemiBold });
-        var sum = new TextBlock { Text = DiskNode.FormatBytes(nodes.Sum(n => n.SizeBytes)), Foreground = (Brush)FindResource("TextSecondaryBrush") }; Grid.SetColumn(sum, 1); head.Children.Add(sum);
+        var sum = new TextBlock { Text = DiskNode.FormatBytes(nodes.Sum(n => n.UsedBytes)), Foreground = (Brush)FindResource("TextSecondaryBrush") }; Grid.SetColumn(sum, 1); head.Children.Add(sum);
         panel.Children.Add(head);
         foreach (var n in nodes)
         {
@@ -497,7 +505,7 @@ public partial class DiskAnalyzerPage : UserControl
             var status = res is not null && res.TryGetValue(n.Path, out var o) ? (o.Moved ? L.X("mutat în Coș", "moved to the Recycle Bin", "movido a la Papelera") : L.X("eșuat: ", "failed: ", "error: ") + o.Error) : System.IO.Path.GetDirectoryName(n.Path) ?? "";
             t.Children.Add(new TextBlock { Text = status, FontSize = 11.5, TextTrimming = TextTrimming.CharacterEllipsis, Foreground = res is not null && res.TryGetValue(n.Path, out var o2) && !o2.Moved ? (Brush)FindResource("StatusErrorBrush") : (Brush)FindResource("TextSecondaryBrush") });
             Grid.SetColumn(t, 1); g.Children.Add(t);
-            var sz = new TextBlock { Text = DiskNode.FormatBytes(n.SizeBytes), Foreground = (Brush)FindResource("TextSecondaryBrush"), VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(sz, 2); g.Children.Add(sz);
+            var sz = new TextBlock { Text = DiskNode.FormatBytes(n.UsedBytes), Foreground = (Brush)FindResource("TextSecondaryBrush"), VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(sz, 2); g.Children.Add(sz);
             panel.Children.Add(g);
         }
         return new Border { Child = panel, CornerRadius = new CornerRadius(12), BorderThickness = new Thickness(risk ? 1.5 : 1), BorderBrush = risk ? (Brush)FindResource("StatusErrorBrush") : (Brush)FindResource("CardStrokeBrush"), Background = (Brush)FindResource("CardBackgroundBrush"), Margin = new Thickness(0, 0, 0, 12) };
@@ -523,10 +531,20 @@ public partial class DiskAnalyzerPage : UserControl
                 if (_tree is not null && _currentRootPath is not null)
                 {
                     foreach (var (path, o) in outcomes.Where(kv => kv.Value.Moved)) { DiskScanEngine.Remove(path, _tree); _selection.Remove(path); }
-                    DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = _currentRootPath, ScannedAtUtc = _lastScannedAtUtc ?? DateTime.UtcNow, Root = _tree, AccessErrors = _accessErrors, VerifiedAtUtc = _verifiedAtUtc });
+                    DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = _currentRootPath, ScannedAtUtc = _lastScannedAtUtc ?? DateTime.UtcNow, Root = _tree, AccessErrors = _accessErrors, AccessSamples = _accessSamples.ToList(), VerifiedAtUtc = _verifiedAtUtc });
                 }
                 _results = outcomes; _trashing = false; _totals = null; RenderResult();
             });
         });
+    }
+
+    /// Elementele pe care Windows nu le-a lăsat să fie citite: analiza NU e completă. Nu se cere nicio autorizare UAC pentru ele.
+    private void OnUnscannedClicked(object sender, RoutedEventArgs e)
+    {
+        var text = string.Format(L.X("Analiza nu este completă: {0} elemente neanalizate.\n\nWindows nu a permis aplicației să citească aceste foldere sau fișiere (permisiuni NTFS, foldere de sistem, date ale altor utilizatori). Totalurile NU le includ. Aplicația nu a cerut și nu va cere autorizare UAC pentru ele.\n\nPasul necesar: acordă contului tău acces la folderul respectiv (Proprietăți → Securitate) sau, dacă ești administratorul calculatorului, pornește conștient aplicația ca administrator (clic dreapta → Run as administrator) și reanalizează.",
+            "The analysis is incomplete: {0} items not analysed.\n\nWindows did not allow the app to read these folders or files (NTFS permissions, system folders, other users' data). The totals do NOT include them. The app did not request and will not request UAC authorisation for them.\n\nRequired step: give your account access to that folder (Properties → Security) or, if you are the computer's administrator, deliberately start the app as administrator (right-click → Run as administrator) and scan again.",
+            "El análisis no está completo: {0} elementos sin analizar.\n\nWindows no permitió que la app leyera estas carpetas o archivos (permisos NTFS, carpetas del sistema, datos de otros usuarios). Los totales NO los incluyen. La app no pidió ni pedirá autorización UAC para ellos.\n\nPaso necesario: concede a tu cuenta acceso a esa carpeta (Propiedades → Seguridad) o, si eres el administrador del equipo, inicia la app como administrador a propósito (clic derecho → Ejecutar como administrador) y vuelve a analizar."), _accessErrors);
+        if (_accessSamples.Count > 0) text += "\n\n" + string.Format(L.X("Primele {0} căi:", "First {0} paths:", "Primeras {0} rutas:"), Math.Min(_accessSamples.Count, 20)) + "\n" + string.Join("\n", _accessSamples.Take(20));
+        MessageBox.Show(Window.GetWindow(this), text, L.X("Elemente neanalizate", "Items not analysed", "Elementos sin analizar"), MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }

@@ -25,13 +25,13 @@ public static class DiskScanEngine
     public enum ScanStatus { Complete, Cancelled, RootUnavailable }
     public enum IncrementalMode { Verified, StructureOnly }
 
-    public sealed record ScanOutcome(ScanStatus Status, int AccessErrors)
+    public sealed record ScanOutcome(ScanStatus Status, int AccessErrors, IReadOnlyList<string>? AccessSamples = null)
     {
         public bool IsCleanAndComplete => Status == ScanStatus.Complete && AccessErrors == 0;
     }
 
     private sealed record Entry(string Name, string Path, bool IsDirectory, long Size, long Allocated, long MTimeTicks, bool CloudOnly);
-    private sealed record Listing(List<Entry> Entries, long DirMTimeTicks, int Errors);
+    private sealed record Listing(List<Entry> Entries, long DirMTimeTicks, int Errors, List<string>? ErrorPaths = null);
 
     private sealed class ProgressCounter
     {
@@ -41,7 +41,9 @@ public static class DiskScanEngine
         private DateTime _lastReportedAt = DateTime.UtcNow;
         public Progress Snapshot { get { lock (_lock) return new Progress { FilesIndexed = _files, BytesIndexed = _bytes, AccessErrors = _errors }; } }
         public int AccessErrors { get { lock (_lock) return _errors; } }
-        public void NoteError(int n = 1) { lock (_lock) _errors += n; }
+        private readonly List<string> _samples = new();
+        public IReadOnlyList<string> Samples { get { lock (_lock) return _samples.ToList(); } }
+        public void NoteError(int n = 1, IEnumerable<string>? paths = null) { lock (_lock) { _errors += n; if (paths is not null) foreach (var p in paths) if (_samples.Count < 400) _samples.Add(p); } }
         public void Add(int files, long bytes, Action<Progress> onProgress)
         {
             Progress? snap = null;
@@ -81,15 +83,15 @@ public static class DiskScanEngine
         op.End(status.ToString(), status == ScanStatus.Complete ? "info" : "warning", fields: new Dictionary<string, string>
         { ["files"] = snap.FilesIndexed.ToString(), ["bytes"] = snap.BytesIndexed.ToString(), ["accessErrors"] = snap.AccessErrors.ToString() });
         onProgress(snap);
-        return (rootNode, new ScanOutcome(status, snap.AccessErrors));
+        return (rootNode, new ScanOutcome(status, snap.AccessErrors, counter.Samples));
     }
 
     private static void Populate(DiskNode node, ProgressCounter counter, Action<Progress> onProgress, bool parallel, CancellationToken ct)
     {
         if (ct.IsCancellationRequested) return;
         var listing = List(node.Path);
-        if (listing is null) { counter.NoteError(); return; }
-        counter.NoteError(listing.Errors);
+        if (listing is null) { counter.NoteError(1, new[] { node.Path }); return; }
+        counter.NoteError(listing.Errors, listing.ErrorPaths);
         node.DirectoryModifiedAtTicks = listing.DirMTimeTicks;
         ApplyFiles(listing, node);
         ReportFiles(listing, counter, onProgress);
@@ -130,7 +132,7 @@ public static class DiskScanEngine
         op.End(status.ToString(), status == ScanStatus.Complete ? "info" : "warning", fields: new Dictionary<string, string>
         { ["changedFiles"] = snap.FilesIndexed.ToString(), ["accessErrors"] = snap.AccessErrors.ToString(), ["mode"] = mode.ToString() });
         onProgress(snap);
-        return (cachedRoot, new ScanOutcome(status, snap.AccessErrors));
+        return (cachedRoot, new ScanOutcome(status, snap.AccessErrors, counter.Samples));
     }
 
     private static void Refresh(DiskNode node, IncrementalMode mode, ProgressCounter counter, Action<Progress> onProgress, bool parallel, CancellationToken ct)
@@ -146,8 +148,8 @@ public static class DiskScanEngine
         }
 
         var listing = List(node.Path);
-        if (listing is null) { counter.NoteError(); return; }   // inaccesibil acum: pastram subarborele din cache
-        counter.NoteError(listing.Errors);
+        if (listing is null) { counter.NoteError(1, new[] { node.Path }); return; }   // inaccesibil acum: pastram subarborele din cache
+        counter.NoteError(listing.Errors, listing.ErrorPaths);
         node.DirectoryModifiedAtTicks = listing.DirMTimeTicks;
 
         if (Fingerprint(listing.Entries) != node.FilesFingerprint)
@@ -254,7 +256,7 @@ public static class DiskScanEngine
         try
         {
             var entries = new List<Entry>();
-            int errors = 0;
+            int errors = 0; var errorPaths = new List<string>();
             var dir = new DirectoryInfo(path);
             foreach (var fsi in dir.EnumerateFileSystemInfos())
             {
@@ -277,9 +279,9 @@ public static class DiskScanEngine
                         entries.Add(new Entry(fsi.Name, fsi.FullName, false, fi.Length, alloc, fi.LastWriteTimeUtc.Ticks, cloud));
                     }
                 }
-                catch { errors++; }
+                catch { errors++; if (errorPaths.Count < 20) errorPaths.Add(System.IO.Path.Combine(path, fsi.Name)); }
             }
-            return new Listing(entries, SafeMTime(path), errors);
+            return new Listing(entries, SafeMTime(path), errors, errorPaths);
         }
         catch { return null; }
     }

@@ -10,6 +10,8 @@ public static class DemoHooks
     public static string? Theme => Get("MCSP_DEMO_THEME");
     /// Machine ID sintetic in materialele demonstrative (capturile publice nu contin identificatorul real).
     public static string DisplayMachineId => Language is not null ? "DEMO-0000-0000" : MachineID.Display;
+    /// Verificare automata (profil izolat): in loc sa deschida WhatsApp, adresa conversatiei se scrie in acest fisier; nu se trimite nimic.
+    public static string? WhatsAppSink => Get("MCSP_DEMO_WA_SINK");
     public static string? ScanPath => Get("MCSP_DEMO_SCAN_PATH");
     public static string? Page => Get("MCSP_DEMO_PAGE");
 }

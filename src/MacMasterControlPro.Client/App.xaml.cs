@@ -42,6 +42,19 @@ public partial class App : Application
         Environment.CurrentDirectory = AppContext.BaseDirectory;
 
         DiagnosticLog.Write("App", "OnStartup: pornire aplicatie.");
+        PrivilegedPlan.Approver = (labels, title) =>
+        {
+            // Verificare automata (profil izolat cu MCSP_DEMO_ELEVATION): planul se aproba fara fereastra; doar promptul UAC e inlocuit de stub.
+            if (MacMasterControlPro.Core.Services.AppProfile.IsIsolated && (Environment.GetEnvironmentVariable("MCSP_DEMO_ELEVATION") is "ok" or "cancel")) return true;
+            return Dispatcher.Invoke(() =>
+            {
+                var shown = labels.Take(10).Select(l => "• " + (l.Contains('#') ? l[..l.LastIndexOf('#')] : l));
+                var more = labels.Count > 10 ? "\n" + string.Format(L.X("… și încă {0}", "… and {0} more", "… y {0} más"), labels.Count - 10) : "";
+                var text = string.Format(L.X("{0} elemente cer drepturi de administrator:", "{0} items need administrator rights:", "{0} elementos requieren derechos de administrador:"), labels.Count) + "\n\n" + string.Join("\n", shown) + more + "\n\n" +
+                    L.X("Windows va cere confirmarea UAC o SINGURĂ dată pentru acest plan. Nimic nu rămâne autorizat după el. Dacă anulezi, nu se modifică nimic.", "Windows will ask for UAC confirmation ONCE for this plan. Nothing stays authorised afterwards. If you cancel, nothing is changed.", "Windows pedirá la confirmación de UAC UNA sola vez para este plan. Nada queda autorizado después. Si cancelas, no se modifica nada.");
+                return System.Windows.MessageBox.Show(MainWindow, text, title, MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK;
+            });
+        };
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
             DiagnosticLog.Write("App", $"UnhandledException (fatal): {DiagnosticLog.Describe(args.ExceptionObject as Exception ?? new Exception("necunoscuta"))}");

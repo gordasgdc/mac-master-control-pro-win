@@ -148,9 +148,12 @@ public static class DuplicateFinderService
     /// de sistem - vezi comentariul din PrivilegedFileOps.cs.
     public static void Delete(IEnumerable<DuplicateFile> files, Action<string> log)
     {
-        foreach (var file in files)
+        var list = files.ToList();
+        var batch = PrivilegedFileOps.DeleteBatch(list.Select(f => f.Path));
+        if (batch.Cancelled) log(CoreL.X("Anulat: nu s-a cerut nicio altă autorizare; elementele care cer drepturi de administrator nu au fost modificate.", "Cancelled: no further authorisation was requested; items that need administrator rights were not changed.", "Cancelado: no se pidió ninguna otra autorización; los elementos que requieren derechos de administrador no se modificaron."));
+        foreach (var file in list)
         {
-            var error = PrivilegedFileOps.Delete(file.Path);
+            var error = batch.Results[file.Path];
             log(error is null
                 ? CoreL.X($"Mutat/șters ({file.SizeDescription}): {file.Path}", $"Moved/deleted ({file.SizeDescription}): {file.Path}", $"Movido o eliminado ({file.SizeDescription}): {file.Path}")
                 : CoreL.X($"EROARE, nu s-a putut șterge {file.Path}: {error}", $"ERROR, could not delete {file.Path}: {error}", $"ERROR, no se pudo eliminar {file.Path}: {error}"));

@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Linq;
+using System.Windows.Media;
 using System.Windows;
 using System.Windows.Controls;
 using MacMasterControlPro.Core.Services;
@@ -10,6 +12,11 @@ namespace MacMasterControlPro.Client;
 public partial class AccessGateWindow : Window
 {
     private static System.Globalization.CultureInfo Culture => new(L.X("ro-RO", "en-GB", "es-ES"));
+    /// Oferta aleasă (id + versiune din lista semnată). Niciodată aleasă implicit; dacă lista se schimbă și perechea nu mai e validă, se cere o nouă alegere.
+    private static (string Id, int Version)? _selected;
+    private string? _notice;
+    private static bool CanRequest(IAccessProvider p) => !p.IsOfficialEdition || _selected is not null;
+
     public AccessGateWindow()
     {
         InitializeComponent();
@@ -40,18 +47,42 @@ public partial class AccessGateWindow : Window
                 break;
         }
         OffersPanel.Children.Clear();
-        if (p.Offers.Count > 0)
+        var offers = p.Offers.OrderBy(o => o.SortKey).ThenBy(o => o.Id, StringComparer.Ordinal).ToList();
+        if (_selected is { } sel && !offers.Any(o => o.Id == sel.Id && o.Version == sel.Version))
+        {
+            _selected = null;
+            _notice = L.X("Lista de oferte s-a actualizat. Alege din nou oferta.", "The offer list has been updated. Please choose your offer again.", "La lista de ofertas se ha actualizado. Elige de nuevo tu oferta.");
+        }
+        if (offers.Count > 0)
         {
             OffersPanel.Children.Add(new TextBlock { Text = L.X("Susține proiectul printr-o donație și primești licență:", "Support the project with a donation and receive a licence:", "Apoya el proyecto con una donación y recibe una licencia:"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
-            foreach (var o in p.Offers)
+            foreach (var o in offers)
             {
-                var g = new Grid { Margin = new Thickness(0, 0, 0, 4) };
-                g.ColumnDefinitions.Add(new ColumnDefinition()); g.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-                g.Children.Add(new TextBlock { Text = o.Title });
-                var amt = new TextBlock { Text = o.AmountText, FontWeight = FontWeights.SemiBold }; Grid.SetColumn(amt, 1); g.Children.Add(amt);
-                OffersPanel.Children.Add(g);
+                var offer = o;
+                var isSel = _selected is { } s0 && s0.Id == offer.Id && s0.Version == offer.Version;
+                var row = new Grid();
+                row.ColumnDefinitions.Add(new ColumnDefinition()); row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                row.Children.Add(new TextBlock { Text = offer.Title, VerticalAlignment = VerticalAlignment.Center });
+                var amt = new TextBlock { Text = offer.AmountText, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center }; Grid.SetColumn(amt, 1); row.Children.Add(amt);
+                var radio = new RadioButton { GroupName = "offers", IsChecked = isSel, Content = row, HorizontalAlignment = HorizontalAlignment.Stretch, HorizontalContentAlignment = HorizontalAlignment.Stretch, Padding = new Thickness(8, 8, 10, 8), Background = Brushes.Transparent, Cursor = System.Windows.Input.Cursors.Hand };
+                System.Windows.Automation.AutomationProperties.SetName(radio, $"{offer.Title}, {offer.AmountText}");
+                radio.Checked += (_, _) => { if (_selected is not { } cur || cur.Id != offer.Id || cur.Version != offer.Version) { _selected = (offer.Id, offer.Version); _notice = null; Render(); } };
+                var border = new Border { Margin = new Thickness(0, 0, 0, 6), CornerRadius = new CornerRadius(10), BorderThickness = new Thickness(isSel ? 1.5 : 1), Child = radio };
+                border.SetResourceReference(Border.BorderBrushProperty, isSel ? "AccentFillColorDefaultBrush" : "CardStrokeBrush");
+                border.SetResourceReference(Border.BackgroundProperty, "CardBackgroundBrush");
+                if (isSel) { border.Background = new SolidColorBrush(Color.FromArgb(36, 0xD0, 0x8A, 0x3C)); }
+                OffersPanel.Children.Add(border);
             }
+            var hint = new TextBlock { FontSize = 12, Margin = new Thickness(0, 2, 0, 0) };
+            hint.SetResourceReference(TextBlock.ForegroundProperty, _notice is null ? "TextSecondaryBrush" : "StatusWarningBrush");
+            hint.Text = _notice ?? (_selected is null ? L.X("Alege o ofertă", "Choose an offer", "Elige una oferta") : "");
+            OffersPanel.Children.Add(hint);
         }
+        else if (p.IsOfficialEdition && !p.Mode.IsFull)
+        {
+            OffersPanel.Children.Add(new TextBlock { Text = L.X("Ofertele nu sunt disponibile acum. Verifică conexiunea la internet și încearcă din nou.", "Offers are not available right now. Check your internet connection and try again.", "Las ofertas no están disponibles ahora. Comprueba tu conexión a internet e inténtalo de nuevo."), TextWrapping = TextWrapping.Wrap, FontSize = 12, Margin = new Thickness(0, 0, 0, 6) });
+        }
+        RequestButton.IsEnabled = CanRequest(p); CopyRequestButton.IsEnabled = CanRequest(p);
         LicensePanel.Visibility = p.Mode.IsFull ? Visibility.Collapsed : Visibility.Visible;
         RequestButton.Content = L.X("Cere o licență", "Request a licence", "Solicitar una licencia");
         PageButton.Content = L.X("Deschide pagina produsului", "Open the product page", "Abrir la página del producto");
@@ -62,11 +93,33 @@ public partial class AccessGateWindow : Window
         EditionText.Text = p.IsOfficialEdition ? L.X("Ediție oficială GDC", "Official GDC edition", "Edición oficial de GDC") : L.X("Ediție comunitară (cod sursă MIT)", "Community edition (MIT source code)", "Edición comunitaria (código fuente MIT)");
     }
 
-    private void OnRequestClicked(object sender, RoutedEventArgs e) =>
-        Process.Start(new ProcessStartInfo(WhatsAppLink.Url(LicenseManager.Shared.Provider.ActivationRequestText())) { UseShellExecute = true });
+    private static (string Key, string Text)? _cachedRequest;
+    /// Același text pentru „Cere o licență” și „Copiază cererea”: generat o dată per ofertă aleasă și limbă (identificatorul cererii și nonce-ul nu se schimbă între cele două acțiuni).
+    private static string RequestText()
+    {
+        var key = $"{_selected?.Id ?? "-"}|{_selected?.Version ?? 0}|{CoreL.Code}";
+        if (_cachedRequest is { } c && c.Key == key) return c.Text;
+        var t = LicenseManager.Shared.Provider.ActivationRequestText(_selected?.Id); _cachedRequest = (key, t); return t;
+    }
+
+    /// Deschide conversația WhatsApp cu mesajul pregătit; utilizatorul decide trimiterea. Dacă nu se poate deschide, cererea se copiază.
+    private void OnRequestClicked(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var url = WhatsAppLink.Url(RequestText());
+            if (DemoHooks.WhatsAppSink is { } sink) { System.IO.File.WriteAllText(sink, url); return; }
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+        }
+        catch
+        {
+            try { Clipboard.SetText(RequestText()); } catch { }
+            MessageText.Text = L.X("WhatsApp nu a putut fi deschis. Cererea a fost copiată: o poți trimite manual.", "WhatsApp could not be opened. The request was copied: you can send it manually.", "No se pudo abrir WhatsApp. La solicitud se ha copiado: puedes enviarla manualmente.");
+        }
+    }
     private void OnPageClicked(object sender, RoutedEventArgs e) =>
         Process.Start(new ProcessStartInfo("https://gordas.dev/mac-master-control-pro/") { UseShellExecute = true });
-    private void OnCopyRequest(object sender, RoutedEventArgs e) => Clipboard.SetText(LicenseManager.Shared.Provider.ActivationRequestText());
+    private void OnCopyRequest(object sender, RoutedEventArgs e) { Clipboard.SetText(RequestText()); MessageText.Text = L.X("Cererea a fost copiată.", "The request was copied.", "La solicitud se ha copiado."); }
     private void OnCopyMachineId(object sender, RoutedEventArgs e) => Clipboard.SetText(DemoHooks.DisplayMachineId);
     private async void OnApplyClicked(object sender, RoutedEventArgs e)
     {

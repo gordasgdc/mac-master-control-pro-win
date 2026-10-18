@@ -29,35 +29,63 @@ public static class PrivilegedRunner
     /// elevata (inclusiv mesaje de eroare native, ex. "sc" raportand ca un
     /// serviciu era deja oprit) - cablat direct in panoul „Terminal Live"
     /// de apelanti (vezi RenderModeService/LoginItemsService).
-    public static bool Run(string command, Action<string>? onOutput = null)
+    public sealed record RunResult(bool Completed, bool Cancelled, IReadOnlyList<string> Lines);
+
+    /// Numărul de solicitări de autorizare (prompturi UAC) lansate de această sesiune. Folosit la verificare și în jurnal.
+    public static int PromptCount => _promptCount;
+    private static int _promptCount;
+
+    /// Verificare automată (DOAR profil izolat, `MCSP_DEMO_ELEVATION=ok|cancel`): fără UAC real; numără solicitările și, pentru `ok`, rulează comanda cu drepturile utilizatorului pe fixture-uri.
+    private static string? StubMode
     {
+        get
+        {
+            if (!AppProfile.IsIsolated) return null;
+            var v = Environment.GetEnvironmentVariable("MCSP_DEMO_ELEVATION");
+            return v is "ok" or "cancel" ? v : null;
+        }
+    }
+
+    public static bool Run(string command, Action<string>? onOutput = null, string reason = "")
+    {
+        var r = RunDetailed(command, reason);
+        foreach (var l in r.Lines) onOutput?.Invoke(l);
+        if (r.Cancelled) onOutput?.Invoke("✘ Promptul UAC a fost respins.");
+        return r.Completed;
+    }
+
+    public static RunResult RunDetailed(string command, string reason = "")
+    {
+        var n = System.Threading.Interlocked.Increment(ref _promptCount);
+        DiagnosticLog.Log("info", "privilege", "prompt", $"#{n} {reason}");
         var logPath = Path.Combine(Path.GetTempPath(), $"mmcp-elevated-{Guid.NewGuid():N}.log");
-        // try/catch prinde erorile TERMINATOARE PowerShell (ex. cmdlet-uri
-        // native gresit scrise) - comenzile externe (sc.exe) care esueaza
-        // cu cod de iesire nenul NU arunca aici, dar mesajul lor de eroare
-        // tot ajunge in log prin `*>` (redirecteaza si stdout si stderr).
+        // try/catch prinde erorile TERMINATOARE PowerShell; comenzile externe care esueaza cu cod nenul nu arunca, dar mesajul lor ajunge in log prin `*>`.
         var wrapped = $"try {{ {command} }} catch {{ Write-Output \"MMCP_ERROR: $($_.Exception.Message)\" }}; Write-Output 'MMCP_DONE'";
         var escaped = wrapped.Replace("\"", "\\\"");
+        var stub = StubMode;
+        if (stub is not null)
+        {
+            try { File.AppendAllText(Path.Combine(AppProfile.Local("MacMasterControlPro"), "elevation-prompts.log"), $"prompt #{n} {stub} {reason}{Environment.NewLine}"); } catch { }
+            if (stub == "cancel") return new RunResult(false, true, Array.Empty<string>());
+        }
         var psi = new ProcessStartInfo
         {
             FileName = "powershell.exe",
             Arguments = $"-NoProfile -Command \"{escaped} *> '{logPath}'\"",
             UseShellExecute = true,
-            Verb = "runas", // declanseaza promptul UAC nativ
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden,
         };
+        if (stub is null) psi.Verb = "runas";   // declanseaza promptul UAC nativ
         try
         {
             using var process = Process.Start(psi);
             process?.WaitForExit();
         }
-        catch (System.ComponentModel.Win32Exception)
+        catch (System.ComponentModel.Win32Exception e)
         {
-            // Userul a respins promptul UAC, sau elevarea a esuat la nivel
-            // de sistem - fara log de citit in acest caz.
-            onOutput?.Invoke("✘ Promptul UAC a fost respins.");
-            return false;
+            // 1223 = ERROR_CANCELLED: utilizatorul a refuzat promptul UAC. Planul se opreste, nu se mai cere nimic.
+            return new RunResult(false, e.NativeErrorCode == 1223, Array.Empty<string>());
         }
 
         string[] lines;
@@ -65,18 +93,8 @@ public static class PrivilegedRunner
         catch { lines = Array.Empty<string>(); }
         finally { try { if (File.Exists(logPath)) File.Delete(logPath); } catch { /* ignora */ } }
 
-        foreach (var line in lines)
-        {
-            var trimmed = line.Trim();
-            if (trimmed.Length == 0 || trimmed == "MMCP_DONE") continue;
-            onOutput?.Invoke(trimmed);
-        }
-
-        // "Completat" = scriptul a rulat pana la capat (marker gasit),
-        // indiferent daca vreo comanda externa individuala a raportat un
-        // cod de iesire nenul benign (ex. "sc stop" pe un serviciu deja
-        // oprit) - acele mesaje sunt deja vizibile mai sus, in log.
-        return lines.Any(l => l.Trim() == "MMCP_DONE");
+        var trimmed = lines.Select(l => l.Trim()).Where(l => l.Length > 0 && l != "MMCP_DONE").ToList();
+        return new RunResult(lines.Any(l => l.Trim() == "MMCP_DONE"), false, trimmed);
     }
 
     public static bool Run(IEnumerable<string> commands, Action<string>? onOutput = null) =>

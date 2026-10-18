@@ -15,7 +15,8 @@ public abstract record AccessMode
 }
 
 /// O ofertă de donație afișată utilizatorului; valorile vin din lista semnată (ediția oficială). Ediția comunitară nu afișează sume.
-public sealed record OfferSummary(string Id, string Title, string AmountText);
+/// `Version` = versiunea ofertei din lista semnată (selecția e valabilă doar pentru perechea id+versiune); `SortKey` = durata, pentru ordinea firească (o lună, trei luni, un an).
+public sealed record OfferSummary(string Id, string Title, string AmountText, int Version = 0, int SortKey = 0);
 
 /// Granița dintre aplicația publică (MIT) și componentele comerciale GDC. Ediția oficială furnizează o implementare legată la
 /// core-ul privat în build-ul oficial; fără ea, aplicația rulează cu `CommunityAccess`.
@@ -24,7 +25,8 @@ public interface IAccessProvider
     AccessMode Mode { get; }
     IReadOnlyList<OfferSummary> Offers { get; }
     bool IsOfficialEdition { get; }
-    string ActivationRequestText();
+    /// `offerId` = oferta aleasă de utilizator (ediția oficială o cere; cea comunitară nu are oferte).
+    string ActivationRequestText(string? offerId);
     /// Aplică o licență lipită de utilizator. Întoarce mesajul de eroare sau null la succes.
     Task<string?> SubmitLicenseAsync(string text);
     /// Chemat la ~1 Hz; `active` = utilizatorul folosește efectiv o funcție.

@@ -1,5 +1,17 @@
 # Changelog — Master Control Studio Pro (Windows)
 
+## v1.19.1 (2026-10-19) — Oferte selectabile, un singur prompt UAC, spațiu alocat corect
+
+### Added
+- **Oferte selectabile:** în panoul de licență alegi oferta (o lună, trei luni, un an) printr-un control radio; până la alegere, cererea nu poate fi generată. Dacă lista se actualizează și alegerea nu mai e valabilă, ți se cere să alegi din nou.
+- **Cerere completă:** „Cere o licență” și „Copiază cererea” generează același mesaj, în limba interfeței, cu oferta aleasă, platforma, Machine ID și limita de un calculator. WhatsApp se deschide cu mesajul completat (tu decizi trimiterea); dacă nu se poate deschide, cererea se copiază.
+- **Analiză Disc:** mesaj detaliat pentru elementele neanalizate (ce nu a putut fi citit, de ce și ce pas e necesar), fără prompturi UAC.
+
+### Changed
+- **Un singur prompt UAC per acțiune:** ștergerea unei selecții și dezinstalarea mai multor aplicații formează un singur plan, prezentat înainte și autorizat o singură dată. Anularea oprește tot planul; reîmprospătarea interfeței nu declanșează prompturi.
+- **„Ce ocupă spațiul” folosește spațiul alocat pe disc**, nu mărimea logică: fișierele sparse, comprimate sau doar-în-cloud nu mai apar umflate. Mărimea logică rămâne în detalii, cu explicație. Analizele vechi se refac automat.
+- Ilustrația de pe Acasă respectă rotunjirea panoului; panoul de progres al scanării are cardul lui.
+
 ## v1.19.0 (2026-10-18) — Studio Glass, analiză de disc nouă, acces Demo
 
 ### Added
