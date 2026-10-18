@@ -1,0 +1,28 @@
+<Window x:Class="MacMasterControlPro.Client.AccessGateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        Title="Acces" Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        Background="{DynamicResource ApplicationBackgroundBrush}">
+    <StackPanel Margin="26" HorizontalAlignment="Stretch">
+        <TextBlock x:Name="TitleText" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+        <TextBlock x:Name="BodyText" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,8,0,12" />
+        <StackPanel x:Name="OffersPanel" Margin="0,0,0,12" />
+        <StackPanel x:Name="LicensePanel">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <ui:Button x:Name="RequestButton" Appearance="Primary" Click="OnRequestClicked" Margin="0,0,8,0" />
+                <ui:Button x:Name="PageButton" Click="OnPageClicked" Margin="0,0,8,0" />
+                <ui:Button x:Name="CopyIdButton" Click="OnCopyMachineId" />
+            </StackPanel>
+            <Grid Margin="0,0,0,6">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                <ui:TextBox x:Name="KeyBox" />
+                <ui:Button x:Name="ApplyButton" Grid.Column="1" Margin="8,0,0,0" Click="OnApplyClicked" />
+            </Grid>
+            <TextBlock x:Name="MessageText" TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,6" />
+            <TextBlock x:Name="EditionText" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+        </StackPanel>
+        <ui:Button x:Name="CloseButton" HorizontalAlignment="Right" Margin="0,12,0,0" Click="OnCloseClicked" />
+    </StackPanel>
+</Window>

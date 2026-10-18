@@ -21,6 +21,8 @@ public partial class MainWindow
         VersionText.Text = $"v{UpdateChecker.CurrentVersion} Pro";
         RefreshProfile();
         RefreshLicenseBadge();
+        LicenseManager.Shared.Changed += () => Dispatcher.Invoke(RefreshLicenseBadge);
+        MacMasterControlPro.Client.Services.AccessCoordinator.Start();
         MachineIdButton.Content = $"Machine ID: {MachineID.Display[..Math.Min(13, MachineID.Display.Length)]}…";
 
         _dependencyChecker.CheckAll();
@@ -163,15 +165,20 @@ public partial class MainWindow
 
     private void RefreshLicenseBadge()
     {
-        var unlocked = LicenseManager.Shared.IsUnlocked;
-        LicenseBadge.Content = unlocked ? "Pro" : "Trial — Activează";
-        LicenseBadge.Foreground = unlocked ? System.Windows.Media.Brushes.LimeGreen : System.Windows.Media.Brushes.Orange;
+        var mode = LicenseManager.Shared.Mode;
+        LicenseBadge.Content = mode switch
+        {
+            MacMasterControlPro.Core.Services.Access.AccessMode.Full => "Acces complet",
+            MacMasterControlPro.Core.Services.Access.AccessMode.DemoAvailable d => $"Probă {d.RemainingSeconds / 60}:{d.RemainingSeconds % 60:00}",
+            _ => "Probă încheiată",
+        };
+        LicenseBadge.Foreground = mode.IsFull ? System.Windows.Media.Brushes.LimeGreen : mode.AllowsFeatures ? System.Windows.Media.Brushes.Orange : System.Windows.Media.Brushes.OrangeRed;
+        LockedOverlay.Visibility = mode.AllowsFeatures ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private void OnLicenseBadgeClicked(object sender, RoutedEventArgs e)
     {
-        if (LicenseManager.Shared.IsUnlocked) return;
-        var gate = new TrialGateWindow { Owner = this };
+        var gate = new AccessGateWindow { Owner = this };
         if (gate.ShowDialog() == true) RefreshLicenseBadge();
     }
 

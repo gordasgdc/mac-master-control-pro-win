@@ -45,5 +45,20 @@ public static class MachineID
 
     /// String Base32 scurt, lizibil (fara liniute) — ce copiaza userul din
     /// Preferinte -> Licenta si trimite inainte sa cumpere.
-    public static string Display => LicenseCore.Base32Encode(HashBytes);
+    public static string Display => Base32Encode(HashBytes);
+
+    // Base32 RFC 4648 (fara padding), identic cu base64.b32encode din Python: acelasi Machine ID ca inainte.
+    private const string Base32Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+    internal static string Base32Encode(ReadOnlySpan<byte> data)
+    {
+        int bits = 0, value = 0;
+        var output = new StringBuilder();
+        foreach (var b in data)
+        {
+            value = (value << 8) | b; bits += 8;
+            while (bits >= 5) { output.Append(Base32Alphabet[(value >> (bits - 5)) & 0x1F]); bits -= 5; }
+        }
+        if (bits > 0) output.Append(Base32Alphabet[(value << (5 - bits)) & 0x1F]);
+        return output.ToString();
+    }
 }

@@ -189,5 +189,34 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
     Check("iconuri: folder (inclusiv personalizat) rezolvat", folder is not null);
 }
 
+// ---- Acces: Demo 10 min / 48 h, ceas, stare falsificată, profil ----
+{
+    var t0 = new DateTimeOffset(2027, 1, 15, 12, 0, 0, TimeSpan.Zero); var clock = t0;
+    MacMasterControlPro.Core.Services.Access.CommunityAccess Make(string acct) => new(acct, () => clock);
+    void Run(MacMasterControlPro.Core.Services.Access.CommunityAccess a, int sec, bool active = true) { for (int i = 0; i < sec; i++) { clock = clock.AddSeconds(1); a.Tick(active); } }
+    var acct = "selftest-demo-" + Guid.NewGuid().ToString("N")[..6];
+    var a = Make(acct); a.Tick(true);
+    Run(a, 300, false);
+    Check("acces: inactivitatea nu consuma", a.Mode is MacMasterControlPro.Core.Services.Access.AccessMode.DemoAvailable { RemainingSeconds: 600 });
+    Run(a, 610);
+    Check("acces: blocat dupa 600 s de utilizare activa", a.Mode is MacMasterControlPro.Core.Services.Access.AccessMode.DemoLocked);
+    var next = ((MacMasterControlPro.Core.Services.Access.AccessMode.DemoLocked)a.Mode).Next;
+    Check("acces: urmatoarea sesiune la exact 48 h", Math.Abs((next - clock).TotalSeconds - 172800) < 15, next.ToString());
+    clock = clock.AddSeconds(-200000); a.Tick(false);
+    Check("acces: ceasul dat inapoi nu deblocheaza", !a.Mode.AllowsFeatures);
+    clock = t0.AddDays(10); a.Tick(true);
+    Check("acces: dupa 48 h sesiune noua", a.Mode.AllowsFeatures);
+    var b = Make(acct); Check("acces: starea supravietuieste repornirii", b.Mode.AllowsFeatures);
+    var bad = "selftest-demo-" + Guid.NewGuid().ToString("N")[..6]; SecretStore.Set(bad, Convert.ToBase64String(new byte[80]));
+    Check("acces: stare falsificata => epuizat", !Make(bad).Mode.AllowsFeatures);
+    var roam = Tmp("roam"); var local = Tmp("local");
+    File.WriteAllText(Path.Combine(roam, "RenderModeSnapshot.json"), "{}"); File.WriteAllText(Path.Combine(roam, "settings.json"), "x");
+    Directory.CreateDirectory(Path.Combine(local, "DiskCache")); File.WriteAllText(Path.Combine(local, "DiskCache", "a.json"), "x");
+    MacMasterControlPro.Core.Services.Access.DemoProfile.Wipe(roam, local);
+    Check("acces: profilul de proba e sters, snapshotul Modului Randare ramane",
+        !File.Exists(Path.Combine(roam, "settings.json")) && File.Exists(Path.Combine(roam, "RenderModeSnapshot.json")) && !Directory.Exists(Path.Combine(local, "DiskCache")));
+    Check("machine id: 10 caractere Base32", MachineID.Display.Length == 10 && MachineID.Display.All(c => char.IsAsciiLetterUpper(c) || (c >= '2' && c <= '7')), MachineID.Display);
+}
+
 Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
 return fail == 0 ? 0 : 1;

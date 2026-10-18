@@ -64,7 +64,7 @@ public partial class NetworkPage : UserControl
     {
         if (!LicenseManager.Shared.IsUnlocked)
         {
-            var gate = new TrialGateWindow { Owner = Window.GetWindow(this) };
+            var gate = new AccessGateWindow { Owner = Window.GetWindow(this) };
             if (gate.ShowDialog() != true) return;
         }
         var ok = _service.ApplyTuning(_selected);

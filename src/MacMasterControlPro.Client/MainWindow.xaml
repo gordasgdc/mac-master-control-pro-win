@@ -129,6 +129,16 @@
 
             <!-- Continut modul curent -->
             <ContentControl x:Name="PageHost" Grid.Column="1" Margin="24" />
+            <Border x:Name="LockedOverlay" Grid.ColumnSpan="2" Visibility="Collapsed" Background="#CC101418">
+                <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="28" CornerRadius="14" MaxWidth="520"
+                        Background="{DynamicResource ApplicationBackgroundBrush}">
+                    <StackPanel>
+                        <TextBlock Text="Sesiunea de probă s-a încheiat" FontSize="20" FontWeight="Bold" />
+                        <TextBlock Text="Aplicația rămâne deschisă. Următoarea sesiune de probă (10 minute de utilizare activă) devine disponibilă la 48 de ore după epuizare; în probă, setările și cache-urile nu se păstrează." TextWrapping="Wrap" Margin="0,8,0,14" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ui:Button Content="Detalii și licență" Appearance="Primary" Click="OnLicenseBadgeClicked" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </Border>
+            </Border>
         </Grid>
     </Grid>
 </ui:FluentWindow>

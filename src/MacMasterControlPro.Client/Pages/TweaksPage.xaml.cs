@@ -139,7 +139,7 @@ public partial class TweaksPage : UserControl
     private bool RequireLicense()
     {
         if (LicenseManager.Shared.IsUnlocked) return true;
-        var gate = new TrialGateWindow { Owner = Window.GetWindow(this) };
+        var gate = new AccessGateWindow { Owner = Window.GetWindow(this) };
         return gate.ShowDialog() == true;
     }
 }
