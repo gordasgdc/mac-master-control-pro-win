@@ -1,61 +1,71 @@
 namespace MacMasterControlPro.Core.Services;
 
-/// "Mod Randare" (2026-08-31, port 1:1 al RenderModeService.swift - Mac) —
-/// elimina cele mai frecvente surse de contentie I/O in timpul unui
-/// export/randare lung: indexarea Windows Search, serviciul de File
-/// History, si prioritatea implicita a procesului DaVinci Resolve.exe.
-/// Revine automat la starea normala la dezactivare.
+/// Mod Randare pe Windows: opreste temporar Windows Search si File History si ridica prioritatea Resolve.
+/// Starea veche se salveaza INAINTE (RenderModeState); dezactivarea o restaureaza exact, inclusiv dupa o inchidere fortata.
 public sealed class RenderModeService
 {
     public bool IsActive { get; private set; }
+    /// Modul era activ la o sesiune anterioara (inchidere fortata/repornire): sistemul poate fi inca modificat.
+    public bool RecoveredFromPreviousSession { get; private set; }
+
+    public RenderModeService()
+    {
+        if (RenderModeState.Load() is not null) { IsActive = true; RecoveredFromPreviousSession = true; }
+    }
+
+    /// Ce ar schimba activarea ACUM, fara sa schimbe nimic.
+    public List<string> PreviewChanges() => RenderModeState.ChangeSummary(RenderModeState.ReadCurrent());
 
     public void Activate(Action<string> log)
     {
-        var commands = new List<string>
-        {
-            "sc config WSearch start= disabled",
-            "sc stop WSearch",
-            "sc stop fhsvc",
-        };
-        var resolveCommand = "Get-Process -Name 'Resolve' -ErrorAction SilentlyContinue | ForEach-Object { $_.PriorityClass = 'High' }";
-        commands.Add(resolveCommand);
+        var snapshot = RenderModeState.ReadCurrent();
+        var commands = RenderModeState.ActivationCommands(snapshot);
+        var op = DiagnosticLog.Begin("render", "activate");
+        foreach (var l in RenderModeState.ChangeSummary(snapshot)) log("• " + l);
+        if (commands.Count == 0) { log("ℹ Nimic de schimbat: tot ce poate face Modul Randare este deja oprit."); op.End("noop"); return; }
+        try { RenderModeState.Save(snapshot); }
+        catch (Exception ex) { log("✘ Nu am putut salva starea curentă, nu modific nimic: " + ex.Message); op.End("snapshot-failed", "error"); return; }
 
         log("$ " + string.Join(" ; ", commands));
         var ok = PrivilegedRunner.Run(commands, line => log("  " + line));
         if (ok)
         {
-            log("✔ Indexare Windows Search oprită.");
-            log("✔ File History pus pe pauză.");
-            log("✔ DaVinci Resolve (dacă rulează) ridicat la prioritate mare.");
             IsActive = true;
-            log("✔ Mod Randare ACTIV.");
+            log("✔ Mod Randare ACTIV. Starea anterioară e salvată; dezactivarea o restaurează exact.");
+            op.End("ok");
         }
         else
         {
-            log("✘ Promptul UAC a fost respins — nicio comandă nu a rulat.");
+            IsActive = true;   // posibil aplicat partial: permite restaurarea
+            log("✘ Promptul UAC a fost respins sau comenzile au eșuat. Starea veche rămâne salvată; dezactivează pentru a readuce orice s-a schimbat parțial.");
+            op.End("failed", "error");
         }
     }
 
     public void Deactivate(Action<string> log)
     {
-        var commands = new List<string>
+        var snapshot = RenderModeState.Load();
+        if (snapshot is null)
         {
-            "sc config WSearch start= delayed-auto",
-            "sc start WSearch",
-            "sc start fhsvc",
-        };
+            log("ℹ Nu există o stare salvată de restaurat. Nu modific Windows Search sau File History.");
+            IsActive = false; RecoveredFromPreviousSession = false; return;
+        }
+        var commands = RenderModeState.RestoreCommands(snapshot);
+        var op = DiagnosticLog.Begin("render", "deactivate");
+        if (commands.Count == 0) { RenderModeState.Clear(); IsActive = false; RecoveredFromPreviousSession = false; log("✔ Nimic de restaurat."); op.End("noop"); return; }
         log("$ " + string.Join(" ; ", commands));
         var ok = PrivilegedRunner.Run(commands, line => log("  " + line));
         if (ok)
         {
-            log("✔ Windows Search reactivat.");
-            log("✔ File History reactivat.");
-            IsActive = false;
-            log("✔ Mod Randare dezactivat — revenit la normal.");
+            RenderModeState.Clear();
+            IsActive = false; RecoveredFromPreviousSession = false;
+            log("✔ Mod Randare dezactivat: s-a restaurat exact starea de dinainte.");
+            op.End("ok");
         }
         else
         {
-            log("✘ Promptul UAC a fost respins — nicio comandă nu a rulat.");
+            log("✘ Restaurarea a eșuat sau UAC a fost respins. Starea salvată a fost păstrată; reîncearcă.");
+            op.End("failed", "error");
         }
     }
 }

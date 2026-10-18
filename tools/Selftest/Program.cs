@@ -157,5 +157,22 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
     }
 }
 
+// ---- Mod Randare (doar logica pura + citire reala; NU modifica servicii) ----
+{
+    var snap = new RenderModeSnapshot();
+    snap.Services["WSearch"] = new ServiceState { StartType = 2, Delayed = true, Running = true };
+    snap.Services["fhsvc"] = new ServiceState { StartType = 3, Running = false };
+    var act = RenderModeState.ActivationCommands(snap); var rst = RenderModeState.RestoreCommands(snap);
+    Check("render: activare atinge doar ce era pornit", act.SequenceEqual(new[] { "sc config WSearch start= disabled", "sc stop WSearch" }), string.Join("|", act));
+    Check("render: restaurare readuce exact modul de pornire (delayed-auto) fara a porni fhsvc", rst.SequenceEqual(new[] { "sc config WSearch start= delayed-auto", "sc start WSearch" }), string.Join("|", rst));
+    var off = new RenderModeSnapshot(); off.Services["WSearch"] = new ServiceState { StartType = 4, Running = false };
+    Check("render: totul deja oprit => nimic de facut / nimic de restaurat", RenderModeState.ActivationCommands(off).Count == 0 && RenderModeState.RestoreCommands(off).Count == 0);
+    var p = Path.Combine(Tmp("rm"), "snap.json"); RenderModeState.Save(snap, p); var back = RenderModeState.Load(p);
+    Check("render: snapshot supravietuieste repornirii (round-trip)", back is not null && back.Services["WSearch"].Delayed && back.Services["WSearch"].StartType == 2);
+    var cur = RenderModeState.ReadCurrent();
+    Check("render: citire reala a starii WSearch/fhsvc", cur.Services.ContainsKey("WSearch"), string.Join(",", cur.Services.Select(kv => kv.Key + ":" + kv.Value.StartType + "/" + kv.Value.Running)));
+    Console.WriteLine("INFO  stare reala: " + string.Join("; ", cur.Services.Select(kv => $"{kv.Key} start={kv.Value.StartType} delayed={kv.Value.Delayed} running={kv.Value.Running}")));
+}
+
 Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
 return fail == 0 ? 0 : 1;
