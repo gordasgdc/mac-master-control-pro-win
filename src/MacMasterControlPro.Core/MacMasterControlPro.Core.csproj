@@ -12,6 +12,8 @@
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
     <!-- WMI pentru MachineID (Win32_ComputerSystemProduct.UUID). -->
     <PackageReference Include="System.Management" Version="8.0.0" />
+    <!-- DPAPI pentru SecretStore (secrete SMTP). -->
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

@@ -38,6 +38,17 @@
             </StackPanel>
         </ui:CardExpander>
 
+        <ui:CardExpander x:Name="DiagCard" IsExpanded="True" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock x:Name="DiagSession" Margin="0,0,0,8" />
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button x:Name="DiagOpenButton" Click="OnDiagOpenFolder" Margin="0,0,8,0" />
+                    <ui:Button x:Name="DiagCopyButton" Click="OnDiagCopySession" Margin="0,0,8,0" />
+                    <ui:Button x:Name="DiagExportButton" Click="OnDiagExport" />
+                </StackPanel>
+            </StackPanel>
+        </ui:CardExpander>
+
         <ui:Button x:Name="GuideButton" Click="OnOpenGuideClicked" />
     </StackPanel>
 </UserControl>

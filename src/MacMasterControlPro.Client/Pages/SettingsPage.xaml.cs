@@ -47,6 +47,11 @@ public partial class SettingsPage : UserControl
         NameBox.PlaceholderText = L.T("settings.name");
         EmailBox.PlaceholderText = L.T("settings.email");
         GuideButton.Content = L.T("settings.guide");
+        DiagCard.Header = L.T("diag.title");
+        DiagSession.Text = L.T("diag.session") + ": " + MacMasterControlPro.Core.Services.DiagnosticLog.SessionId;
+        DiagOpenButton.Content = L.T("diag.open");
+        DiagCopyButton.Content = L.T("diag.copy");
+        DiagExportButton.Content = L.T("diag.export");
     }
 
     private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
@@ -84,6 +89,30 @@ public partial class SettingsPage : UserControl
         UserProfileStore.Name = NameBox.Text;
         UserProfileStore.Email = EmailBox.Text;
         _mainWindow?.RefreshProfile();
+    }
+
+    private void OnDiagOpenFolder(object sender, RoutedEventArgs e)
+    {
+        System.IO.Directory.CreateDirectory(MacMasterControlPro.Core.Services.DiagnosticLog.Directory_);
+        System.Diagnostics.Process.Start("explorer.exe", "\"" + MacMasterControlPro.Core.Services.DiagnosticLog.Directory_ + "\"");
+    }
+
+    private void OnDiagCopySession(object sender, RoutedEventArgs e) =>
+        Clipboard.SetText(MacMasterControlPro.Core.Services.DiagnosticLog.SessionId);
+
+    private void OnDiagExport(object sender, RoutedEventArgs e)
+    {
+        var items = MacMasterControlPro.Core.Services.DiagnosticExport.Preview();
+        var list = string.Join("\n", items.Select(i => $"{i.Name}  ({i.Bytes / 1024.0:0.#} KB)"));
+        if (MessageBox.Show(L.T("diag.previewIntro") + "\n\n" + list, L.T("diag.export"), MessageBoxButton.OKCancel) != MessageBoxResult.OK) return;
+        var dlg = new Microsoft.Win32.OpenFolderDialog();
+        if (dlg.ShowDialog() != true) return;
+        try
+        {
+            var zip = MacMasterControlPro.Core.Services.DiagnosticExport.Export(dlg.FolderName);
+            System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + zip + "\"");
+        }
+        catch (Exception ex) { MessageBox.Show(ex.Message); }
     }
 
     private void OnOpenGuideClicked(object sender, RoutedEventArgs e)

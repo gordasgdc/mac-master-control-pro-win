@@ -6,8 +6,8 @@ namespace MacMasterControlPro.Core.Services;
 
 /// Port 1:1 al EmailNotifierService.swift (Mac) - notificare automata pe
 /// email (WhatsApp NU poate trimite fara click manual, doar email e cu
-/// adevarat automat catre telefon). Stocare LOCALA, in clar (JSON in
-/// AppData) - recomanda explicit in UI o "parola de aplicatie", nu parola
+/// adevarat automat catre telefon). Parola in DPAPI (SecretStore), restul in JSON in
+/// AppData - recomanda explicit in UI o "parola de aplicatie", nu parola
 /// reala a contului.
 public sealed class EmailNotifierSettings
 {
@@ -25,18 +25,40 @@ public static class EmailNotifierService
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "MacMasterControlPro", "EmailNotifierSettings.json");
 
+    private const string PasswordAccount = "smtp.appPassword";
+
+    /// Parola sta in SecretStore (DPAPI); in JSON se salveaza doar restul. Valoarea veche, in clar,
+    /// se migreaza la prima citire si se sterge din fisier.
     public static EmailNotifierSettings Settings
     {
         get
         {
-            if (!File.Exists(StorePath)) return new EmailNotifierSettings();
-            try { return JsonSerializer.Deserialize<EmailNotifierSettings>(File.ReadAllText(StorePath)) ?? new(); }
-            catch { return new(); }
+            EmailNotifierSettings s;
+            try { s = File.Exists(StorePath) ? JsonSerializer.Deserialize<EmailNotifierSettings>(File.ReadAllText(StorePath)) ?? new() : new(); }
+            catch { s = new(); }
+            if (!string.IsNullOrEmpty(s.AppPassword))
+            {
+                if (SecretStore.Set(PasswordAccount, s.AppPassword))
+                {
+                    var scrubbed = JsonSerializer.Serialize(new EmailNotifierSettings
+                    {
+                        Enabled = s.Enabled, SmtpHost = s.SmtpHost, SmtpPort = s.SmtpPort, Username = s.Username, Recipient = s.Recipient,
+                    });
+                    File.WriteAllText(StorePath, scrubbed);
+                    DiagnosticLog.Log("info", "secrets", "smtp.migrated", result: "ok");
+                }
+            }
+            else s.AppPassword = SecretStore.Get(PasswordAccount) ?? "";
+            return s;
         }
         set
         {
+            SecretStore.Set(PasswordAccount, value.AppPassword);
             Directory.CreateDirectory(Path.GetDirectoryName(StorePath)!);
-            File.WriteAllText(StorePath, JsonSerializer.Serialize(value));
+            File.WriteAllText(StorePath, JsonSerializer.Serialize(new EmailNotifierSettings
+            {
+                Enabled = value.Enabled, SmtpHost = value.SmtpHost, SmtpPort = value.SmtpPort, Username = value.Username, Recipient = value.Recipient,
+            }));
         }
     }
 
