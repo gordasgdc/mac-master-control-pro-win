@@ -1,8 +1,9 @@
 <Project>
   <!-- STORAGE_POLICY: bin/obj pe volumul extern cand MCSP_BUILD_ROOT e setata (scripts de dezvoltare); CI/GitHub Actions ramane pe implicit. -->
   <PropertyGroup Condition="'$(MCSP_BUILD_ROOT)' != ''">
-    <BaseIntermediateOutputPath>$(MCSP_BUILD_ROOT)/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
-    <BaseOutputPath>$(MCSP_BUILD_ROOT)/bin/$(MSBuildProjectName)/</BaseOutputPath>
+    <McspProj>$([System.Text.RegularExpressions.Regex]::Replace('$(MSBuildProjectName)', '_[a-z0-9]+_wpftmp$', ''))</McspProj>
+    <BaseIntermediateOutputPath>$(MCSP_BUILD_ROOT)/obj/$(McspProj)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MCSP_BUILD_ROOT)/bin/$(McspProj)/</BaseOutputPath>
     <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 </Project>

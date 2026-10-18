@@ -61,11 +61,11 @@ public partial class MainWindow
     {
         var groups = new (string Title, ListBoxItem[] Items)[]
         {
-            ("Acasă", new[] { ItemDashboard }),
-            ("Spațiu", new[] { ItemDiskAnalyzer, ItemCleanup, ItemDuplicates, ItemUninstaller }),
-            ("Sistem și activitate", new[] { ItemProcessMonitor, ItemLoginItems, ItemDiskHealth, ItemRenderMode, ItemNetwork, ItemSecurity, ItemTweaks, ItemWindowLayouts }),
-            ("Media și Resolve", new[] { ItemResolveTools, ItemCloud }),
-            ("Aplicație", new[] { DependenciesItem, ItemSettings }),
+            (L.X("Acasă","Home","Inicio"), new[] { ItemDashboard }),
+            (L.X("Spațiu","Space","Espacio"), new[] { ItemDiskAnalyzer, ItemCleanup, ItemDuplicates, ItemUninstaller }),
+            (L.X("Sistem și activitate","System & activity","Sistema y actividad"), new[] { ItemProcessMonitor, ItemLoginItems, ItemDiskHealth, ItemRenderMode, ItemNetwork, ItemSecurity, ItemTweaks, ItemWindowLayouts }),
+            (L.X("Media și Resolve","Media & Resolve","Medios y Resolve"), new[] { ItemResolveTools, ItemCloud }),
+            (L.X("Aplicație","App","Aplicación"), new[] { DependenciesItem, ItemSettings }),
         };
         ModuleList.Items.Clear();
         foreach (var (title, items) in groups)
@@ -105,23 +105,23 @@ public partial class MainWindow
 
         // Cerinta directa (2026-09-01): "cand te duci cu mouse-ul peste un
         // buton, sa-ti apara o descriere de ce face".
-        ItemDashboard.ToolTip = "Privire de ansamblu — starea generală a PC-ului dintr-o privire.";
-        ItemRenderMode.ToolTip = "Oprește temporar Windows Search/File History cât randezi în DaVinci Resolve.";
-        ItemLoginItems.ToolTip = "Vezi și oprești aplicațiile care pornesc automat odată cu Windows.";
-        ItemProcessMonitor.ToolTip = "Procesele active acum, sortabile după RAM — închide ce consumă prea mult.";
-        ItemUninstaller.ToolTip = "Dezinstalează complet una sau mai multe aplicații, cu toate urmele lor.";
-        ItemDiskHealth.ToolTip = "Spațiu liber, status SMART și test de viteză pentru discurile montate.";
-        ItemDiskAnalyzer.ToolTip = "Vezi ce ocupă spațiul pe disc, folder cu folder — indexare o singură dată, apoi navigare instantă.";
-        ItemResolveTools.ToolTip = "Notificare la final de randare, verificare Media Pool, sincronizare LUT-uri, backup bază de date.";
-        ItemWindowLayouts.ToolTip = "Salvează și restaurează aranjamentul ferestrelor pe ecran.";
-        ItemNetwork.ToolTip = "Configurare și optimizare rețea, persistentă la repornire.";
-        ItemCloud.ToolTip = "Conectează și gestionează conturi Cloud (Drive, Dropbox, S3 și altele).";
-        ItemCleanup.ToolTip = "Șterge cache-uri recuperabile, fișiere mari uitate, eliberează RAM.";
-        ItemDuplicates.ToolTip = "Găsește fișiere identice ca și conținut și te lasă să alegi ce ștergi.";
-        ItemSecurity.ToolTip = "Verifică setările de securitate ale PC-ului, cu ghid pas-cu-pas pentru ce lipsește.";
-        ItemTweaks.ToolTip = "Ajustări rapide de sistem.";
-        DependenciesItem.ToolTip = "Componentele externe de care aplicația are nevoie — instalare cu un click.";
-        ItemSettings.ToolTip = "Temă, limbă, licență și alte preferințe ale aplicației.";
+        ItemDashboard.ToolTip = L.X("Privire de ansamblu — starea generală a PC-ului dintr-o privire.", "Overview — the general state of your PC at a glance.", "Resumen: el estado general del equipo de un vistazo.");
+        ItemRenderMode.ToolTip = L.X("Oprește temporar Windows Search/File History cât randezi în DaVinci Resolve.", "Temporarily pauses Windows Search/File History while you render in DaVinci Resolve.", "Pausa temporalmente Windows Search/Historial de archivos mientras renderizas en DaVinci Resolve.");
+        ItemLoginItems.ToolTip = L.X("Vezi și oprești aplicațiile care pornesc automat odată cu Windows.", "See and stop apps that start automatically with Windows.", "Consulta y detén las apps que se inician con Windows.");
+        ItemProcessMonitor.ToolTip = L.X("Procesele active acum, sortabile după RAM — închide ce consumă prea mult.", "Running processes, sortable by RAM — close what uses too much.", "Procesos activos, ordenables por RAM: cierra lo que consume demasiado.");
+        ItemUninstaller.ToolTip = L.X("Dezinstalează complet una sau mai multe aplicații, cu toate urmele lor.", "Fully uninstall one or more apps, leftovers included.", "Desinstala por completo una o varias apps, con todos sus restos.");
+        ItemDiskHealth.ToolTip = L.X("Spațiu liber, status SMART și test de viteză pentru discurile montate.", "Free space, SMART status and speed test for mounted drives.", "Espacio libre, estado SMART y prueba de velocidad de las unidades.");
+        ItemDiskAnalyzer.ToolTip = L.X("Vezi ce ocupă spațiul pe disc, folder cu folder — indexare o singură dată, apoi navigare instantă.", "See what uses disk space, folder by folder — index once, then browse instantly.", "Mira qué ocupa espacio en el disco, carpeta por carpeta: se indexa una vez y luego navegas al instante.");
+        ItemResolveTools.ToolTip = L.X("Notificare la final de randare, verificare Media Pool, sincronizare LUT-uri, backup bază de date.", "Render-finished notification, Media Pool check, LUT sync, database backup.", "Aviso al terminar el render, revisión del Media Pool, sincronización de LUT y copia de la base de datos.");
+        ItemWindowLayouts.ToolTip = L.X("Salvează și restaurează aranjamentul ferestrelor pe ecran.", "Save and restore your window arrangement.", "Guarda y restaura la disposición de las ventanas.");
+        ItemNetwork.ToolTip = L.X("Configurare și optimizare rețea, persistentă la repornire.", "Network setup and tuning that persists across restarts.", "Configuración y optimización de red que persiste tras reiniciar.");
+        ItemCloud.ToolTip = L.X("Conectează și gestionează conturi Cloud (Drive, Dropbox, S3 și altele).", "Connect and manage cloud accounts (Drive, Dropbox, S3 and more).", "Conecta y gestiona cuentas en la nube (Drive, Dropbox, S3 y más).");
+        ItemCleanup.ToolTip = L.X("Șterge cache-uri recuperabile, fișiere mari uitate, eliberează RAM.", "Clear recoverable caches and forgotten large files, free RAM.", "Elimina cachés recuperables y archivos grandes olvidados, libera RAM.");
+        ItemDuplicates.ToolTip = L.X("Găsește fișiere identice ca și conținut și te lasă să alegi ce ștergi.", "Find files with identical content and choose what to remove.", "Encuentra archivos con contenido idéntico y elige qué eliminar.");
+        ItemSecurity.ToolTip = L.X("Verifică setările de securitate ale PC-ului, cu ghid pas-cu-pas pentru ce lipsește.", "Check your PC's security settings, with step-by-step guidance for what is missing.", "Revisa los ajustes de seguridad del equipo, con una guía paso a paso de lo que falta.");
+        ItemTweaks.ToolTip = L.X("Ajustări rapide de sistem.", "Quick system tweaks.", "Ajustes rápidos del sistema.");
+        DependenciesItem.ToolTip = L.X("Componentele externe de care aplicația are nevoie — instalare cu un click.", "External components the app needs — one-click install.", "Componentes externos que necesita la app: instalación con un clic.");
+        ItemSettings.ToolTip = L.X("Temă, limbă, licență și alte preferințe ale aplicației.", "Theme, language, licence and other app preferences.", "Tema, idioma, licencia y otras preferencias de la app.");
     }
 
     /// Cuvinte-cheie suplimentare de cautare, pe langa nume/tooltip -
@@ -210,8 +210,8 @@ public partial class MainWindow
         LicenseBadge.Content = mode switch
         {
             MacMasterControlPro.Core.Services.Access.AccessMode.Full => "Acces complet",
-            MacMasterControlPro.Core.Services.Access.AccessMode.DemoAvailable d => $"Probă {d.RemainingSeconds / 60}:{d.RemainingSeconds % 60:00}",
-            _ => "Probă încheiată",
+            MacMasterControlPro.Core.Services.Access.AccessMode.DemoAvailable d => $"{L.X("Probă", "Trial", "Prueba")} {d.RemainingSeconds / 60}:{d.RemainingSeconds % 60:00}",
+            _ => L.X("Probă încheiată", "Trial ended", "Prueba finalizada"),
         };
         LicenseBadge.Foreground = mode.IsFull ? System.Windows.Media.Brushes.LimeGreen : mode.AllowsFeatures ? System.Windows.Media.Brushes.Orange : System.Windows.Media.Brushes.OrangeRed;
         LockedOverlay.Visibility = mode.AllowsFeatures ? Visibility.Collapsed : Visibility.Visible;
@@ -244,8 +244,8 @@ public partial class MainWindow
             {
                 await new Wpf.Ui.Controls.MessageBox
                 {
-                    Title = "Ești la zi",
-                    Content = $"Rulezi deja ultima versiune ({UpdateChecker.CurrentVersion}).",
+                    Title = L.X("Ești la zi", "You are up to date", "Estás al día"),
+                    Content = string.Format(L.X("Rulezi deja ultima versiune ({0}).", "You are already running the latest version ({0}).", "Ya usas la última versión ({0})."), UpdateChecker.CurrentVersion),
                 }.ShowDialogAsync();
             }
             return;
@@ -254,10 +254,10 @@ public partial class MainWindow
 
         var box = new Wpf.Ui.Controls.MessageBox
         {
-            Title = "Este disponibilă o versiune nouă",
-            Content = $"Master Control Studio Pro {version} este disponibil (tu ai {UpdateChecker.CurrentVersion}).",
-            PrimaryButtonText = "Actualizează acum",
-            CloseButtonText = "Mai târziu",
+            Title = L.X("Este disponibilă o versiune nouă", "A new version is available", "Hay una versión nueva disponible"),
+            Content = string.Format(L.X("Master Control Studio Pro {0} este disponibil (tu ai {1}).", "Master Control Studio Pro {0} is available (you have {1}).", "Master Control Studio Pro {0} está disponible (tienes {1})."), version, UpdateChecker.CurrentVersion),
+            PrimaryButtonText = L.X("Actualizează acum", "Update now", "Actualizar ahora"),
+            CloseButtonText = L.X("Mai târziu", "Later", "Más tarde"),
         };
         var result = await box.ShowDialogAsync();
         UpdateChecker.Shared.Dismiss();

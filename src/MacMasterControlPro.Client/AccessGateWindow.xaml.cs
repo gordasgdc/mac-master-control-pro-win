@@ -9,6 +9,7 @@ namespace MacMasterControlPro.Client;
 /// Panou de acces: starea (probă / acces complet), oferte (dacă ediția le are), cerere de licență, câmp pentru licență.
 public partial class AccessGateWindow : Window
 {
+    private static System.Globalization.CultureInfo Culture => new(L.X("ro-RO", "en-GB", "es-ES"));
     public AccessGateWindow()
     {
         InitializeComponent();
@@ -22,21 +23,26 @@ public partial class AccessGateWindow : Window
         switch (p.Mode)
         {
             case AccessMode.DemoLocked l:
-                TitleText.Text = "Sesiunea de probă s-a încheiat";
-                BodyText.Text = $"Proba durează 10 minute de utilizare activă. Următoarea sesiune este disponibilă pe {l.Next.LocalDateTime:d MMMM yyyy, HH:mm}. În probă, aplicația pornește de fiecare dată de la zero: setările și cache-urile nu se păstrează.";
+                TitleText.Text = L.X("Sesiunea de probă s-a încheiat", "The trial session has ended", "La sesión de prueba ha terminado");
+                BodyText.Text = string.Format(L.X(
+                    "Proba durează 10 minute de utilizare activă. Următoarea sesiune este disponibilă pe {0}. Setările tale nu se șterg: în probă nu se modifică nimic din configurația ta.",
+                    "The trial lasts 10 minutes of active use. The next session is available on {0}. Your settings are not erased: the trial never changes your configuration.",
+                    "La prueba dura 10 minutos de uso activo. La próxima sesión estará disponible el {0}. Tus ajustes no se borran: la prueba nunca modifica tu configuración."),
+                    l.Next.LocalDateTime.ToString("d MMMM yyyy, HH:mm", Culture));
                 break;
             case AccessMode.DemoAvailable d:
-                TitleText.Text = $"Sesiune de probă: {d.RemainingSeconds / 60}:{d.RemainingSeconds % 60:00} rămase";
-                BodyText.Text = "Cât timp o folosești activ, toate funcțiile sunt disponibile.";
+                TitleText.Text = string.Format(L.X("Sesiune de probă: {0}:{1:00} rămase", "Trial session: {0}:{1:00} left", "Sesión de prueba: {0}:{1:00} restantes"), d.RemainingSeconds / 60, d.RemainingSeconds % 60);
+                BodyText.Text = L.X("Cât timp o folosești activ, toate funcțiile sunt disponibile.", "While you use it actively, every feature is available.", "Mientras la uses activamente, todas las funciones están disponibles.");
                 break;
             default:
-                TitleText.Text = "Acces complet"; BodyText.Text = "Licența este activă pe acest calculator.";
+                TitleText.Text = L.X("Acces complet", "Full access", "Acceso completo");
+                BodyText.Text = L.X("Licența este activă pe acest calculator.", "The licence is active on this computer.", "La licencia está activa en este equipo.");
                 break;
         }
         OffersPanel.Children.Clear();
         if (p.Offers.Count > 0)
         {
-            OffersPanel.Children.Add(new TextBlock { Text = "Susține proiectul printr-o donație și primești licență:", FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
+            OffersPanel.Children.Add(new TextBlock { Text = L.X("Susține proiectul printr-o donație și primești licență:", "Support the project with a donation and receive a licence:", "Apoya el proyecto con una donación y recibe una licencia:"), FontWeight = FontWeights.SemiBold, Margin = new Thickness(0, 0, 0, 6) });
             foreach (var o in p.Offers)
             {
                 var g = new Grid { Margin = new Thickness(0, 0, 0, 4) };
@@ -47,9 +53,12 @@ public partial class AccessGateWindow : Window
             }
         }
         LicensePanel.Visibility = p.Mode.IsFull ? Visibility.Collapsed : Visibility.Visible;
-        RequestButton.Content = "Cere o licență"; PageButton.Content = "Pagina produsului"; CopyIdButton.Content = "Copiază Machine ID";
-        ApplyButton.Content = "Aplică"; CloseButton.Content = "Închide"; KeyBox.PlaceholderText = "Lipește licența primită";
-        EditionText.Text = p.EditionLabel;
+        RequestButton.Content = L.X("Cere o licență", "Request a licence", "Solicitar una licencia");
+        PageButton.Content = L.X("Deschide pagina produsului", "Open the product page", "Abrir la página del producto");
+        CopyIdButton.Content = L.X("Copiază Machine ID", "Copy Machine ID", "Copiar Machine ID");
+        ApplyButton.Content = L.X("Aplică", "Apply", "Aplicar"); CloseButton.Content = L.X("Închide", "Close", "Cerrar");
+        KeyBox.PlaceholderText = L.X("Lipește licența primită", "Paste the licence you received", "Pega la licencia recibida");
+        EditionText.Text = p.IsOfficialEdition ? L.X("Ediție oficială GDC", "Official GDC edition", "Edición oficial de GDC") : L.X("Ediție comunitară (cod sursă MIT)", "Community edition (MIT source code)", "Edición comunitaria (código fuente MIT)");
     }
 
     private void OnRequestClicked(object sender, RoutedEventArgs e) =>
@@ -60,7 +69,7 @@ public partial class AccessGateWindow : Window
     private async void OnApplyClicked(object sender, RoutedEventArgs e)
     {
         var err = await LicenseManager.Shared.Provider.SubmitLicenseAsync(KeyBox.Text);
-        MessageText.Text = err ?? "Licență aplicată.";
+        MessageText.Text = err ?? L.X("Licență aplicată.", "Licence applied.", "Licencia aplicada.");
         if (err is null) DialogResult = true;
     }
     private void OnCloseClicked(object sender, RoutedEventArgs e) { DialogResult = LicenseManager.Shared.IsUnlocked; Close(); }

@@ -119,15 +119,18 @@ public static class L
         ["trial.title"] = new() { [AppLanguage.Ro] = "Analiza este 100% completă", [AppLanguage.En] = "Analysis is 100% complete", [AppLanguage.Es] = "El análisis está 100% completo" },
         ["trial.body"] = new()
         {
-            [AppLanguage.Ro] = "Susține dezvoltarea cu o donație (17€, o singură dată) pentru a debloca aplicarea modificărilor.",
-            [AppLanguage.En] = "Support development with a one-time 17€ donation to unlock applying changes.",
-            [AppLanguage.Es] = "Apoya el desarrollo con una donación única de 17€ para desbloquear la aplicación de cambios.",
+            [AppLanguage.Ro] = "Susține dezvoltarea printr-o donație pentru a primi o licență.",
+            [AppLanguage.En] = "Support development with a donation to receive a licence.",
+            [AppLanguage.Es] = "Apoya el desarrollo con una donación para recibir una licencia.",
         },
         ["trial.donate"] = new() { [AppLanguage.Ro] = "Donează din GDC Plugin Manager", [AppLanguage.En] = "Donate via GDC Plugin Manager", [AppLanguage.Es] = "Donar desde GDC Plugin Manager" },
         ["trial.activate"] = new() { [AppLanguage.Ro] = "Activează", [AppLanguage.En] = "Activate", [AppLanguage.Es] = "Activar" },
         ["trial.cancel"] = new() { [AppLanguage.Ro] = "Anulează", [AppLanguage.En] = "Cancel", [AppLanguage.Es] = "Cancelar" },
         ["trial.key"] = new() { [AppLanguage.Ro] = "Cheie de licență", [AppLanguage.En] = "License key", [AppLanguage.Es] = "Clave de licencia" },
     };
+
+    /// Trei limbi in loc, ca `L.x` pe macOS.
+    public static string X(string ro, string en, string es) => LanguageStore.Current switch { AppLanguage.En => en, AppLanguage.Es => es, _ => ro };
 
     public static string T(string key)
     {

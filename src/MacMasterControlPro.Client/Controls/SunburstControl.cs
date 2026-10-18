@@ -91,7 +91,7 @@ public sealed class SunburstControl : FrameworkElement
         var n = _hover ?? _root;
         DrawCentered(dc, n.Name.Length > 22 ? n.Name[..21] + "…" : n.Name, 14, FontWeights.SemiBold, fg, c.X, c.Y - hole * 0.40, hole * 1.7);
         DrawCentered(dc, DiskNode.FormatBytes(n.SizeBytes), Math.Max(20, hole * 0.34), FontWeights.Bold, fg, c.X, c.Y - hole * 0.18, hole * 1.7);
-        var caption = ReferenceEquals(n, _root) ? "în acest folder" : $"{(double)n.SizeBytes / Math.Max(_root.SizeBytes, 1):P0} din folder";
+        var caption = ReferenceEquals(n, _root) ? L.X("în acest folder", "in this folder", "en esta carpeta") : $"{(double)n.SizeBytes / Math.Max(_root.SizeBytes, 1):P0} "+L.X("din folder", "of folder", "de la carpeta");
         DrawCentered(dc, caption, 11.5, FontWeights.Normal, muted, c.X, c.Y + hole * 0.30, hole * 1.7);
     }
 

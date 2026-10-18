@@ -47,9 +47,9 @@ public partial class SettingsPage : UserControl
         NameBox.PlaceholderText = L.T("settings.name");
         EmailBox.PlaceholderText = L.T("settings.email");
         GuideButton.Content = L.T("settings.guide");
-        ConfigCard.Header = "Configurație";
-        ConfigText.Text = "Setările, folderele alese și cache-urile aplicației. Resetarea este o acțiune separată: nu se întâmplă automat la expirarea probei și face mai întâi o copie de siguranță.";
-        ResetConfigButton.Content = "Resetează configurația aplicației…";
+        ConfigCard.Header = L.X("Configurație", "Configuration", "Configuración");
+        ConfigText.Text = L.X("Setările, folderele alese și cache-urile aplicației. Resetarea este o acțiune separată: nu se întâmplă automat la expirarea probei și face mai întâi o copie de siguranță.", "App settings, chosen folders and caches. Resetting is a separate action: it never happens automatically when the trial ends, and it makes a safety copy first.", "Ajustes, carpetas elegidas y cachés de la app. El restablecimiento es una acción aparte: no ocurre al terminar la prueba y antes hace una copia de seguridad.");
+        ResetConfigButton.Content = L.X("Resetează configurația aplicației…", "Reset app configuration…", "Restablecer la configuración de la app…");
         DiagCard.Header = L.T("diag.title");
         DiagSession.Text = L.T("diag.session") + ": " + MacMasterControlPro.Core.Services.DiagnosticLog.SessionId;
         DiagOpenButton.Content = L.T("diag.open");
@@ -96,10 +96,10 @@ public partial class SettingsPage : UserControl
 
     private void OnResetConfigClicked(object sender, RoutedEventArgs e)
     {
-        if (MessageBox.Show("Resetezi configurația aplicației?\n\n" + string.Join("\n", MacMasterControlPro.Core.Services.AppProfile.ResetPreview()),
-            "Confirmare", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
-        try { ResetResultText.Text = "Copie de siguranță: " + MacMasterControlPro.Core.Services.AppProfile.ResetUserConfiguration(); }
-        catch (Exception ex) { ResetResultText.Text = "Resetarea a eșuat: " + ex.Message; }
+        if (MessageBox.Show(L.X("Resetezi configurația aplicației?", "Reset the app configuration?", "¿Restablecer la configuración de la app?") + "\n\n" + string.Join("\n", MacMasterControlPro.Core.Services.AppProfile.ResetPreview()),
+            L.X("Confirmare", "Confirm", "Confirmar"), MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
+        try { ResetResultText.Text = L.X("Copie de siguranță: ", "Safety copy: ", "Copia de seguridad: ") + MacMasterControlPro.Core.Services.AppProfile.ResetUserConfiguration(); }
+        catch (Exception ex) { ResetResultText.Text = L.X("Resetarea a eșuat: ", "Reset failed: ", "Falló el restablecimiento: ") + ex.Message; }
     }
 
     private void OnDiagOpenFolder(object sender, RoutedEventArgs e)

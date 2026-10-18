@@ -23,7 +23,7 @@ public interface IAccessProvider
 {
     AccessMode Mode { get; }
     IReadOnlyList<OfferSummary> Offers { get; }
-    string EditionLabel { get; }
+    bool IsOfficialEdition { get; }
     string ActivationRequestText();
     /// Aplică o licență lipită de utilizator. Întoarce mesajul de eroare sau null la succes.
     Task<string?> SubmitLicenseAsync(string text);

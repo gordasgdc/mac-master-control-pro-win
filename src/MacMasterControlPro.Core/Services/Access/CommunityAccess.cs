@@ -46,7 +46,7 @@ public sealed class CommunityAccess : IAccessProvider
     }
 
     public IReadOnlyList<OfferSummary> Offers => Array.Empty<OfferSummary>();
-    public string EditionLabel => "Ediție comunitară (cod sursă MIT)";
+    public bool IsOfficialEdition => false;
     public string ActivationRequestText() => $"Cerere de licență Master Control Studio Pro. Machine ID: {MachineID.Display}";
     public Task<string?> SubmitLicenseAsync(string text) => Task.FromResult<string?>("Ediția comunitară nu are activare. Licențele se aplică în ediția oficială distribuită de GDC.");
     public Task RefreshAsync() => Task.CompletedTask;
