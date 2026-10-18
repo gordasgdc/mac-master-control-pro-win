@@ -43,6 +43,8 @@
 
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
+    <Resource Include="Assets\home-glass.jpg" />
+    <Resource Include="Assets\disk-empty-glass.jpg" />
   </ItemGroup>
 
   <ItemGroup>

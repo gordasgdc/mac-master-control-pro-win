@@ -27,6 +27,7 @@
                 <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel Orientation="Horizontal" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
             </ItemsControl>
             <TextBlock x:Name="PickerHint" Text="Alege un volum ca să-l analizezi. Rezultatul rămâne salvat; la următoarea deschidere nu se reia scanarea." Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,10,0,0" />
+            <ContentControl x:Name="PickerArt" HorizontalAlignment="Left" Margin="0,18,0,0" IsTabStop="False" />
             <StackPanel x:Name="IndexingPanel" Visibility="Collapsed" Margin="0,16,0,0">
                 <StackPanel Orientation="Horizontal">
                     <ui:ProgressRing IsIndeterminate="True" Width="18" Height="18" Margin="0,0,10,0" />

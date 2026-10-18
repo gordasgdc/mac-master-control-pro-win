@@ -4,7 +4,9 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
     <!-- Acasă, Studio Glass: volumele reale cu iconurile Shell, o acțiune principală, apoi ce merită verificat. Stările necunoscute rămân necunoscute. -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel MaxWidth="980" HorizontalAlignment="Left" Margin="0,0,0,24">
+        <Grid x:Name="RootGrid" MaxWidth="980" HorizontalAlignment="Left" Margin="0,0,0,24">
+        <ContentControl x:Name="ArtHost" HorizontalAlignment="Right" VerticalAlignment="Top" IsTabStop="False" />
+        <StackPanel>
             <TextBlock x:Name="TitleText" FontSize="30" FontWeight="Bold" />
             <TextBlock x:Name="TaglineText" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,2,0,18" />
             <ItemsControl x:Name="VolumeCards">
@@ -21,5 +23,6 @@
                 </StackPanel>
             </Border>
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </UserControl>

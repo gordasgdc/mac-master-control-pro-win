@@ -57,6 +57,7 @@ public partial class DiskAnalyzerPage : UserControl
     {
         InitializeComponent();
         ApplyLanguage();
+        PickerArt.Content = Services.StudioArt.Create("disk-empty-glass", 300, 189);
         Chart.Tapped += n => { _focus = n; if (!ToggleSelection(n)) System.Media.SystemSounds.Beep.Play(); RenderResult(); };
         Chart.Drilled += n => Drill(n);
         Chart.HoverChanged += n => HighlightRow(n);
@@ -204,6 +205,7 @@ public partial class DiskAnalyzerPage : UserControl
     {
         var hasTree = !_isIndexing && _tree is not null;
         PickerHint.Visibility = (!_isIndexing && _tree is null) ? Visibility.Visible : Visibility.Collapsed;
+        PickerArt.Visibility = PickerHint.Visibility;
         IndexingPanel.Visibility = _isIndexing ? Visibility.Visible : Visibility.Collapsed;
         ResultPanel.Visibility = hasTree ? Visibility.Visible : Visibility.Collapsed;
         CrumbBar.Visibility = hasTree ? Visibility.Visible : Visibility.Collapsed;

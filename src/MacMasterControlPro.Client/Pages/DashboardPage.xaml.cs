@@ -20,6 +20,8 @@ public partial class DashboardPage : UserControl
         DiskButton.Content = L.X("Vezi ce ocupă spațiul", "See what takes up space", "Ver qué ocupa espacio");
         CleanButton.Content = L.X("Curățare", "Cleanup", "Limpieza");
         CheckTitle.Text = L.X("Ce merită verificat", "Worth checking", "Qué conviene revisar");
+        SizeChanged += (_, e) => RootGrid.Width = Math.Max(300, Math.Min(980, e.NewSize.Width - 24));
+        ArtHost.Content = Services.StudioArt.Create("home-glass", 224, 168);
         RenderVolumes();
         RenderChecks(null, null);
         Task.Run(() =>
