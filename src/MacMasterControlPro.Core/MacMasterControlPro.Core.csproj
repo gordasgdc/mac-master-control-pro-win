@@ -16,4 +16,13 @@
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
   </ItemGroup>
 
+  <!-- Ediția oficială (doar build-ul GDC): core-ul comercial privat + adaptorul se leagă prin proprietăți MSBuild; repository-ul public nu conține cod privat. -->
+  <PropertyGroup Condition="'$(GDC_COMMERCIAL_CORE_DOTNET)' != '' And Exists('$(GDC_OFFICIAL_ADAPTER_DIR)')">
+    <DefineConstants>$(DefineConstants);OFFICIAL_BUILD</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GDC_COMMERCIAL_CORE_DOTNET)' != '' And Exists('$(GDC_OFFICIAL_ADAPTER_DIR)')">
+    <ProjectReference Include="$(GDC_COMMERCIAL_CORE_DOTNET)/GDC.Commercial.Core/GDC.Commercial.Core.csproj" />
+    <Compile Include="$(GDC_OFFICIAL_ADAPTER_DIR)/*.cs" LinkBase="Official" />
+  </ItemGroup>
+
 </Project>

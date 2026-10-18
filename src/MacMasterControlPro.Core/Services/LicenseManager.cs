@@ -14,6 +14,9 @@ public sealed class LicenseManager
 
     private LicenseManager()
     {
+#if OFFICIAL_BUILD
+        AccessFactory.Make = () => new MacMasterControlPro.Official.OfficialAccess();
+#endif
         _provider = AccessFactory.Make();
         _provider.Changed += () => Changed?.Invoke();
     }
