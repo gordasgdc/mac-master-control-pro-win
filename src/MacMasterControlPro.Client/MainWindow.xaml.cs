@@ -75,6 +75,13 @@ public partial class MainWindow
         }
     }
 
+    /// Navigare programatică (ex. din Acasă către Analiză Disc).
+    public void NavigateTo(string tag)
+    {
+        foreach (var o in ModuleList.Items)
+            if (o is ListBoxItem i && (i.Tag as string) == tag) { ModuleList.SelectedItem = i; return; }
+    }
+
     private void RenderSidebarLabels()
     {
         SetLabel(ItemDashboard, "\uE80F", L.T("sidebar.dashboard"));

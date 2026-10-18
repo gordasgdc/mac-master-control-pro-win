@@ -49,6 +49,13 @@ public partial class DiskAnalyzerPage : UserControl
     private void RenderVolumes()
     {
         VolumesList.Items.Clear();
+        var pick = new Button { Background = Brushes.Transparent, BorderThickness = new Thickness(0), Padding = new Thickness(6) };
+        var ps = new StackPanel { Width = 112, Margin = new Thickness(4) };
+        ps.Children.Add(new TextBlock { Text = "\uE8F4", FontFamily = new FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"), FontSize = 34, HorizontalAlignment = HorizontalAlignment.Center, Foreground = (Brush)FindResource("LinkAccentBrush"), Margin = new Thickness(0, 6, 0, 6) });
+        ps.Children.Add(new TextBlock { Text = "Alege un folder", TextAlignment = TextAlignment.Center, FontWeight = FontWeights.Medium });
+        ps.Children.Add(new TextBlock { Text = "orice folder sau volum", FontSize = 11, TextAlignment = TextAlignment.Center, Foreground = (Brush)FindResource("TextSecondaryBrush") });
+        pick.Content = ps; pick.Click += (_, _) => ChooseFolder();
+        VolumesList.Items.Add(pick);
         foreach (var root in DiskAnalyzerServiceRoots.AvailableRoots())
         {
             var icon = MakeIcon(root.Path, 48);
@@ -62,6 +69,13 @@ public partial class DiskAnalyzerPage : UserControl
             System.Windows.Automation.AutomationProperties.SetName(b, $"Volum {root.Name}");
             VolumesList.Items.Add(b);
         }
+    }
+
+    private void ChooseFolder()
+    {
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Alege folderul sau volumul de analizat" };
+        if (dlg.ShowDialog() != true) return;
+        StartIndexing(new DiskEntry(System.IO.Path.GetFileName(dlg.FolderName.TrimEnd('\\')) is { Length: > 0 } n ? n : dlg.FolderName, dlg.FolderName, 0));
     }
 
     private static Image MakeIcon(string path, int size)
