@@ -21,6 +21,12 @@ public static class DiskCacheStore
         public string RootPath { get; set; } = "";
         public DateTime ScannedAtUtc { get; set; }
         public DiskNode Root { get; set; } = new();
+        /// Elemente inaccesibile la ultima scanare (0 = complet).
+        public int AccessErrors { get; set; }
+        /// Ultima verificare la nivel de fisier; null = cache vechi, nereconciliat.
+        public DateTime? VerifiedAtUtc { get; set; }
+        /// Serialul volumului la momentul salvarii; alt volum la aceeasi litera invalideaza cache-ul.
+        public string? VolumeSerial { get; set; }
     }
 
     private static string CacheDirectory
@@ -57,6 +63,13 @@ public static class DiskCacheStore
             // imposibila cu SHA-256, dar verificam explicit — Regula 30,
             // nu presupunem) nu se foloseste niciodata orb.
             if (!string.Equals(snapshot.RootPath, rootPath, StringComparison.OrdinalIgnoreCase)) return null;
+            // Alt volum la aceeasi litera de unitate (disc extern inlocuit): cache-ul ar minti.
+            var now = DiskScanEngine.VolumeSerial(rootPath);
+            if (snapshot.VolumeSerial is not null && now is not null && snapshot.VolumeSerial != now)
+            {
+                DiagnosticLog.Log("warning", "disk", "cache.volume-mismatch");
+                return null;
+            }
             return snapshot;
         }
         catch
@@ -69,11 +82,16 @@ public static class DiskCacheStore
     {
         try
         {
-            File.WriteAllText(FileFor(snapshot.RootPath), JsonSerializer.Serialize(snapshot));
+            snapshot.VolumeSerial ??= DiskScanEngine.VolumeSerial(snapshot.RootPath);
+            var target = FileFor(snapshot.RootPath);
+            var tmp = target + ".tmp";
+            File.WriteAllText(tmp, JsonSerializer.Serialize(snapshot));
+            File.Move(tmp, target, overwrite: true);   // atomic: un crash nu lasa un cache pe jumatate scris
         }
-        catch
+        catch (Exception ex)
         {
-            // nescrierea cache-ului nu trebuie sa blocheze UI-ul
+            // nescrierea cache-ului nu trebuie sa blocheze UI-ul, dar se logheaza
+            DiagnosticLog.Log("error", "disk", "cache.write-failed", ex.GetType().Name);
         }
     }
 

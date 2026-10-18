@@ -1,308 +1,312 @@
+using System.Runtime.InteropServices;
+using System.Text;
+
 namespace MacMasterControlPro.Core.Services;
 
-/// [2026-09-04] Port 1:1 al DiskScanEngine.swift (Mac, v2.30.0) — vezi
-/// acel fișier pentru raționamentul complet al arhitecturii. Rezumat:
-/// modulul „Analiză Disc" nu exista deloc pe Windows (doar
-/// `DiskHealthService`, complet diferit — sănătate SMART, nu explorare de
-/// spațiu) — construit de la zero, cu aceleași trei mecanisme cerute
-/// explicit de Cristi pentru Mac, adaptate la .NET/Windows:
+/// Motor de analiza disc pentru Windows (nativ .NET, fara administrator, valabil pe orice sistem de fisiere).
 ///
-/// 1. **Enumerare nativă, nu recursivitate PowerShell/`Get-ChildItem`.**
-///    `DirectoryInfo.EnumerateFileSystemInfos()` cheamă intern API-ul
-///    Win32 de nivel jos (`FindFirstFile`/`FindNextFile`) — o SINGURĂ
-///    trecere pe director dă simultan nume, mărime ȘI dată de
-///    modificare, fără `stat()`-uri separate per fișier (echivalentul
-///    direct al `fts_statp` de pe Mac). Alternativa „adevărat nivel jos"
-///    (citire directă MFT) a fost respinsă pentru ACELAȘI motiv ca pe
-///    Mac (`getattrlistbulk` respins în favoarea `fts`): complexitate și
-///    risc disproporționate (specific NTFS, cere Administrator, nu merge
-///    pe FAT32/exFAT/ReFS/unități de rețea) față de câștigul real.
-/// 2. **Paralel pe toate nucleele.** `Parallel.For` peste subfolderele de
-///    PRIM NIVEL ale rădăcinii — echivalentul .NET al
-///    `DispatchQueue.concurrentPerform` de pe Mac. Fiecare thread
-///    construiește propriul subarbore, ZERO stare comună mutabilă în
-///    timpul scanării.
-/// 3. **Scanare incrementală.** `IncrementalUpdate` compară mtime-ul
-///    fiecărui folder cu cel din cache (`DiskNode.DirectoryModifiedAtTicks`)
-///    — port direct al strategiei Mac, EXPLICIT portabilă pe Windows prin
-///    `Directory.GetLastWriteTimeUtc` (menționată ca atare încă din
-///    jurnalul Mac).
-///
-/// **Capcană reală de platformă, verificată explicit înainte de a scrie
-/// codul de mai jos** (Regula 30 — nu presupunem): spre deosebire de
-/// `stat()` pe Mac (eșuează cu un cod de eroare pe o cale inexistentă),
-/// `Directory.GetLastWriteTimeUtc` pe .NET NU aruncă pe o cale lipsă —
-/// întoarce tăcut sentinela `1601-01-01` (`DateTime.FromFileTimeUtc(0)`).
-/// Orice verificare „a dispărut folderul de pe disc?" trebuie să
-/// folosească explicit `Directory.Exists`, NICIODATĂ să se bazeze pe o
-/// excepție de la `GetLastWriteTimeUtc` — vezi `SafeDirectoryMTime`/
-/// `RefreshDirectory` mai jos.
+/// Scanare completa: parcurgere paralela pe subfolderele de prim nivel (EnumerateFileSystemInfos -> FindFirstFileEx,
+/// o singura trecere dă nume, marime, atribute, mtime). Nu urmareste puncte de reparse (junction/symlink/OneDrive
+/// placeholders ca foldere) si nu descarca fisiere "doar in cloud".
+/// Actualizare incrementala `Verified`: relisteaza fiecare folder si compara amprenta fisierelor directe
+/// (nume + marime + alocat + mtime) cu cache-ul => detecteaza si modificarea in-loc, la orice adancime.
+/// `StructureOnly`: doar mtime de folder (rapid, nu vede modificari in-loc; pentru masuratori).
+/// Cititul direct din MFT/USN nu e folosit: cere administrator si nu merge pe ReFS/FAT/exFAT/retea; se reevalueaza
+/// doar daca masuratorile arata ca `Verified` e prea lent pe volume NTFS mari.
 public static class DiskScanEngine
 {
     public sealed class Progress
     {
         public int FilesIndexed { get; init; }
         public long BytesIndexed { get; init; }
+        public int AccessErrors { get; init; }
     }
 
-    private sealed record TopLevelEntry(string Name, string Path, bool IsDirectory, long Size);
+    public enum ScanStatus { Complete, Cancelled, RootUnavailable }
+    public enum IncrementalMode { Verified, StructureOnly }
 
-    /// Acumulator de progres thread-safe — raportează în loturi (nu
-    /// per-fișier), doar rezultatul agregat, throttled la 1/secundă,
-    /// ajunge la `onProgress`. Portul Windows nu are nevoie să forțeze
-    /// dispatch pe thread de UI aici — apelantul (pagina WPF) e cel care
-    /// face `Dispatcher.Invoke` în jurul callback-ului, la fel ca restul
-    /// serviciilor din acest Core (`DuplicateFinderService.Scan`).
+    public sealed record ScanOutcome(ScanStatus Status, int AccessErrors)
+    {
+        public bool IsCleanAndComplete => Status == ScanStatus.Complete && AccessErrors == 0;
+    }
+
+    private sealed record Entry(string Name, string Path, bool IsDirectory, long Size, long Allocated, long MTimeTicks, bool CloudOnly);
+    private sealed record Listing(List<Entry> Entries, long DirMTimeTicks, int Errors);
+
     private sealed class ProgressCounter
     {
         private readonly object _lock = new();
-        private int _files;
+        private int _files, _errors;
         private long _bytes;
         private DateTime _lastReportedAt = DateTime.UtcNow;
-
-        public int Files { get { lock (_lock) return _files; } }
-        public long Bytes { get { lock (_lock) return _bytes; } }
-
-        public void Add(int deltaFiles, long deltaBytes, Action<Progress> onProgress)
+        public Progress Snapshot { get { lock (_lock) return new Progress { FilesIndexed = _files, BytesIndexed = _bytes, AccessErrors = _errors }; } }
+        public int AccessErrors { get { lock (_lock) return _errors; } }
+        public void NoteError(int n = 1) { lock (_lock) _errors += n; }
+        public void Add(int files, long bytes, Action<Progress> onProgress)
         {
-            Progress? snapshot = null;
+            Progress? snap = null;
             lock (_lock)
             {
-                _files += deltaFiles;
-                _bytes += deltaBytes;
+                _files += files; _bytes += bytes;
                 var now = DateTime.UtcNow;
                 if ((now - _lastReportedAt).TotalSeconds >= 1)
                 {
                     _lastReportedAt = now;
-                    snapshot = new Progress { FilesIndexed = _files, BytesIndexed = _bytes };
+                    snap = new Progress { FilesIndexed = _files, BytesIndexed = _bytes, AccessErrors = _errors };
                 }
             }
-            if (snapshot is not null) onProgress(snapshot);
+            if (snap is not null) onProgress(snap);
         }
     }
 
-    // MARK: - Scanare completa (prima data, sau "Reseteaza cache")
+    // MARK: - Scanare completa
 
-    /// Construiește arborele complet pentru `root`, paralel pe toate
-    /// nucleele. Rulează SINCRON pe thread-ul apelantului — apelantul
-    /// (pagina WPF) îl pornește prin `Task.Run`, la fel ca
-    /// `DuplicateFinderService.Scan`.
-    public static DiskNode BuildTree(string root, Action<Progress> onProgress)
+    public static (DiskNode Tree, ScanOutcome Outcome) BuildTree(string root, Action<Progress> onProgress, CancellationToken ct = default)
     {
-        var resolvedRoot = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root));
-        var displayName = System.IO.Path.GetFileName(resolvedRoot);
-        var rootNode = new DiskNode(string.IsNullOrEmpty(displayName) ? resolvedRoot : displayName, resolvedRoot, isDirectory: true)
+        var op = DiagnosticLog.Begin("disk", "scan.full");
+        var resolved = System.IO.Path.TrimEndingDirectorySeparator(System.IO.Path.GetFullPath(root));
+        var display = System.IO.Path.GetFileName(resolved);
+        var rootNode = new DiskNode(string.IsNullOrEmpty(display) ? resolved : display, resolved, isDirectory: true);
+        var counter = new ProgressCounter();
+        if (!Directory.Exists(resolved))
         {
-            DirectoryModifiedAtTicks = SafeDirectoryMTime(resolvedRoot),
-        };
-
-        List<TopLevelEntry> topLevel;
-        try { topLevel = DirectChildren(resolvedRoot); }
-        catch { return rootNode; }
-        if (topLevel.Count == 0) return rootNode;
-
-        var progressReporter = new ProgressCounter();
-        var partial = new DiskNode?[topLevel.Count];
-
-        Parallel.For(0, topLevel.Count, i =>
-        {
-            var entry = topLevel[i];
-            partial[i] = entry.IsDirectory
-                ? ScanSubtreeNative(entry.Path, entry.Name, progressReporter, onProgress)
-                : NewFileNode(entry, progressReporter, onProgress);
-        });
-
-        foreach (var node in partial)
-        {
-            if (node is null) continue;
-            rootNode.Children[node.Name] = node;
-            rootNode.SizeBytes += node.SizeBytes;
+            op.End("rootUnavailable", "warning");
+            return (rootNode, new ScanOutcome(ScanStatus.RootUnavailable, 0));
         }
-
-        onProgress(new Progress { FilesIndexed = progressReporter.Files, BytesIndexed = progressReporter.Bytes });
-        return rootNode;
+        var serial = VolumeSerial(resolved);
+        Populate(rootNode, counter, onProgress, parallel: true, ct);
+        var status = ct.IsCancellationRequested ? ScanStatus.Cancelled
+            : (Directory.Exists(resolved) && VolumeSerial(resolved) == serial ? ScanStatus.Complete : ScanStatus.RootUnavailable);
+        var snap = counter.Snapshot;
+        op.End(status.ToString(), status == ScanStatus.Complete ? "info" : "warning", fields: new Dictionary<string, string>
+        { ["files"] = snap.FilesIndexed.ToString(), ["bytes"] = snap.BytesIndexed.ToString(), ["accessErrors"] = snap.AccessErrors.ToString() });
+        onProgress(snap);
+        return (rootNode, new ScanOutcome(status, snap.AccessErrors));
     }
 
-    private static DiskNode NewFileNode(TopLevelEntry entry, ProgressCounter progressReporter, Action<Progress> onProgress)
+    private static void Populate(DiskNode node, ProgressCounter counter, Action<Progress> onProgress, bool parallel, CancellationToken ct)
     {
-        var node = new DiskNode(entry.Name, entry.Path, isDirectory: false) { SizeBytes = entry.Size };
-        progressReporter.Add(1, entry.Size, onProgress);
-        return node;
+        if (ct.IsCancellationRequested) return;
+        var listing = List(node.Path);
+        if (listing is null) { counter.NoteError(); return; }
+        counter.NoteError(listing.Errors);
+        node.DirectoryModifiedAtTicks = listing.DirMTimeTicks;
+        ApplyFiles(listing, node);
+        ReportFiles(listing, counter, onProgress);
+
+        var dirs = listing.Entries.Where(e => e.IsDirectory).ToList();
+        var built = new DiskNode?[dirs.Count];
+        void Work(int i)
+        {
+            var child = new DiskNode(dirs[i].Name, dirs[i].Path, isDirectory: true);
+            Populate(child, counter, onProgress, parallel: false, ct);
+            built[i] = child;
+        }
+        if (parallel) Parallel.For(0, dirs.Count, new ParallelOptions { CancellationToken = CancellationToken.None }, Work);
+        else for (var i = 0; i < dirs.Count; i++) Work(i);
+        foreach (var c in built) if (c is not null) node.Children[c.Name] = c;
+        SumChildren(node);
     }
 
-    /// Enumerare recursivă, completă, a UNUI subfolder — apelată o dată
-    /// per subfolder de prim nivel (paralel, vezi `BuildTree`), și din
-    /// nou, punctual, de `RefreshDirectory` pentru un folder nou-apărut
-    /// care nu exista deloc în cache. Recursivitate simplă (nu o stivă
-    /// manuală) — adâncimi de foldere de mii de niveluri sunt nerealiste
-    /// în practică, riscul de stack overflow e neglijabil.
-    private static DiskNode ScanSubtreeNative(string root, string name, ProgressCounter progressReporter, Action<Progress> onProgress)
+    // MARK: - Actualizare incrementala
+
+    /// Nu salva rezultatul decat daca `Outcome.Status == Complete`. La `Cancelled` arborele poate fi partial actualizat
+    /// (reincarca din cache); la `RootUnavailable` arborele nu a fost modificat.
+    public static (DiskNode Tree, ScanOutcome Outcome) IncrementalUpdate(DiskNode cachedRoot, Action<Progress> onProgress,
+        IncrementalMode mode = IncrementalMode.Verified, CancellationToken ct = default)
     {
-        var rootNode = new DiskNode(name, root, isDirectory: true) { DirectoryModifiedAtTicks = SafeDirectoryMTime(root) };
-        int pendingFiles = 0;
-        long pendingBytes = 0;
-
-        void Walk(string dirPath, DiskNode dirNode)
+        var op = DiagnosticLog.Begin("disk", "scan.incremental");
+        var counter = new ProgressCounter();
+        if (!Directory.Exists(cachedRoot.Path))
         {
-            IEnumerable<FileSystemInfo> entries;
-            try { entries = new DirectoryInfo(dirPath).EnumerateFileSystemInfos(); }
-            catch { return; } // acces refuzat/disparut intre timp - degradeaza elegant, nu opreste tot scanul
-
-            foreach (var entry in entries)
-            {
-                bool isDir = (entry.Attributes & FileAttributes.Directory) != 0;
-                if (isDir)
-                {
-                    long mtimeTicks;
-                    try { mtimeTicks = entry.LastWriteTimeUtc.Ticks; } catch { mtimeTicks = 0; }
-                    var childNode = new DiskNode(entry.Name, entry.FullName, isDirectory: true) { DirectoryModifiedAtTicks = mtimeTicks };
-                    dirNode.Children[entry.Name] = childNode;
-                    Walk(entry.FullName, childNode);
-                    dirNode.SizeBytes += childNode.SizeBytes;
-                }
-                else
-                {
-                    long size;
-                    try { size = ((FileInfo)entry).Length; } catch { size = 0; }
-                    dirNode.Children[entry.Name] = new DiskNode(entry.Name, entry.FullName, isDirectory: false) { SizeBytes = size };
-                    dirNode.SizeBytes += size;
-                    pendingFiles++;
-                    pendingBytes += size;
-                    if (pendingFiles >= 500)
-                    {
-                        progressReporter.Add(pendingFiles, pendingBytes, onProgress);
-                        pendingFiles = 0;
-                        pendingBytes = 0;
-                    }
-                }
-            }
+            op.End("rootUnavailable", "warning");
+            return (cachedRoot, new ScanOutcome(ScanStatus.RootUnavailable, 0));
         }
-
-        Walk(root, rootNode);
-        if (pendingFiles > 0) progressReporter.Add(pendingFiles, pendingBytes, onProgress);
-        return rootNode;
+        var serial = VolumeSerial(cachedRoot.Path);
+        Refresh(cachedRoot, mode, counter, onProgress, parallel: true, ct);
+        var status = ct.IsCancellationRequested ? ScanStatus.Cancelled
+            : (Directory.Exists(cachedRoot.Path) && VolumeSerial(cachedRoot.Path) == serial ? ScanStatus.Complete : ScanStatus.RootUnavailable);
+        var snap = counter.Snapshot;
+        op.End(status.ToString(), status == ScanStatus.Complete ? "info" : "warning", fields: new Dictionary<string, string>
+        { ["changedFiles"] = snap.FilesIndexed.ToString(), ["accessErrors"] = snap.AccessErrors.ToString(), ["mode"] = mode.ToString() });
+        onProgress(snap);
+        return (cachedRoot, new ScanOutcome(status, snap.AccessErrors));
     }
 
-    // MARK: - Scanare incrementala ("Re-scaneaza doar modificarile")
-
-    public static DiskNode IncrementalUpdate(DiskNode cachedRoot, Action<Progress> onProgress)
+    private static void Refresh(DiskNode node, IncrementalMode mode, ProgressCounter counter, Action<Progress> onProgress, bool parallel, CancellationToken ct)
     {
-        var progressReporter = new ProgressCounter();
-        var updated = RefreshDirectory(cachedRoot, progressReporter, onProgress);
-        onProgress(new Progress { FilesIndexed = progressReporter.Files, BytesIndexed = progressReporter.Bytes });
-        return updated;
+        if (ct.IsCancellationRequested) return;
+
+        if (mode == IncrementalMode.StructureOnly && node.FilesFingerprint != 0 && SafeMTime(node.Path) == node.DirectoryModifiedAtTicks)
+        {
+            foreach (var c in node.Children.Values.Where(c => c.IsDirectory).ToList())
+                Refresh(c, mode, counter, onProgress, false, ct);
+            SumChildren(node);
+            return;
+        }
+
+        var listing = List(node.Path);
+        if (listing is null) { counter.NoteError(); return; }   // inaccesibil acum: pastram subarborele din cache
+        counter.NoteError(listing.Errors);
+        node.DirectoryModifiedAtTicks = listing.DirMTimeTicks;
+
+        if (Fingerprint(listing.Entries) != node.FilesFingerprint)
+        {
+            ApplyFiles(listing, node);
+            ReportFiles(listing, counter, onProgress);
+        }
+
+        var liveDirs = listing.Entries.Where(e => e.IsDirectory).ToList();
+        var liveNames = new HashSet<string>(liveDirs.Select(d => d.Name), StringComparer.OrdinalIgnoreCase);
+        foreach (var name in node.Children.Where(kv => kv.Value.IsDirectory && !liveNames.Contains(kv.Key)).Select(kv => kv.Key).ToList())
+            node.Children.Remove(name);
+
+        var existing = new List<DiskNode>();
+        var fresh = new List<DiskNode>();
+        foreach (var d in liveDirs)
+        {
+            if (node.Children.TryGetValue(d.Name, out var c) && c.IsDirectory) existing.Add(c);
+            else { node.Children.Remove(d.Name); fresh.Add(new DiskNode(d.Name, d.Path, isDirectory: true)); }
+        }
+        void Work(int i)
+        {
+            if (i < existing.Count) Refresh(existing[i], mode, counter, onProgress, false, ct);
+            else Populate(fresh[i - existing.Count], counter, onProgress, false, ct);
+        }
+        var total = existing.Count + fresh.Count;
+        if (parallel) Parallel.For(0, total, Work); else for (var i = 0; i < total; i++) Work(i);
+        foreach (var n in fresh) node.Children[n.Name] = n;
+        SumChildren(node);
     }
 
-    /// Recursiv, dar ieftin: costul real e un `GetLastWriteTimeUtc` per
-    /// folder vizitat — un subarbore ale cărui mtime-uri n-au fost atinse
-    /// tot recursează prin el (ca să verifice și sub-subfolderele), dar
-    /// NICIODATĂ nu re-listează conținutul unui folder al cărui mtime
-    /// propriu n-a diferit.
-    private static DiskNode RefreshDirectory(DiskNode node, ProgressCounter progressReporter, Action<Progress> onProgress)
+    // MARK: - Constructie / agregare
+
+    private static void ApplyFiles(Listing listing, DiskNode node)
     {
-        if (!node.IsDirectory) return node;
-
-        // Vezi capcana documentata la nivelul clasei: `Directory.Exists`
-        // explicit, NICIODATA doar o exceptie de la GetLastWriteTimeUtc.
-        if (!Directory.Exists(node.Path))
-        {
-            node.Children.Clear();
-            node.SizeBytes = 0;
-            return node;
-        }
-        var currentMTime = SafeDirectoryMTime(node.Path);
-
-        if (currentMTime == node.DirectoryModifiedAtTicks)
-        {
-            foreach (var child in node.Children.Values.Where(c => c.IsDirectory))
-                RefreshDirectory(child, progressReporter, onProgress);
-            node.SizeBytes = node.Children.Values.Sum(c => c.SizeBytes);
-            return node;
-        }
-
-        node.DirectoryModifiedAtTicks = currentMTime;
-        List<TopLevelEntry> liveEntries;
-        try { liveEntries = DirectChildren(node.Path); } catch { liveEntries = new(); }
-        var liveNames = new HashSet<string>(liveEntries.Select(e => e.Name), StringComparer.OrdinalIgnoreCase);
-
-        foreach (var staleName in node.Children.Keys.Where(k => !liveNames.Contains(k)).ToList())
-            node.Children.Remove(staleName);
-
-        int newFiles = 0;
-        long newBytes = 0;
-        foreach (var entry in liveEntries)
-        {
-            if (entry.IsDirectory)
-            {
-                if (node.Children.TryGetValue(entry.Name, out var existingChild))
-                    RefreshDirectory(existingChild, progressReporter, onProgress);
-                else
-                    node.Children[entry.Name] = ScanSubtreeNative(entry.Path, entry.Name, progressReporter, onProgress);
-            }
-            else if (!node.Children.TryGetValue(entry.Name, out var existingFile) || existingFile.SizeBytes != entry.Size)
-            {
-                node.Children[entry.Name] = new DiskNode(entry.Name, entry.Path, isDirectory: false) { SizeBytes = entry.Size };
-                newFiles++;
-                newBytes += entry.Size;
-            }
-        }
-        if (newFiles > 0) progressReporter.Add(newFiles, newBytes, onProgress);
-        node.SizeBytes = node.Children.Values.Sum(c => c.SizeBytes);
-        return node;
+        foreach (var k in node.Children.Where(kv => !kv.Value.IsDirectory).Select(kv => kv.Key).ToList()) node.Children.Remove(k);
+        foreach (var e in listing.Entries.Where(e => !e.IsDirectory))
+            node.Children[e.Name] = new DiskNode(e.Name, e.Path, isDirectory: false)
+            { SizeBytes = e.Size, AllocatedBytes = e.Allocated, ModifiedAtTicks = e.MTimeTicks, IsCloudOnly = e.CloudOnly };
+        node.FilesFingerprint = Fingerprint(listing.Entries);
     }
 
-    // MARK: - Stergere (actualizeaza arborele fara rescanare)
+    private static void ReportFiles(Listing listing, ProgressCounter counter, Action<Progress> onProgress)
+    {
+        var files = listing.Entries.Where(e => !e.IsDirectory).ToList();
+        if (files.Count > 0) counter.Add(files.Count, files.Sum(f => f.Size), onProgress);
+    }
 
-    /// Actualizează arborele DUPĂ o ștergere reușită — scade mărimea
-    /// fișierului/folderului șters din TOȚI strămoșii lui și îl elimină
-    /// din arbore, ca navigarea să rămână instantă.
+    private static void SumChildren(DiskNode node)
+    {
+        long s = 0, a = 0;
+        foreach (var c in node.Children.Values) { s += c.SizeBytes; a += c.AllocatedBytes; }
+        node.SizeBytes = s; node.AllocatedBytes = a;
+    }
+
+    /// FNV-1a 64 peste fisierele sortate ordinal dupa nume (nume, marime, alocat, mtime). Niciodata 0.
+    private static long Fingerprint(List<Entry> entries)
+    {
+        ulong h = 0xcbf29ce484222325;
+        void Mix(ulong v) { h = (h ^ v) * 0x100000001b3; }
+        var files = entries.Where(e => !e.IsDirectory).OrderBy(e => e.Name.ToUpperInvariant(), StringComparer.Ordinal).ToList();
+        foreach (var f in files)
+        {
+            foreach (var b in Encoding.UTF8.GetBytes(f.Name.ToUpperInvariant())) Mix(b);
+            Mix(0xFF); Mix((ulong)f.Size); Mix((ulong)f.Allocated); Mix((ulong)f.MTimeTicks);
+        }
+        Mix((ulong)files.Count);
+        var v = unchecked((long)h);
+        return v == 0 ? 1 : v;
+    }
+
+    // MARK: - Stergere
+
     public static void Remove(string nodePath, DiskNode root)
     {
-        var rootPrefix = root.Path.EndsWith(System.IO.Path.DirectorySeparatorChar)
-            ? root.Path
-            : root.Path + System.IO.Path.DirectorySeparatorChar;
+        var rootPrefix = root.Path.EndsWith(System.IO.Path.DirectorySeparatorChar) ? root.Path : root.Path + System.IO.Path.DirectorySeparatorChar;
         if (!nodePath.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase)) return;
-        var relative = nodePath[rootPrefix.Length..];
-        var components = relative.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        var components = nodePath[rootPrefix.Length..].Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
         if (components.Length == 0) return;
-
         var chain = new List<DiskNode> { root };
         var current = root;
         foreach (var component in components)
         {
             if (!current.Children.TryGetValue(component, out var child)) return;
-            chain.Add(child);
-            current = child;
+            chain.Add(child); current = child;
         }
-        var removedSize = current.SizeBytes;
-        for (int i = 0; i < chain.Count - 1; i++) chain[i].SizeBytes -= removedSize;
+        var size = current.SizeBytes; var alloc = current.AllocatedBytes;
+        for (var i = 0; i < chain.Count - 1; i++) { chain[i].SizeBytes -= size; chain[i].AllocatedBytes -= alloc; }
         chain[^2].Children.Remove(components[^1]);
+        chain[^2].FilesFingerprint = 0;   // la urmatoarea verificare folderul se recitește
     }
 
     // MARK: - Helpers native
 
-    /// Listare de UN SINGUR nivel — pentru împărțirea în task-uri paralele
-    /// (subfolderele de prim nivel ale rădăcinii) și pentru comparația
-    /// "ce mai există pe disc" din scanarea incrementală.
-    private static List<TopLevelEntry> DirectChildren(string path)
+    private static long SafeMTime(string path)
     {
-        var result = new List<TopLevelEntry>();
-        foreach (var entry in new DirectoryInfo(path).EnumerateFileSystemInfos())
-        {
-            bool isDir = (entry.Attributes & FileAttributes.Directory) != 0;
-            long size = 0;
-            if (!isDir)
-            {
-                try { size = ((FileInfo)entry).Length; } catch { /* fisier inaccesibil - marime 0, mai bine decat crash */ }
-            }
-            result.Add(new TopLevelEntry(entry.Name, entry.FullName, isDir, size));
-        }
-        return result;
+        try { return Directory.Exists(path) ? Directory.GetLastWriteTimeUtc(path).Ticks : 0; } catch { return 0; }
     }
 
-    private static long SafeDirectoryMTime(string path)
+    /// Un nivel de director. null doar daca nu se poate deschide. Omite puncte de reparse (directoare) si
+    /// fisierele "doar in cloud" sunt raportate cu alocat 0, fara a fi descarcate.
+    private static Listing? List(string path)
     {
-        try { return Directory.Exists(path) ? Directory.GetLastWriteTimeUtc(path).Ticks : 0; }
-        catch { return 0; }
+        try
+        {
+            var entries = new List<Entry>();
+            int errors = 0;
+            var dir = new DirectoryInfo(path);
+            foreach (var fsi in dir.EnumerateFileSystemInfos())
+            {
+                try
+                {
+                    var attrs = fsi.Attributes;
+                    if ((attrs & FileAttributes.Directory) != 0)
+                    {
+                        if ((attrs & FileAttributes.ReparsePoint) != 0) continue;   // junction/symlink: nu se urmareste
+                        entries.Add(new Entry(fsi.Name, fsi.FullName, true, 0, 0, 0, false));
+                    }
+                    else
+                    {
+                        var fi = (FileInfo)fsi;
+                        const FileAttributes Recall = (FileAttributes)0x00400000 | (FileAttributes)0x00040000;   // RECALL_ON_DATA_ACCESS | RECALL_ON_OPEN
+                        var cloud = (attrs & Recall) != 0 || (attrs & FileAttributes.Offline) != 0;
+                        long alloc = fi.Length;
+                        if (cloud) alloc = 0;
+                        else if ((attrs & (FileAttributes.SparseFile | FileAttributes.Compressed)) != 0) alloc = CompressedSize(fi.FullName, fi.Length);
+                        entries.Add(new Entry(fsi.Name, fsi.FullName, false, fi.Length, alloc, fi.LastWriteTimeUtc.Ticks, cloud));
+                    }
+                }
+                catch { errors++; }
+            }
+            return new Listing(entries, SafeMTime(path), errors);
+        }
+        catch { return null; }
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern uint GetCompressedFileSizeW(string lpFileName, out uint lpFileSizeHigh);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool GetVolumeInformationW(string root, StringBuilder? volName, int volNameLen, out uint serial,
+        out uint maxComp, out uint flags, StringBuilder? fsName, int fsNameLen);
+
+    private static long CompressedSize(string path, long fallback)
+    {
+        var low = GetCompressedFileSizeW(path, out var high);
+        if (low == 0xFFFFFFFF && Marshal.GetLastWin32Error() != 0) return fallback;
+        return ((long)high << 32) | low;
+    }
+
+    /// Serialul volumului (hex) sau null daca nu se poate determina (ex. cale UNC).
+    public static string? VolumeSerial(string path)
+    {
+        try
+        {
+            var root = System.IO.Path.GetPathRoot(System.IO.Path.GetFullPath(path));
+            if (string.IsNullOrEmpty(root)) return null;
+            return GetVolumeInformationW(root, null, 0, out var serial, out _, out _, null, 0) ? serial.ToString("X8") : null;
+        }
+        catch { return null; }
     }
 }

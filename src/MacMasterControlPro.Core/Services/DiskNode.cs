@@ -31,6 +31,19 @@ public sealed class DiskNode
     /// recitit de pe disc.
     public long DirectoryModifiedAtTicks { get; set; }
 
+    /// Spatiu alocat pe disc (fisiere sparse/comprimate/doar-in-cloud ocupa mai putin decat dimensiunea logica).
+    /// 0 pentru cache-uri vechi pana la prima verificare.
+    public long AllocatedBytes { get; set; }
+
+    /// Doar fisiere: LastWriteTimeUtc.Ticks.
+    public long ModifiedAtTicks { get; set; }
+
+    /// Doar foldere: amprenta (nume, marime, alocat, mtime) a fisierelor DIRECTE. 0 = necunoscuta.
+    public long FilesFingerprint { get; set; }
+
+    /// Fisier "doar in cloud" (OneDrive etc.): nu se descarca niciodata pentru analiza.
+    public bool IsCloudOnly { get; set; }
+
     public Dictionary<string, DiskNode> Children { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public DiskNode() { }

@@ -28,6 +28,10 @@ public partial class DiskAnalyzerPage : UserControl
     private DateTime? _lastScannedAtUtc;
     private bool _isIndexing;
     private bool _isRescanning;
+    private DateTime? _verifiedAtUtc;
+    private int _accessErrors;
+    private string? _scanNotice;
+    private CancellationTokenSource? _cts;
 
     private DiskNode? CurrentNode => _pathStack.Count > 0 ? _pathStack[^1] : _tree;
     private List<DiskNode> CurrentChildren => CurrentNode?.SortedChildren.ToList() ?? new();
@@ -74,6 +78,8 @@ public partial class DiskAnalyzerPage : UserControl
         {
             _tree = cached.Root;
             _lastScannedAtUtc = cached.ScannedAtUtc;
+            _verifiedAtUtc = cached.VerifiedAtUtc;
+            _accessErrors = cached.AccessErrors;
             RenderResult();
             return;
         }
@@ -87,22 +93,37 @@ public partial class DiskAnalyzerPage : UserControl
         RenderState();
         IndexingStatusText.Text = "Indexez… 0 fișiere până acum.";
 
+        _cts = new CancellationTokenSource();
+        var ct = _cts.Token;
         Task.Run(() =>
         {
-            var node = DiskScanEngine.BuildTree(rootPath, progress =>
+            var (node, outcome) = DiskScanEngine.BuildTree(rootPath, progress =>
                 Dispatcher.Invoke(() => IndexingStatusText.Text =
-                    $"Indexez… {progress.FilesIndexed:N0} fișiere, {DiskNode.FormatBytes(progress.BytesIndexed)} până acum."));
+                    $"Indexez… {progress.FilesIndexed:N0} fișiere, {DiskNode.FormatBytes(progress.BytesIndexed)} până acum."), ct);
 
             Dispatcher.Invoke(() =>
             {
-                _tree = node;
                 _isIndexing = false;
+                if (outcome.Status != DiskScanEngine.ScanStatus.Complete)
+                {
+                    // Anulat sau unitate indisponibila: arbore partial - nu se afiseaza si NU se salveaza in cache.
+                    _scanNotice = outcome.Status == DiskScanEngine.ScanStatus.RootUnavailable ? "Unitatea nu mai este disponibilă. Nu am salvat nimic." : null;
+                    _tree = null;
+                    RenderState();
+                    return;
+                }
+                _tree = node;
                 _lastScannedAtUtc = DateTime.UtcNow;
-                DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node });
+                _verifiedAtUtc = _lastScannedAtUtc;
+                _accessErrors = outcome.AccessErrors;
+                DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node,
+                    AccessErrors = outcome.AccessErrors, VerifiedAtUtc = _verifiedAtUtc });
                 RenderResult();
             });
         });
     }
+
+    private void OnStopScanClicked(object sender, RoutedEventArgs e) => _cts?.Cancel();
 
     /// „Re-scanează doar modificările" — compară cache-ul cu discul,
     /// atinge doar ce s-a schimbat. Arborele existent rămâne navigabil
@@ -114,15 +135,35 @@ public partial class DiskAnalyzerPage : UserControl
         RenderCacheBanner();
 
         var rootPath = _currentRootPath;
+        _scanNotice = null;
+        _cts = new CancellationTokenSource();
+        var ct = _cts.Token;
+        var tree = _tree;
         Task.Run(() =>
         {
-            var node = DiskScanEngine.IncrementalUpdate(_tree, _ => { }); // progres per-fisier nu are sens aici - de regula dureaza cateva secunde
+            var (node, outcome) = DiskScanEngine.IncrementalUpdate(tree, _ => { }, DiskScanEngine.IncrementalMode.Verified, ct);
             Dispatcher.Invoke(() =>
             {
-                _tree = node;
                 _isRescanning = false;
-                _lastScannedAtUtc = DateTime.UtcNow;
-                DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node });
+                switch (outcome.Status)
+                {
+                    case DiskScanEngine.ScanStatus.Complete:
+                        _tree = node;
+                        _lastScannedAtUtc = DateTime.UtcNow;
+                        _verifiedAtUtc = _lastScannedAtUtc;
+                        _accessErrors = outcome.AccessErrors;
+                        DiskCacheStore.Save(new DiskCacheStore.Snapshot { RootPath = rootPath, ScannedAtUtc = _lastScannedAtUtc.Value, Root = node,
+                            AccessErrors = outcome.AccessErrors, VerifiedAtUtc = _verifiedAtUtc });
+                        break;
+                    case DiskScanEngine.ScanStatus.RootUnavailable:
+                        _scanNotice = "Unitatea nu mai este disponibilă. Datele afișate sunt din ultima analiză salvată.";
+                        break;
+                    default:   // Cancelled: arborele din memorie poate fi partial actualizat; cache-ul de pe disc e intact
+                        _scanNotice = "Verificare anulată. S-a păstrat ultima analiză salvată.";
+                        var snap = DiskCacheStore.Load(rootPath);
+                        if (snap is not null) { _tree = snap.Root; _lastScannedAtUtc = snap.ScannedAtUtc; _verifiedAtUtc = snap.VerifiedAtUtc; _accessErrors = snap.AccessErrors; }
+                        break;
+                }
                 RenderResult();
             });
         });
@@ -178,7 +219,13 @@ public partial class DiskAnalyzerPage : UserControl
     {
         if (_lastScannedAtUtc is null) { CacheBanner.Visibility = Visibility.Collapsed; return; }
         CacheBanner.Visibility = Visibility.Visible;
-        CacheBannerText.Text = $"Afișez datele din analiza de la {_lastScannedAtUtc.Value.ToLocalTime():d MMMM, HH:mm}.";
+        var fresh = _verifiedAtUtc is { } v
+            ? $"verificat fișier cu fișier: {v.ToLocalTime():d MMMM, HH:mm}"
+            : "neverificat fișier cu fișier — apasă „Verifică modificările”";
+        var errs = _accessErrors > 0 ? $" · {_accessErrors} elemente inaccesibile (rezultat parțial acolo)" : "";
+        var notice = _scanNotice is null ? "" : $"\n{_scanNotice}";
+        CacheBannerText.Text = $"Afișez datele din analiza de la {_lastScannedAtUtc.Value.ToLocalTime():d MMMM, HH:mm} ({fresh}){errs}.{notice}";
+        StopRescanButton.Visibility = _isRescanning ? Visibility.Visible : Visibility.Collapsed;
         RescanSpinner.Visibility = _isRescanning ? Visibility.Visible : Visibility.Collapsed;
         RescanningText.Visibility = _isRescanning ? Visibility.Visible : Visibility.Collapsed;
         RescanButton.Visibility = _isRescanning ? Visibility.Collapsed : Visibility.Visible;

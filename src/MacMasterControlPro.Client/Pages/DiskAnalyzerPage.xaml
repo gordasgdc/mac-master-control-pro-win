@@ -19,6 +19,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                 <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="0,0,10,0" />
                 <TextBlock x:Name="IndexingStatusText" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                <ui:Button x:Name="StopScanButton" Content="Oprește" Click="OnStopScanClicked" Margin="12,0,0,0" />
             </StackPanel>
             <TextBlock Text="O singură trecere completă — după ce se termină, orice subfolder se deschide instant, fără rescanare." FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
         </StackPanel>
@@ -36,7 +37,8 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal" x:Name="CacheBannerActions">
                         <ui:ProgressRing x:Name="RescanSpinner" IsIndeterminate="True" Width="14" Height="14" Margin="0,0,8,0" Visibility="Collapsed" />
                         <TextBlock x:Name="RescanningText" Text="Rescanez…" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" Visibility="Collapsed" />
-                        <ui:Button x:Name="RescanButton" Content="Re-scanează doar modificările" Click="OnRescanClicked" Margin="0,0,8,0" />
+                        <ui:Button x:Name="StopRescanButton" Content="Oprește" Click="OnStopScanClicked" Margin="0,0,8,0" Visibility="Collapsed" />
+                        <ui:Button x:Name="RescanButton" Content="Verifică modificările" Click="OnRescanClicked" Margin="0,0,8,0" />
                         <ui:Button x:Name="ResetCacheButton" Content="Resetare Cache &amp; Scanare Completă" Appearance="Transparent" Click="OnResetCacheClicked" />
                     </StackPanel>
                 </Grid>
