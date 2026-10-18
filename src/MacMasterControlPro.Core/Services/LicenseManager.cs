@@ -7,7 +7,7 @@ namespace MacMasterControlPro.Core.Services;
 public sealed class LicenseManager
 {
     public static readonly LicenseManager Shared = new();
-    public const string ProductId = "mac-master-control-pro";
+    public const string ProductId = "gdc-master-control-studio-pro";
 
     private readonly IAccessProvider _provider;
     public event Action? Changed;
