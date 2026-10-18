@@ -1,3 +1,6 @@
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
@@ -172,6 +175,18 @@ Console.WriteLine($"OS: {Environment.OSVersion}  arch: {System.Runtime.InteropSe
     var cur = RenderModeState.ReadCurrent();
     Check("render: citire reala a starii WSearch/fhsvc", cur.Services.ContainsKey("WSearch"), string.Join(",", cur.Services.Select(kv => kv.Key + ":" + kv.Value.StartType + "/" + kv.Value.Running)));
     Console.WriteLine("INFO  stare reala: " + string.Join("; ", cur.Services.Select(kv => $"{kv.Key} start={kv.Value.StartType} delayed={kv.Value.Delayed} running={kv.Value.Running}")));
+}
+
+// ---- Iconuri Shell (asincron, cache) ----
+{
+    var sw = Stopwatch.StartNew();
+    var t = MacMasterControlPro.Client.Services.ShellIconCache.GetAsync("C:\\", 64);
+    var returnedFast = sw.ElapsedMilliseconds < 50;   // apelul nu blocheaza
+    var bmp = t.GetAwaiter().GetResult();
+    Check("iconuri: unitatea C: primeste iconul Shell, asincron", bmp is not null && bmp.PixelWidth > 0 && returnedFast, $"w={bmp?.PixelWidth} fast={returnedFast}");
+    Check("iconuri: al doilea apel vine din cache", MacMasterControlPro.Client.Services.ShellIconCache.Cached("C:\\", 64) is not null);
+    var folder = MacMasterControlPro.Client.Services.ShellIconCache.GetAsync(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), 48).GetAwaiter().GetResult();
+    Check("iconuri: folder (inclusiv personalizat) rezolvat", folder is not null);
 }
 
 Console.WriteLine($"\nREZULTAT: {pass} trecute, {fail} esuate");
