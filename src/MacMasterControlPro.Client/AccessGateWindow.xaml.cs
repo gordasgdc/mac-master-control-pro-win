@@ -20,6 +20,17 @@ public partial class AccessGateWindow : Window
     public AccessGateWindow()
     {
         InitializeComponent();
+        // Câmpul e pe un singur rând: un text lipit pe mai multe rânduri (mesajul primit împreună cu licența) trebuie păstrat întreg,
+        // altfel un TextBox cu o singură linie păstrează doar primul rând și pierde codul.
+        DataObject.AddPastingHandler(KeyBox, (_, e) =>
+        {
+            if (e.DataObject.GetDataPresent(DataFormats.UnicodeText) && e.DataObject.GetData(DataFormats.UnicodeText) is string t)
+            {
+                var flat = System.Text.RegularExpressions.Regex.Replace(t, @"\s*[\r\n]+\s*", " ").Trim();
+                e.DataObject = new DataObject(DataFormats.UnicodeText, flat);
+                e.FormatToApply = DataFormats.UnicodeText;
+            }
+        });
         Render();
         LicenseManager.Shared.Changed += () => Dispatcher.Invoke(Render);
     }

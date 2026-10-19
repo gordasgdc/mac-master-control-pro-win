@@ -1,6 +1,6 @@
 # Changelog — Master Control Studio Pro (Windows)
 
-## v1.19.3 (2026-10-19) — Licența se poate lipi împreună cu mesajul primit
+## v1.19.4 (2026-10-19) — Licența se poate lipi împreună cu mesajul primit
 
 ### Fixed
 - Câmpul de licență acceptă acum și mesajul întreg primit împreună cu licența (salut + cod): aplicația găsește singură codul. Codul simplu merge ca până acum. Dacă textul conține mai multe coduri diferite, nu se activează nimic și ești rugat să lipești doar codul dorit.
